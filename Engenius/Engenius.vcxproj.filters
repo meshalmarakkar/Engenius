@@ -1,0 +1,278 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Shader">
+      <UniqueIdentifier>{6296dead-9814-4280-8e82-e9796e9d0fd6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\Shadow">
+      <UniqueIdentifier>{4b6adec7-c892-46c6-bcbe-27c0db4dc51c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\Skybox">
+      <UniqueIdentifier>{88383faf-5920-4a13-89e4-acd747fe3c14}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\ModelLoading">
+      <UniqueIdentifier>{e0951757-7cdd-4281-ad92-425979f8e52e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\Particles">
+      <UniqueIdentifier>{4cf39059-b093-4f55-8c09-e92d7c4c9479}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\Testing">
+      <UniqueIdentifier>{457c0b65-ee4a-4e64-9416-b49fb9602049}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shader\ScreenSpace">
+      <UniqueIdentifier>{e9aa339b-b5cf-4c3a-abc6-0f8a2568731f}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Skybox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Culling.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Character.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HUDManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ParticleManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EntityManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CollisionManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MousePicker.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LightingManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AudioManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="EditModeManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ShaderManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Terrain.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimatedModel.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HUDItem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WindowManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="InputManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TerrainManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Culling.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Character.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HUDManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Common.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Skybox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Entity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EntityManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CollisionManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MousePicker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LightingManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AudioManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="EditModeManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ShaderManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Terrain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AnimatedModel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="GameManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HUDItem.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="InputManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TerrainManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\shadowMap.gs">
+      <Filter>Shader\Shadow</Filter>
+    </None>
+    <None Include="Shaders\shadowMap.frag">
+      <Filter>Shader\Shadow</Filter>
+    </None>
+    <None Include="Shaders\shadowMap.vert">
+      <Filter>Shader\Shadow</Filter>
+    </None>
+    <None Include="Shaders\HUD.frag">
+      <Filter>Shader\ScreenSpace</Filter>
+    </None>
+    <None Include="Shaders\cubeMap.frag">
+      <Filter>Shader\Skybox</Filter>
+    </None>
+    <None Include="Shaders\cubeMap.vert">
+      <Filter>Shader\Skybox</Filter>
+    </None>
+    <None Include="Shaders\particle.frag">
+      <Filter>Shader\Particles</Filter>
+    </None>
+    <None Include="Shaders\particle.vert">
+      <Filter>Shader\Particles</Filter>
+    </None>
+    <None Include="Shaders\simple.frag">
+      <Filter>Shader\ModelLoading</Filter>
+    </None>
+    <None Include="Shaders\simple.vert">
+      <Filter>Shader\ModelLoading</Filter>
+    </None>
+    <None Include="Shaders\terrain.frag">
+      <Filter>Shader\ModelLoading</Filter>
+    </None>
+    <None Include="Shaders\terrain.vert">
+      <Filter>Shader\ModelLoading</Filter>
+    </None>
+    <None Include="Shaders\mapped_model.frag">
+      <Filter>Shader\ModelLoading</Filter>
+    </None>
+    <None Include="Shaders\mapped_model.vert">
+      <Filter>Shader\ModelLoading</Filter>
+    </None>
+    <None Include="Shaders\model.frag">
+      <Filter>Shader\ModelLoading</Filter>
+    </None>
+    <None Include="Shaders\model.vert">
+      <Filter>Shader\ModelLoading</Filter>
+    </None>
+    <None Include="Shaders\animated_model.vert">
+      <Filter>Shader\ModelLoading</Filter>
+    </None>
+    <None Include="Shaders\animated_model.frag">
+      <Filter>Shader\ModelLoading</Filter>
+    </None>
+    <None Include="Shaders\terrain_mapped.frag">
+      <Filter>Shader\ModelLoading</Filter>
+    </None>
+    <None Include="Shaders\terrain_mapped.vert">
+      <Filter>Shader\ModelLoading</Filter>
+    </None>
+    <None Include="Shaders\DepthMap.frag">
+      <Filter>Shader\Testing</Filter>
+    </None>
+    <None Include="Shaders\DepthMap.vert">
+      <Filter>Shader\Testing</Filter>
+    </None>
+    <None Include="Shaders\displayNormals.frag">
+      <Filter>Shader\Testing</Filter>
+    </None>
+    <None Include="Shaders\displayNormals.gs">
+      <Filter>Shader\Testing</Filter>
+    </None>
+    <None Include="Shaders\displayNormals.vert">
+      <Filter>Shader\Testing</Filter>
+    </None>
+    <None Include="Shaders\blur.frag">
+      <Filter>Shader\ScreenSpace</Filter>
+    </None>
+    <None Include="Shaders\postProcessing.frag">
+      <Filter>Shader\ScreenSpace</Filter>
+    </None>
+    <None Include="Shaders\screenSpace.vert">
+      <Filter>Shader\ScreenSpace</Filter>
+    </None>
+    <None Include="Shaders\firstPass.frag">
+      <Filter>Shader\ScreenSpace</Filter>
+    </None>
+  </ItemGroup>
+</Project>

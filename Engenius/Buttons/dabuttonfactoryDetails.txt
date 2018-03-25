@@ -1,0 +1,11 @@
+Calibri
+24
+Bold
+
+
+Sub buttons
+32*32
+
+Insert menu buttons
+128*32
+
