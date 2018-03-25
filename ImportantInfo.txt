@@ -1,0 +1,7 @@
+Project properties: Make sure the configuration is Active(Debug) and the Platform is Active(Win32). 
+                    This is to make sure all the include libraries have the right links.
+                    
+Dev files: Necessary files for building can be found it here - https://www.dropbox.com/s/e3kmu0n2owtxkfi/RequiredDev.zip?dl=0. 
+            Place it in the C:\ folder with the name "dev".
+Necessary DLLs: Add these dlls in the Debug folder - https://www.dropbox.com/s/ft0md8rv9e0phwu/NecessaryDLLs.zip?dl=0
+Models: models are not uploaded to github so download it from here and add it to the Engenius folder - https://www.dropbox.com/s/fqmtc1ldcqa2fy5/Models.zip?dl=0
