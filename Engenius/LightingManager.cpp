@@ -61,10 +61,10 @@ void LightingManager::initPointLights() {
 	//const glm::vec3 diffuse(0.1f, 0.1f, 0.1f);
 	//const glm::vec3 specular(0.1f, 0.1f, 0.1f);
 
-	addPointLight(glm::vec3(0.0f, 10.0f, -2.0f), att_const, att_lin, att_quad, ambient, diffuse, specular);
-	addPointLight(glm::vec3(0.0f, 10.0f, -25.0f), att_const, att_lin, att_quad, ambient, diffuse, specular);
-	addPointLight(glm::vec3(0.0f, 10.0f, -32.0f), att_const, att_lin, att_quad, ambient, diffuse, specular);
-	addPointLight(glm::vec3(0.0f, 10.0f, -48.0f), att_const, att_lin, att_quad, ambient, diffuse, specular);
+	addPointLight(glm::vec3(0.0f, 7.5f, -2.0f), att_const, att_lin, att_quad, ambient, diffuse, specular);
+	addPointLight(glm::vec3(0.0f, 7.5f, -25.0f), att_const, att_lin, att_quad, ambient, diffuse, specular);
+	addPointLight(glm::vec3(0.0f, 7.5f, -32.0f), att_const, att_lin, att_quad, ambient, diffuse, specular);
+	addPointLight(glm::vec3(0.0f, 7.5f, -48.0f), att_const, att_lin, att_quad, ambient, diffuse, specular);
 }
 
 void LightingManager::initLights(glm::vec3 cameraEye, glm::vec3 cameraAt) {

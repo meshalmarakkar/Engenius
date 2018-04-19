@@ -28,7 +28,7 @@ void EditModeManager::init() {
 	mode_objects = new Mode();
 	mode_selected = mode_objects;
 
-	particleManager->insertFire(1, (*edit_ObjectIterator)->getPos() + glm::vec3(0.0f, 5.0f, 0.0f), true);
+//	particleManager->insertFire(1, (*edit_ObjectIterator)->getPos() + glm::vec3(0.0f, 5.0f, 0.0f), true);
 
 	bool_controlPlayer = false;
 }
