@@ -32,6 +32,10 @@ void InputManager::EditModeControls(const Uint8 *keys, const float dt_secs) {
 		editModeManager->toggleViewMode();
 	}
 
+	if (keys[SDL_SCANCODE_G]) {
+		editModeManager->toggleVisualize();
+	}
+
 	if (keys[SDL_SCANCODE_LEFT]) {
 		editModeManager->switchModel(false);
 	}

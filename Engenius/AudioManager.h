@@ -17,6 +17,7 @@ public:
 	~AudioManager();
 	void LoadAudioFiles(std::string name, char * filepath);
 	void InsertSource(const std::string name, const glm::vec3 pos, const glm::vec3 velocity, const float volume, const float pitch, const float referenceDist, const bool loop, const bool ambient = false);
+	void StopAll();
 	void SetVolume(const std::string name, const float volume);
 	void SetPitch(const std::string name, const float pitch);
 	void SetPosition(const std::string name, const glm::vec3 pos);

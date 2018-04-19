@@ -734,7 +734,7 @@ void EntityManager::checkTrigger() {
 			audioManager->Stop("alarm");
 			controlReset_2 = true;
 			audioManager->stopTense();
-			lightingManager->setExposure(5.0f);
+			lightingManager->setExposure(2.0f);
 		}
 	}
 }

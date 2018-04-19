@@ -153,6 +153,13 @@ void AudioManager::InsertSource(const std::string name, glm::vec3 pos, const glm
 
 }
 
+void AudioManager::StopAll() {
+	std::unordered_map<std::string, ALuint>::iterator it;
+	for (it = sourceIDs.begin(); it != sourceIDs.end(); it++) {
+		Stop((*it).first);
+	}
+}
+
 void AudioManager::SetVolume(const std::string name, const float volume) {
 	alSourcef(sourceIDs.at(name), AL_GAIN, volume);
 }
@@ -195,6 +202,8 @@ void AudioManager::startGame(const glm::vec3 listenerPos) {
 	PlayAudio("machine2", "machine", listenerPos);
 	SetVolume("machine2", 0.1f);
 	PlayAudio("tense", "tense", listenerPos);
+	//stopAllMusicForShowreel
+	StopAll();
 }
 
 void AudioManager::playAlarm(const glm::vec3 listenerPos) {

@@ -113,7 +113,7 @@ private:
 		float edit_roll;
 
 		Mode() {
-			addMode = false;
+			addMode = true;
 			moveMode = false;
 			visualize = false;
 			edit_pos = glm::vec3(0.0f);
