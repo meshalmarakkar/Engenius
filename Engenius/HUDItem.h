@@ -8,8 +8,8 @@
 
 class HUDItem {
 public:
-	HUDItem(int x, int y, int sizeX, int sizeY, GLuint texture, bool allowLowTransparency, float transparency = 0.0f);
-	void convert_ClipSpace_to_HomogeneousSpace(float screenWidth, float screenHeight);
+	HUDItem(int screenWidth, int screenHeight, int x, int y, int sizeX, int sizeY, GLuint texture, bool allowLowTransparency, float transparency = 0.0f);
+	void convert_ClipSpace_to_HomogeneousSpace(int screenWidth, int screenHeight);
 
 	void setTexture(GLuint newTex);
 	void setIfClicked(bool newVal);
@@ -34,7 +34,7 @@ protected:
 	bool allowLowTransparency;
 
 private:
-	void init(int x, int y, int sizeX, int sizeY, GLuint texture, bool allowLowTransparency, float transparency);
+	void init(int screenWidth, int screenHeight, int x, int y, int sizeX, int sizeY, GLuint texture, bool allowLowTransparency, float transparency);
 };
 
 #endif

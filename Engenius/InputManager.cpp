@@ -21,6 +21,9 @@ void InputManager::EditModeControls(const Uint8 *keys, const float dt_secs) {
 		entityManager->writeFile();
 	}
 
+	if (keys[SDL_SCANCODE_T]) {
+		entityManager->changeAnimation();
+	}
 
 	if (keys[SDL_SCANCODE_X]) {
 		editModeManager->toggleModes();
@@ -30,10 +33,6 @@ void InputManager::EditModeControls(const Uint8 *keys, const float dt_secs) {
 	}
 	if (keys[SDL_SCANCODE_C]) {
 		editModeManager->toggleViewMode();
-	}
-
-	if (keys[SDL_SCANCODE_G]) {
-		editModeManager->toggleVisualize();
 	}
 
 	if (keys[SDL_SCANCODE_LEFT]) {

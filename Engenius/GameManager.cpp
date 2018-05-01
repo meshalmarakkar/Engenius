@@ -67,8 +67,8 @@ void GameManager::init(WindowManager * windowManager) {
 
 	shaderManager = new ShaderManager();
 
-	hudManager = new HUDManager(windowManager, shaderManager->get_hud_program());
 	camera = new Camera(windowManager->getScreenWidth(), windowManager->getScreenHeight());
+	hudManager = new HUDManager(windowManager, shaderManager->get_hud_program());
 	audioManager = new AudioManager();
 	
 

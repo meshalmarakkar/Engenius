@@ -101,11 +101,14 @@ HUDManager::HUDManager(WindowManager* windowManager, GLuint shader) : windowMana
 	tex_decrease = textureFromFile("../Engenius/Buttons/icon_down.png");
 
 	int spacingPlusSizeX = spacing + menuBar_SizeX;
+	menuBar_PosY = windowManager->getScreenHeight() - 35;
 	addMenuBarHUD(spacing, menuBar_PosY, menuBar_SizeX, menuBar_SizeY, "menu_objects", tex_objects, true, 0.4f);
 	addMenuBarHUD(spacing + spacingPlusSizeX, menuBar_PosY, menuBar_SizeX, menuBar_SizeY, "menu_bounding", tex_bounding, true, 0.4f);
 	addMenuBarHUD(spacing + spacingPlusSizeX + spacingPlusSizeX, menuBar_PosY, menuBar_SizeX, menuBar_SizeY, "menu_lighting", tex_lighting, true, 0.4f);
 	lightingSubOptions();
 	addMenuBarHUD(spacing + spacingPlusSizeX + spacingPlusSizeX + spacingPlusSizeX, menuBar_PosY, menuBar_SizeX, menuBar_SizeY, "menu_audio", tex_audio, true, 0.4f);
+
+	addAnimatedHUD(spacing, windowManager->getScreenHeight() / 2, menuBar_SizeY, menuBar_SizeY, fireTexture, false);
 
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao); // bind VAO 0 as current object
@@ -144,7 +147,7 @@ void HUDManager::lightingSubOptions() {
 }
 
 void HUDManager::addHUD(int x, int y, int sizeX, int sizeY, const std::string storageName, const GLuint texture, bool allowLowTransparency, float transparency) {
-	HUDItem * h = new HUDItem(x, y, sizeX, sizeY, texture, allowLowTransparency);
+	HUDItem * h = new HUDItem(windowManager->getScreenWidth(), windowManager->getScreenHeight(), x, y, sizeX, sizeY, texture, allowLowTransparency);
 	HUDs.insert(std::pair<std::string, HUDItem*>(storageName, h));
 }
 void HUDManager::addHUD(int x, int y, int sizeX, int sizeY, const std::string storageName, const std::string text, TTF_Font* font, bool allowLowTransparency, float transparency) {
@@ -156,7 +159,7 @@ void HUDManager::addHUD(int x, int y, int sizeX, int sizeY, const std::string st
 void HUDManager::addSubOptions(std::unordered_map<std::string, HUDItem*> &subOptions, int x, int y, int sizeX, int sizeY, std::string storageName, GLuint texture, bool allowLowTransparency, float transparency) {
 	int newx = x;
 	int newy = y - sizeY - spacing;
-	HUDItem * h = new HUDItem(newx, newy, sizeX, sizeY, texture, allowLowTransparency, transparency);
+	HUDItem * h = new HUDItem(windowManager->getScreenWidth(), windowManager->getScreenHeight(), newx, newy, sizeX, sizeY, texture, allowLowTransparency, transparency);
 	subOptions.insert(std::pair<std::string, HUDItem*>(storageName, h));
 }
 void HUDManager::addSubOptions(std::unordered_map<std::string, HUDItem*> &subOptions, int x, int y, int sizeX, int sizeY, std::string storageName, const std::string text, TTF_Font* font, bool allowLowTransparency, float transparency) {
@@ -165,7 +168,7 @@ void HUDManager::addSubOptions(std::unordered_map<std::string, HUDItem*> &subOpt
 }
 
 void HUDManager::addMenuBarHUD(int x, int y, int sizeX, int sizeY, const std::string storageName, const GLuint texture, bool allowLowTransparency, float transparency) {
-	MenubarHUD * menuh = new MenubarHUD(x, y, sizeX, sizeY, texture, allowLowTransparency, transparency);
+	MenubarHUD * menuh = new MenubarHUD(windowManager->getScreenWidth(), windowManager->getScreenHeight(), x, y, sizeX, sizeY, texture, allowLowTransparency, transparency);
 	int temp_x;
 	temp_x = x + subBar_SpaceFromEnd;
 	addSubOptions(menuh->subOptions, temp_x, y, subBar_SizeX, subBar_SizeY, "sub_add", tex_add, false);
@@ -185,7 +188,7 @@ void HUDManager::addMenuBarHUD(int x, int y, int sizeX, int sizeY, const std::st
 }
 
 void HUDManager::addAnimatedHUD(int x, int y, int sizeX, int sizeY, GLuint texture, bool allowLowTransparency, float transparency) {
-	AnimatedHUD * h = new AnimatedHUD(x, y, sizeX, sizeY, texture, allowLowTransparency, transparency);
+	AnimatedHUD * h = new AnimatedHUD(windowManager->getScreenWidth(), windowManager->getScreenHeight(), x, y, sizeX, sizeY, texture, allowLowTransparency, transparency);
 	h->UVs.resize(6);
 	h->duration = 0.0f;
 	AnimatedHUDs.push_back(h);
@@ -262,6 +265,7 @@ void HUDManager::render() {
 	for (unsigned int i = 0; i < AnimatedHUDs.size(); i++) {
 		render(AnimatedHUDs.at(i)->getVerts(), AnimatedHUDs.at(i)->UVs, AnimatedHUDs.at(i)->getTexture(), AnimatedHUDs.at(i)->getAllowLowTransparency(), AnimatedHUDs.at(i)->getTransparency());
 	}
+
 	for (std::unordered_map<std::string, MenubarHUD*>::iterator it = menuBarHUDs.begin(); it != menuBarHUDs.end(); ++it) {
 		render(it->second->getVerts(), UVs, it->second->getTexture(), it->second->getAllowLowTransparency(), it->second->getTransparency());
 		if (it->second->getIfClicked() == true) {

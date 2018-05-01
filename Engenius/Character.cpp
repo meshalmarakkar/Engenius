@@ -6,8 +6,9 @@ Character::Character(AnimatedModel* model, glm::vec3 position, glm::vec3 scale, 
 	upwardsSpeed = 0.0f;
 	this->walkSpeedLimit = MAX_SPEED * 0.35f;
 	this->currentState = 0;
-	//transforms.resize(model->getNumBones());
-	animated = false;
+	transforms.resize(model->getNumBones());
+	animated = true;
+	currentState = IDLE_STATE;
 }
 
 static btVector3 getLinearVelocityInBodyFrame(btRigidBody* body)
@@ -147,7 +148,7 @@ void Character::Update(const float yaw, glm::vec3 cameraAt, glm::vec3 cameraUp, 
 	this->position.z = pos.z();
 	ghost->setWorldTransform(t);
 
-//	model->BoneTransform(dt_secs, transforms);
+	model->BoneTransform(dt_secs, transforms);
 }
 
 btRigidBody* Character::getBounding() {
@@ -164,7 +165,23 @@ void Character::draw(GLuint shader) {
 		}
 	}
 	glm::mat4 modelMatrix;
-	Common::createModelMatrix(modelMatrix, position, rotation, scale);
-	glUniform1i(glGetUniformLocation(shader, "animated"), animated);
+	//Common::createModelMatrix(modelMatrix, position, rotation, scale);
+	Common::createModelMatrix(modelMatrix, glm::vec3(0.0f, 1.0f, -10.0f), scale, rotation);
+//	glUniform1i(glGetUniformLocation(shader, "animated"), animated);
 	model->Draw(shader, modelMatrix);
+}
+
+void Character::changeAnimation() {
+	if (currentState == IDLE_STATE) {
+		currentState = WALK_STATE;
+	}
+	else if (currentState == WALK_STATE) {
+		currentState = JOG_STATE;
+		model->jogAnimation();
+	}
+	else if (currentState == JOG_STATE) {
+		currentState = WALK_STATE;
+		model->walkAnimation();
+	}
+	//model->idleAnimation();
 }

@@ -1,13 +1,5 @@
 #version 330 core
 
-struct DirLight {
-    vec3 direction;
-	
-    vec3 ambient;
-    vec3 diffuse;
-    vec3 specular;
-};
-
 struct PointLight {
     vec3 position;
     
@@ -43,17 +35,19 @@ in VS_OUT {
 	vec2 TexCoords;
 	vec3 FragPos;
 	vec3 Normal;
-	vec4 FragPosLightSpace;
+	vec2 pointIDs;
+	vec2 spotIDs;
 } fs_in;
 
-uniform DirLight dirLight;
-uniform PointLight pointLights[MAX_PER_LIGHT_TYPE];
+uniform PointLight pointLights[4];
 uniform SpotLight spotLights[MAX_PER_LIGHT_TYPE];
+
+uniform int pointLightIDs[MAX_PER_LIGHT_TYPE];
+uniform int spotLightIDs[MAX_PER_LIGHT_TYPE];
 
 uniform float far_plane;
 uniform samplerCube depthMap[MAX_PER_LIGHT_TYPE];
 uniform bool depthMap_ifRender[MAX_PER_LIGHT_TYPE];
-uniform sampler2D depthMap_DirLight;
 
 uniform vec3 viewPos;
 uniform bool hasSpecularMap;
@@ -73,8 +67,6 @@ vec3 sampleOffsetDirections[20] = vec3[]
 
 ////-- Function prototypes --////
 float ShadowCalculation(vec3 lightPosition, samplerCube shadowCube);
-float ShadowCalculation_DirLight(vec4 fragPosLightSpace, vec3 normal);
-vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir, vec3 colour, vec3 specMap, float shadow);
 vec3 CalcPointLight(PointLight light, vec3 viewDir, vec3 norm, float shadow, vec3 colour, vec3 specMap);
 vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec3 colour, vec3 specMap);
 
@@ -97,12 +89,11 @@ void main()
 	vec3 specMap = hasSpecularMap ? texture(texture_specular1, fs_in.TexCoords).rgb : vec3(1.0f);
 
     float shadow = 0.0;
-	//shadow = ShadowCalculation_DirLight(fs_in.FragPosLightSpace, norm);
-	vec3 result;// = CalcDirLight(dirLight, norm, viewDir, colour, specMap, shadow);
+	vec3 result;
 	for(int i = 0; i < MAX_PER_LIGHT_TYPE; i++){
 		shadow = displayShadow && depthMap_ifRender[i] ? ShadowCalculation(pointLights[i].position, depthMap[i]) : 0.0;	
-		result += pointLights[i].constant > 0.0f ? CalcPointLight(pointLights[i], viewDir, norm, shadow, colour, specMap) : vec3(0.0f);   
-		result += spotLights[i].constant > 0.0f ? CalcSpotLight(spotLights[i], norm, fs_in.FragPos, viewDir, colour, specMap) : vec3(0.0f);  
+		result += pointLightIDs[i] > -1 ? CalcPointLight(pointLights[pointLightIDs[i]], viewDir, norm, shadow, colour, specMap) : vec3(0.0f);   
+		result += spotLightIDs[i] > -1 ? CalcSpotLight(spotLights[spotLightIDs[i]], norm, fs_in.FragPos, viewDir, colour, specMap) : vec3(0.0f);
 	}
 	
 	//out_Color = vec4(vec3(gl_FragCoord.z), 1.0); //Depth buffer visualization (non-linear)
@@ -111,10 +102,10 @@ void main()
 
 	//eyes prefer green most and blue least
 	float brightness = dot(result, vec3(0.2126, 0.7152, 0.0722));
-//	if(brightness > 1.0)
- //      toBlur_out_Color = vec4(result, 1.0);
-//	else
-		toBlur_out_Color = vec4(0.0f, 0.0f, 0.0f, texture(texture_diffuse1, fs_in.TexCoords).a) * texture(texture_diffuse1, fs_in.TexCoords);//vec4(1.0, 1.0, 1.0, 1.0);
+    if(brightness > 1.0)
+       toBlur_out_Color = vec4(result, 1.0);
+	else
+		toBlur_out_Color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 	out_Color = vec4(result, 1.0);
 }
@@ -149,25 +140,6 @@ vec3 CalcPointLight(PointLight light, vec3 viewDir, vec3 norm, float shadow, vec
     diffuse *= attenuation;
     specular *= attenuation;
 
-     return (ambient + (1.0 - shadow) * (diffuse + specular));
-}
-
-// calculates the color when using a directional light.
-vec3 CalcDirLight(DirLight light, vec3 normal, vec3 viewDir, vec3 colour, vec3 specMap, float shadow)
-{
-    vec3 lightDir = normalize(-light.direction);
-    // diffuse shading
-    float diff = max(dot(normal, lightDir), 0.0);
-    //Blinn-Phong
-	vec3 halfwayDir = normalize(lightDir + viewDir);
-	float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.0f);
-	//Phong
-	//vec3 reflectDir = reflect(-lightDir, normal);
-	//float spec = pow(max(dot(viewDir, reflectDir), 0.0), 8.0f);
-    // combine results
-    vec3 ambient = light.ambient * colour;
-    vec3 diffuse = light.diffuse * diff * colour;
-    vec3 specular = light.specular * spec * specMap;
      return (ambient + (1.0 - shadow) * (diffuse + specular));
 }
 
@@ -238,40 +210,5 @@ float ShadowCalculation(vec3 lightPosition, samplerCube shadowCube)
 	}
 	shadow /= float(samples);  
 
-    return shadow;
-}
-
-float ShadowCalculation_DirLight(vec4 fragPosLightSpace, vec3 normal)
-{
-    // perform perspective divide
-    vec3 projCoords = fragPosLightSpace.xyz / fragPosLightSpace.w;
-    // transform to [0,1] range
-    projCoords = projCoords * 0.5 + 0.5;
-    // get closest depth value from light's perspective (using [0,1] range fragPosLight as coords)
-    float closestDepth = texture(depthMap_DirLight, projCoords.xy).r; 
-    // get depth of current fragment from light's perspective
-    float currentDepth = projCoords.z;
-    // calculate bias (based on depth map resolution and slope)
-    vec3 lightDir = normalize(dirLight.direction - fs_in.FragPos);
-    float bias = max(0.05 * (1.0 - dot(normal, lightDir)), 0.005);
-    // check whether current frag pos is in shadow
-    // float shadow = currentDepth - bias > closestDepth  ? 1.0 : 0.0;
-    // PCF
-    float shadow = 0.0;
-    vec2 texelSize = 1.0 / textureSize(depthMap_DirLight, 0);
-    for(int x = -1; x <= 1; ++x)
-    {
-        for(int y = -1; y <= 1; ++y)
-        {
-            float pcfDepth = texture(depthMap_DirLight, projCoords.xy + vec2(x, y) * texelSize).r; 
-            shadow += currentDepth - bias > pcfDepth  ? 1.0 : 0.0;        
-        }    
-    }
-    shadow /= 9.0;
-    
-    // keep the shadow at 0.0 when outside the far_plane region of the light's frustum.
-    if(projCoords.z > 1.0)
-        shadow = 0.0;
-        
     return shadow;
 }

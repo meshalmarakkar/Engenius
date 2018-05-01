@@ -35,6 +35,7 @@ public:
 	Entity* getObject(unsigned int i);
 	void checkTrigger();
 	bool writeFile();
+	void changeAnimation();
 
 	void setEntityPos(const glm::vec3 pos, int indexOfSelectedObject);
 	std::unordered_map<std::string, Model*>::iterator getEnviModel_Begin();

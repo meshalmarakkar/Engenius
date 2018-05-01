@@ -203,130 +203,130 @@ void computeTangentBasis(
 }
 
 void Terrain::init(const float vertHeights[]) {
-	//LAST_VERTEX = VERTEX_COUNT - 1;
+	LAST_VERTEX = VERTEX_COUNT - 1;
 
-	//float HALF_TERRAIN_SIZE = TERRAIN_SIZE * 0.5f;
-	//terrain_centre = glm::vec3(position.x + HALF_TERRAIN_SIZE, position.y, position.z + HALF_TERRAIN_SIZE);
+	float HALF_TERRAIN_SIZE = TERRAIN_SIZE * 0.5f;
+	terrain_centre = glm::vec3(position.x + HALF_TERRAIN_SIZE, position.y, position.z + HALF_TERRAIN_SIZE);
 
-	//terrain_left = position.x;
-	//terrain_right = position.x + TERRAIN_SIZE;
-	//terrain_up = position.z;
-	//terrain_down = position.z + TERRAIN_SIZE;
+	terrain_left = position.x;
+	terrain_right = position.x + TERRAIN_SIZE;
+	terrain_up = position.z;
+	terrain_down = position.z + TERRAIN_SIZE;
 
-	//glGenVertexArrays(1, &VAOHeightmap); // Create one VAO
-	//glGenBuffers(1, &VBOVertices);
-	//glGenBuffers(1, &VBONormals);
-	//glGenBuffers(1, &VBOTexCoords);
-	//glGenBuffers(1, &VBOIndices);
+	glGenVertexArrays(1, &VAOHeightmap); // Create one VAO
+	glGenBuffers(1, &VBOVertices);
+	glGenBuffers(1, &VBONormals);
+	glGenBuffers(1, &VBOTexCoords);
+	glGenBuffers(1, &VBOIndices);
 
-	//std::vector<glm::vec3> vertices;
-	//std::vector<glm::vec3> normals;
-	//std::vector<glm::vec2> textureCoords;
-	//vertices.resize(count);
-	//normals.resize(count);
-	//textureCoords.resize(count);
+	std::vector<glm::vec3> vertices;
+	std::vector<glm::vec3> normals;
+	std::vector<glm::vec2> textureCoords;
+	vertices.resize(count);
+	normals.resize(count);
+	textureCoords.resize(count);
 
-	//float lakeH[VERTEX_COUNT * VERTEX_COUNT];
-	//for (int j = 0; j < VERTEX_COUNT * VERTEX_COUNT; j++) {
-	//	lakeH[j] = vertHeights[j];
-	//}
+	float lakeH[VERTEX_COUNT * VERTEX_COUNT];
+	for (int j = 0; j < VERTEX_COUNT * VERTEX_COUNT; j++) {
+		lakeH[j] = vertHeights[j];
+	}
 
-	//int vertexPointer = 0;
-	//for (int z = 0; z < VERTEX_COUNT; z++) {
-	//	for (int x = 0; x < VERTEX_COUNT; x++) {
-	//		vertices[vertexPointer].x = (float)x / ((float)LAST_VERTEX) * TERRAIN_SIZE;
+	int vertexPointer = 0;
+	for (int z = 0; z < VERTEX_COUNT; z++) {
+		for (int x = 0; x < VERTEX_COUNT; x++) {
+			vertices[vertexPointer].x = (float)x / ((float)LAST_VERTEX) * TERRAIN_SIZE;
 
-	//		vertices[vertexPointer].y = lakeH[vertexPointer];
-	//		heights[x][z] = lakeH[vertexPointer];
-	//		vertices[vertexPointer].z = (float)z / ((float)LAST_VERTEX) * TERRAIN_SIZE;
-	//		textureCoords[vertexPointer].x = (float)x / ((float)LAST_VERTEX);
-	//		textureCoords[vertexPointer].y = (float)z / ((float)LAST_VERTEX);
-	//		vertexPointer++;
-	//	}
-	//}
+			vertices[vertexPointer].y = lakeH[vertexPointer];
+			heights[x][z] = lakeH[vertexPointer];
+			vertices[vertexPointer].z = (float)z / ((float)LAST_VERTEX) * TERRAIN_SIZE;
+			textureCoords[vertexPointer].x = (float)x / ((float)LAST_VERTEX);
+			textureCoords[vertexPointer].y = (float)z / ((float)LAST_VERTEX);
+			vertexPointer++;
+		}
+	}
 
-	//int vp = 0;
-	//for (int z = 0; z < VERTEX_COUNT; z++) {
-	//	for (int x = 0; x < VERTEX_COUNT; x++) {
-	//		normals[vp] = calculateNormal(x, z);
-	//		vp++;
-	//	}
-	//}
+	int vp = 0;
+	for (int z = 0; z < VERTEX_COUNT; z++) {
+		for (int x = 0; x < VERTEX_COUNT; x++) {
+			normals[vp] = calculateNormal(x, z);
+			vp++;
+		}
+	}
 
-	//std::vector<unsigned int> indices;
+	std::vector<unsigned int> indices;
 
-	//for (int z = 0; z < LAST_VERTEX; z++) { //cause 0-8 and bottom calc goes to 9
-	//	for (int x = 0; x < LAST_VERTEX; x += 2) {
-	//		unsigned int topLeft = (z*VERTEX_COUNT) + x;
-	//		unsigned int topRight = topLeft + 1;
-	//		unsigned int bottomLeft = ((z + 1)*VERTEX_COUNT) + x;
-	//		unsigned int bottomRight = bottomLeft + 1;
-	//		indices.push_back(topLeft);
-	//		indices.push_back(bottomLeft);
-	//		indices.push_back(topRight);
-	//		indices.push_back(bottomRight);
-	//	}
-	//}
+	for (int z = 0; z < LAST_VERTEX; z++) { //cause 0-8 and bottom calc goes to 9
+		for (int x = 0; x < LAST_VERTEX; x += 2) {
+			unsigned int topLeft = (z*VERTEX_COUNT) + x;
+			unsigned int topRight = topLeft + 1;
+			unsigned int bottomLeft = ((z + 1)*VERTEX_COUNT) + x;
+			unsigned int bottomRight = bottomLeft + 1;
+			indices.push_back(topLeft);
+			indices.push_back(bottomLeft);
+			indices.push_back(topRight);
+			indices.push_back(bottomRight);
+		}
+	}
 
-	//Common::createModelMatrix(model, this->position, 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
+	Common::createModelMatrix(model, this->position, 0.0f, glm::vec3(1.0f, 1.0f, 1.0f));
 
-	//std::vector<glm::vec3> indexed_vertices;
-	//std::vector<glm::vec3> indexed_normals;
-	//std::vector<glm::vec2> indexed_textureCoords;
+	std::vector<glm::vec3> indexed_vertices;
+	std::vector<glm::vec3> indexed_normals;
+	std::vector<glm::vec2> indexed_textureCoords;
 
-	//if (mapped) {
-	//	glGenBuffers(1, &VBOTangents);
-	//	glGenBuffers(1, &VBOBitangents);
-	//	std::vector<glm::vec3> tangents;
-	//	std::vector<glm::vec3> bitangents;
-	//	computeTangentBasis(vertices, textureCoords, indices, normals, tangents, bitangents);
-	//	std::vector<glm::vec3> indexed_tangents;
-	//	std::vector<glm::vec3> indexed_bitangents;
-	//	indexVBO_TBN(vertices, textureCoords, normals, tangents, bitangents, indexed_vertices, indexed_textureCoords, indexed_normals, indexed_tangents, indexed_bitangents);
+	if (mapped) {
+		glGenBuffers(1, &VBOTangents);
+		glGenBuffers(1, &VBOBitangents);
+		std::vector<glm::vec3> tangents;
+		std::vector<glm::vec3> bitangents;
+		computeTangentBasis(vertices, textureCoords, indices, normals, tangents, bitangents);
+		std::vector<glm::vec3> indexed_tangents;
+		std::vector<glm::vec3> indexed_bitangents;
+		indexVBO_TBN(vertices, textureCoords, normals, tangents, bitangents, indexed_vertices, indexed_textureCoords, indexed_normals, indexed_tangents, indexed_bitangents);
 
-	//	glBindVertexArray(VAOHeightmap);
+		glBindVertexArray(VAOHeightmap);
 
-	//	glBindBuffer(GL_ARRAY_BUFFER, VBOTangents);
-	//	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * indexed_tangents.size(), &indexed_tangents[0], GL_STATIC_DRAW);
-	//	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glBindBuffer(GL_ARRAY_BUFFER, VBOTangents);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * indexed_tangents.size(), &indexed_tangents[0], GL_STATIC_DRAW);
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	//	glBindBuffer(GL_ARRAY_BUFFER, VBOBitangents);
-	//	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * indexed_bitangents.size(), &indexed_bitangents[0], GL_STATIC_DRAW);
-	//	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, 0);
-	//}
-	//else {
-	//	indexVBO(vertices, textureCoords, normals, indexed_vertices, indexed_textureCoords, indexed_normals);
-	//	glBindVertexArray(VAOHeightmap);
-	//}
+		glBindBuffer(GL_ARRAY_BUFFER, VBOBitangents);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * indexed_bitangents.size(), &indexed_bitangents[0], GL_STATIC_DRAW);
+		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	}
+	else {
+		indexVBO(vertices, textureCoords, normals, indexed_vertices, indexed_textureCoords, indexed_normals);
+		glBindVertexArray(VAOHeightmap);
+	}
 
-	//glBindBuffer(GL_ARRAY_BUFFER, VBOVertices);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * indexed_vertices.size(), &indexed_vertices[0], GL_STATIC_DRAW);
-	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, VBOVertices);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * indexed_vertices.size(), &indexed_vertices[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	//glBindBuffer(GL_ARRAY_BUFFER, VBONormals);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * indexed_normals.size(), &indexed_normals[0], GL_STATIC_DRAW);
-	//glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, VBONormals);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * indexed_normals.size(), &indexed_normals[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	//glBindBuffer(GL_ARRAY_BUFFER, VBOTexCoords);
-	//glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * indexed_textureCoords.size(), &indexed_textureCoords[0], GL_STATIC_DRAW);
-	//glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, VBOTexCoords);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec2) * indexed_textureCoords.size(), &indexed_textureCoords[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
-	//int addition = VERTEX_COUNT * 2;
-	//for (int i = 1; i < LAST_VERTEX; i++) {
-	//	std::vector<unsigned int>::iterator it = indices.begin();
-	//	indices.insert(it + addition, count);//insert adds before the chosen spot
-	//	addition += VERTEX_COUNT * 2 + 1; //+1 cause insert means theres one more
-	//}
+	int addition = VERTEX_COUNT * 2;
+	for (int i = 1; i < LAST_VERTEX; i++) {
+		std::vector<unsigned int>::iterator it = indices.begin();
+		indices.insert(it + addition, count);//insert adds before the chosen spot
+		addition += VERTEX_COUNT * 2 + 1; //+1 cause insert means theres one more
+	}
 
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VBOIndices);
-	//glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indices.size(), &indices[0], GL_STATIC_DRAW);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, VBOIndices);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * indices.size(), &indices[0], GL_STATIC_DRAW);
 
-	//const float HM_SIZE_X = VERTEX_COUNT;
-	//const float HM_SIZE_Y = VERTEX_COUNT;
-	//indicesCount = static_cast<unsigned int>(HM_SIZE_X*(HM_SIZE_Y - 1) * 2 + HM_SIZE_Y - 2);
+	const float HM_SIZE_X = VERTEX_COUNT;
+	const float HM_SIZE_Y = VERTEX_COUNT;
+	indicesCount = static_cast<unsigned int>(HM_SIZE_X*(HM_SIZE_Y - 1) * 2 + HM_SIZE_Y - 2);
 
-	//glEnableVertexAttribArray(0);
-	//glBindVertexArray(0);
+	glEnableVertexAttribArray(0);
+	glBindVertexArray(0);
 }
 
 void Terrain::Draw(GLuint shader) {

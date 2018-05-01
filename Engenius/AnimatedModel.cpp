@@ -5,7 +5,7 @@ AnimatedModel::AnimatedModel(const string path, const bool justAnimation) : Mode
 }
 
 AnimatedModel::AnimatedModel(std::string name, const string path) : Model(name, path) {
-	;// this->loadAnimation();
+	this->loadAnimation();
 }
 
 void AnimatedModel::loadAnimation() {

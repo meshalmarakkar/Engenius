@@ -34,13 +34,13 @@ private:
 	std::vector<glm::vec2> UVs;
 
 	struct AnimatedHUD : public HUDItem {
-		AnimatedHUD(int x, int y, int sizeX, int sizeY, GLuint texture, bool allowLowTransparency, float transparency) : HUDItem(x, y, sizeX, sizeY, texture, allowLowTransparency, transparency) { ; }
+		AnimatedHUD(int screenWidth, int screenHeight, int x, int y, int sizeX, int sizeY, GLuint texture, bool allowLowTransparency, float transparency) : HUDItem(screenWidth, screenHeight, x, y, sizeX, sizeY, texture, allowLowTransparency, transparency) { ; }
 		std::vector<glm::vec2> UVs;
 		float duration;
 	};
 
 	struct MenubarHUD : public HUDItem {
-		MenubarHUD(int x, int y, int sizeX, int sizeY, GLuint texture, bool allowLowTransparency, float transparency) : HUDItem(x, y, sizeX, sizeY, texture, allowLowTransparency, transparency) { ; }
+		MenubarHUD(int screenWidth, int screenHeight, int x, int y, int sizeX, int sizeY, GLuint texture, bool allowLowTransparency, float transparency) : HUDItem(screenWidth, screenHeight, x, y, sizeX, sizeY, texture, allowLowTransparency, transparency) { ; }
 		std::unordered_map<std::string, HUDItem*> subOptions;
 	};
 
@@ -65,7 +65,7 @@ private:
 	//EDITMODE
 	const int menuBar_SizeX = 128;
 	const int menuBar_SizeY = 32;
-	const int menuBar_PosY = 565;
+	int menuBar_PosY = 565;
 
 	const int spacing = 2;
 

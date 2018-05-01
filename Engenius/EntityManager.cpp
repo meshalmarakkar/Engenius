@@ -51,40 +51,39 @@ void initEnvironmentModels(unordered_map<std::string, Model*> &models) {
 //	cout << "desk -> ";
 	path = envDirectory + "BasicDesk/Desk.obj";
 	models.insert(std::pair<string, Model*>("desk", new Model("desk", path, "diffuse.jpg", "specular.jpg", "normal.jpg")));
-
 }
 
 void initCharacterModels(unordered_map<std::string, AnimatedModel*> &models) {
-	const string charDirectory = "../Engenius/Models/Environment/";
+	/*const string charDirectory = "../Engenius/Models/Environment/";
 	string path = "";
 
 	cout << "dummycubechar -> ";
 	path = charDirectory + "Terrain/cube.obj";
 
-	models.insert(std::pair<string, AnimatedModel*>("cube", new AnimatedModel("cube", path)));
+	models.insert(std::pair<string, AnimatedModel*>("cube", new AnimatedModel("cube", path)));*/
 	//models.insert(std::pair<string, AnimatedModel*>("batman", new AnimatedModel("character", path)));
-	//const string charDirectory = "../Engenius/Models/Characters/"; 
-	//string path = "";
+	const string charDirectory = "../Engenius/Models/Characters/"; 
+	string path = "";
 
-	//cout << "steamPunkBatman -> ";
-	//path = charDirectory + "Batman/warrior_idle.dae";
-	//models.insert(std::pair<string, AnimatedModel*>("batman", new AnimatedModel("character", path)));
-	//path = charDirectory + "Batman/walking.dae";
-	//models.insert(std::pair<string, AnimatedModel*>("batmanWalk", new AnimatedModel(path, true)));
-	//path = charDirectory + "Batman/running.dae";
-	//models.insert(std::pair<string, AnimatedModel*>("batmanJog", new AnimatedModel(path, true)));
-	//path = charDirectory + "Batman/standard_run.dae";
-	//models.insert(std::pair<string, AnimatedModel*>("batmanRun", new AnimatedModel(path, true)));
-	//path = charDirectory + "Batman/walking_backwards.dae";
-	//models.insert(std::pair<string, AnimatedModel*>("batmanWalkBack", new AnimatedModel(path, true)));
-	//models.at("batman")->setMovementAnims(models.at("batmanWalk")->getAnims());
-	//models.at("batman")->setMovementAnims(models.at("batmanJog")->getAnims());
-	//models.at("batman")->setMovementAnims(models.at("batmanRun")->getAnims());
-	//models.at("batman")->setMovementAnims(models.at("batmanWalkBack")->getAnims());
-	//models.erase("batmanWalk");
-	//models.erase("batmanJog");
-	//models.erase("batmanRun");
-	//models.erase("batmanWalkBack");	
+	cout << "steamPunkBatman -> ";
+	path = charDirectory + "Batman/warrior_idle.dae";
+	models.insert(std::pair<string, AnimatedModel*>("batman", new AnimatedModel("batman", path)));
+	path = charDirectory + "Batman/walking.dae";
+	models.insert(std::pair<string, AnimatedModel*>("batmanWalk", new AnimatedModel(path, true)));
+	path = charDirectory + "Batman/running.dae";
+	models.insert(std::pair<string, AnimatedModel*>("batmanJog", new AnimatedModel(path, true)));
+	path = charDirectory + "Batman/standard_run.dae";
+	models.insert(std::pair<string, AnimatedModel*>("batmanRun", new AnimatedModel(path, true)));
+	path = charDirectory + "Batman/walking_backwards.dae";
+	models.insert(std::pair<string, AnimatedModel*>("batmanWalkBack", new AnimatedModel(path, true)));
+	models.at("batman")->setMovementAnims(models.at("batmanWalk")->getAnims());
+	models.at("batman")->setMovementAnims(models.at("batmanJog")->getAnims());
+	models.at("batman")->setMovementAnims(models.at("batmanRun")->getAnims());
+	models.at("batman")->setMovementAnims(models.at("batmanWalkBack")->getAnims());
+	models.erase("batmanWalk");
+	models.erase("batmanJog");
+	models.erase("batmanRun");
+	models.erase("batmanWalkBack");	
 }
 
 void EntityManager::addEntityObject(std::string modelName, glm::vec3 pos, glm::vec3 scale, glm::vec3 rotation, float cullingBound, unsigned int gridNo, int p1, int p2, int s1, int s2) {
@@ -131,7 +130,6 @@ void EntityManager::addEntityWall(std::string modelName, glm::vec3 pos, glm::vec
 	objects.back()->setSpotLightIDs(s1, s2);
 	objects.back()->setTiling(tiling);
 }
-
 
 bool EntityManager::writeFile() {
 	// writing on a text file
@@ -432,7 +430,7 @@ void EntityManager::initPlayer() {
 
 	colManager->addGhostToWorld(playerGhost, COL_PLAYER, playerCollidesWith);
 
-	player = new Character(charModels.at("cube"), pos, glm::vec3(0.5f, 1.0f, 0.5f), 0.0f, playerBody, playerGhost);
+	player = new Character(charModels.at("batman"), pos, glm::vec3(1.0f), 0.0f, playerBody, playerGhost);
 	std::pair<unsigned int, unsigned int> lights = lightingManager->getClosestLights(player->getPos());
 	player->setPointLightIDs(lights.first, lights.second);
 	lights = lightingManager->getClosestSpotLights(player->getPos());
@@ -557,7 +555,7 @@ void EntityManager::renderCharacters() {
 	camera->passViewProjToShader(shader);
 	lightingManager->lightsToShader(shader);
 	lightIDsToShader(shader, player->getPointLightID(0), player->getPointLightID(1), player->getSpotLightID(0), player->getSpotLightID(1));
-
+	
 	player->draw(shader);
 }
 
@@ -604,15 +602,14 @@ void EntityManager::shadow_draw(GLuint shader) {
 
 	glEnable(GL_CULL_FACE);
 	//PLAYER
-	//player->draw(shader);
+	player->draw(shader);
 }
 
 void EntityManager::draw() {
-	//terrainManager->render(test, player->getPos());
+	terrainManager->render(test, player->getPos());
 	renderEntities();
 	renderEnvironment();
-	//renderCharacters();	
-
+	renderCharacters();	
 }
 
 void EntityManager::areaControl() {
@@ -734,7 +731,7 @@ void EntityManager::checkTrigger() {
 			audioManager->Stop("alarm");
 			controlReset_2 = true;
 			audioManager->stopTense();
-			lightingManager->setExposure(2.0f);
+			lightingManager->setExposure(5.0f);
 		}
 	}
 }
@@ -742,7 +739,7 @@ void EntityManager::checkTrigger() {
 void EntityManager::Update(const float dt_secs) {
 	frustumCulling->setCamDef(camera->getCameraEye(), camera->getCameraDirection(), camera->getCameraUp());
 
-	float terrHeightAtPlayerPos = 0.0f;//terrainManager->getTerrainHeight(player->getPos().x, player->getPos().z);
+	float terrHeightAtPlayerPos = terrainManager->getTerrainHeight(player->getPos().x, player->getPos().z);
 
 	colManager->update();
 	player->Update(camera->getYaw(), camera->getCameraAt(), camera->getCameraUp(), terrHeightAtPlayerPos, dt_secs);
@@ -759,6 +756,10 @@ bool EntityManager::getIfPause() {
 }
 void EntityManager::setPause(bool newVal) {
 	pause = newVal;
+}
+
+void EntityManager::changeAnimation() {
+	player->changeAnimation();
 }
 
 Entity* EntityManager::getObject(unsigned int i) {	return objects.at(i); }

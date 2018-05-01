@@ -14,6 +14,7 @@ public:
 	AnimatedModel* getModel();
 	void setAnimated(bool newValue);
 	void draw(GLuint shader);
+	void changeAnimation();
 
 	void MoveForward();
 	void MoveBackward();

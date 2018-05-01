@@ -3,7 +3,7 @@
 LightingManager::LightingManager(glm::vec3 cameraEye, glm::vec3 cameraAt) {
 	initLights(cameraEye, cameraAt);
 	initShadows();
-	exposure = 1.0f;
+	exposure = 5.0f;
 	bloom = false;
 	editMode = false;
 	pointL = true;
@@ -54,8 +54,8 @@ void LightingManager::initPointLights() {
 	const float att_lin  = -2.5f;
 	const float att_quad = 23.0f;
 
-	const glm::vec3 ambient = glm::vec3(0.5f, 0.5f, 0.5f);
-	const glm::vec3 diffuse = glm::vec3(0.5f, 0.5f, 0.5f);
+	const glm::vec3 ambient = glm::vec3(5.0f, 5.0f, 5.0f);
+	const glm::vec3 diffuse = glm::vec3(1.0f, 1.0f, 1.0f);
 	const glm::vec3 specular = glm::vec3(1.0f, 1.0f, 1.0f);
 	//const glm::vec3 ambient(0.2f, 0.2f, 0.2f);
 	//const glm::vec3 diffuse(0.1f, 0.1f, 0.1f);
@@ -279,10 +279,6 @@ void LightingManager::changeExposure(bool increase) {
 }
 
 void LightingManager::setExposure(float newVal) {
-	for (int i = 0; i < pointLights.size(); i++) {
-		pointLights.at(i).ambient = glm::vec3(60.0f);
-		pointLights.at(i).diffuse = glm::vec3(60.0f);
-	}
 	exposure = newVal;
 }
 
@@ -452,7 +448,7 @@ std::pair<int, int> LightingManager::getClosestLights(glm::vec3 pos) {
 }
 
 std::pair<int, int> LightingManager::getClosestSpotLights(glm::vec3 pos) {
-	int id1 = 0;
+	int id1 = -1;
 	int id2 = -1;
 	
 

@@ -18,8 +18,12 @@ private:
 
 	SDL_Window * window; // window handle
 	SDL_GLContext glContext; // OpenGL context handle
-	const int SCREENWIDTH = 1600;
-	const int SCREENHEIGHT = 900;
+	//int SCREENWIDTH = 800;
+	//int SCREENHEIGHT = 600;
+	//int SCREENWIDTH = 1600;
+	//int SCREENHEIGHT = 900;
+	int SCREENWIDTH = 1024;
+	int SCREENHEIGHT = 576;
 	int fullScreenWidth;
 	int fullScreenHeight;
 	bool fullScreen;

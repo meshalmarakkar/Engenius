@@ -6,6 +6,8 @@ layout (location = 2) in vec2 texCoords;
 layout (location = 5) in ivec4 boneIDs;
 layout (location = 6) in vec4 weights;
 layout (location = 7) in mat4 layout_model;
+layout (location = 11) in vec2 pointIDs;
+layout (location = 12) in vec2 spotIDs;
 
 uniform bool instanced;
 uniform mat4 uniform_model;
@@ -20,7 +22,6 @@ out VS_OUT {
 	vec2 TexCoords;
 	vec3 FragPos;
 	vec3 Normal;
-	vec4 FragPosLightSpace;
 } vs_out;
 
 void main()
@@ -37,7 +38,6 @@ void main()
 	gl_Position = projection * view * model * PosL;
 
 	vs_out.FragPos = vec3(model * vec4(position, 1.0f));
-	vs_out.FragPosLightSpace = lightSpaceMatrix * vec4(vs_out.FragPos, 1.0);
     vs_out.TexCoords = texCoords;
 	vs_out.Normal = transpose(inverse(mat3(model))) * normal;
 	vs_out.Normal = normalize(vs_out.Normal);

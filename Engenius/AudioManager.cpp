@@ -202,8 +202,9 @@ void AudioManager::startGame(const glm::vec3 listenerPos) {
 	PlayAudio("machine2", "machine", listenerPos);
 	SetVolume("machine2", 0.1f);
 	PlayAudio("tense", "tense", listenerPos);
+
 	//stopAllMusicForShowreel
-	//StopAll();
+	StopAll();
 }
 
 void AudioManager::playAlarm(const glm::vec3 listenerPos) {

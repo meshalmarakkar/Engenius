@@ -1,10 +1,10 @@
 #include "HUDItem.h"
 
-HUDItem::HUDItem(int x, int y, int sizeX, int sizeY, GLuint texture, bool allowLowTransparency, float transparency) {
-	init(x, y, sizeX, sizeY, texture, allowLowTransparency, transparency);
+HUDItem::HUDItem(int screenWidth, int screenHeight, int x, int y, int sizeX, int sizeY, GLuint texture, bool allowLowTransparency, float transparency) {
+	init(screenWidth, screenHeight, x, y, sizeX, sizeY, texture, allowLowTransparency, transparency);
 }
 
-void HUDItem::init(int x, int y, int sizeX, int sizeY, GLuint texture, bool allowLowTransparency, float transparency) {
+void HUDItem::init(int screenWidth, int screenHeight, int x, int y, int sizeX, int sizeY, GLuint texture, bool allowLowTransparency, float transparency) {
 	this->xy.x = static_cast<float>(x);
 	this->xy.y = static_cast<float>(y);
 	this->size.x = static_cast<float>(sizeX);
@@ -25,20 +25,20 @@ void HUDItem::init(int x, int y, int sizeX, int sizeY, GLuint texture, bool allo
 	verts.at(4) = vertex_up_right;
 	verts.at(5) = vertex_down_left;
 
-	convert_ClipSpace_to_HomogeneousSpace(800.0f, 600.0f);
+	convert_ClipSpace_to_HomogeneousSpace(screenWidth, screenHeight);
 	
 	this->texture = texture;
 	this->transparency = transparency;
 	this->allowLowTransparency = allowLowTransparency;
 }
 
-void HUDItem::convert_ClipSpace_to_HomogeneousSpace(float screenWidth, float screenHeight) {
+void HUDItem::convert_ClipSpace_to_HomogeneousSpace(int screenWidth, int screenHeight) {
 	for (unsigned int i = 0; i < verts.size(); i++) {
 		// Output position of the vertex, in clip space
-		// map [0..800][0..600] to [-1..1][-1..1]
+		// map [0..screenWidth][0..screenHeight] to [-1..1][-1..1]
 		float centre_width = screenWidth * 0.5f;
 		float centre_height = screenHeight*0.5f;
-		glm::vec2 vertexPosition_homoneneousspace = verts[i] - glm::vec2(centre_width, centre_height); // [0..800][0..600] -> [-400..400][-300..300]
+		glm::vec2 vertexPosition_homoneneousspace = verts[i] - glm::vec2(centre_width, centre_height); // [0..screenWidth][0..screenHeight] -> [-screenWidth/2..screenWidth/2][-screenHeight/2..screenHeight/2]
 		vertexPosition_homoneneousspace /= glm::vec2(centre_width, centre_height);
 		verts[i] = vertexPosition_homoneneousspace;
 	}

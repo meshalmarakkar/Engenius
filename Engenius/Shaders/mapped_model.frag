@@ -39,7 +39,6 @@ in VS_OUT {
 	mat3 TBN;
 	vec3 viewDir;
 	vec3 tangentFragPos;
-	vec4 FragPosLightSpace;
 	vec2 pointIDs;
 	vec2 spotIDs;
 } fs_in;
