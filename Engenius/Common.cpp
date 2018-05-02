@@ -141,19 +141,19 @@ namespace Common {
 		model = glm::scale(model, scale);
 	}
 
-	void enableVertexAttribArray(unsigned int first, unsigned int last) {
-		for (unsigned int i = first; i < last + 1; i++)
+	void enableVertexAttribArray(GLuint first, GLuint last) {
+		for (GLuint i = first; i < last + 1; i++)
 			glEnableVertexAttribArray(i);
 	}
 	void enableVertexAttribArray(unsigned int num) {
 		glEnableVertexAttribArray(num);
 	}
 
-	void disableVertexAttribArray(unsigned int first, unsigned int last) {
-		for (unsigned int i = first; i < last + 1; i++)
+	void disableVertexAttribArray(GLuint first, GLuint last) {
+		for (GLuint i = first; i < last + 1; i++)
 			glDisableVertexAttribArray(i);
 	}
-	void disableVertexAttribArray(unsigned int num) {
+	void disableVertexAttribArray(GLuint num) {
 		glDisableVertexAttribArray(num);
 	}
 

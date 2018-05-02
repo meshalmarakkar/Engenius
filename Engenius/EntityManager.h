@@ -35,6 +35,7 @@ public:
 	Entity* getObject(unsigned int i);
 	void checkTrigger();
 	bool writeFile();
+	bool writeFile_Panels();
 	void changeAnimation();
 
 	void setEntityPos(const glm::vec3 pos, int indexOfSelectedObject);
@@ -59,20 +60,17 @@ private:
 
 	void initPlayer();
 	bool readFile();
+	bool readFile_Panels();
 
 	void initObjectsToWorld();
 	void lightIDsToShader(GLuint shader, int pointLights_id1, int pointLights_id2, int spotLights_id1, int spotLights_id2);
 	void farPlane_camEye_toShader(GLuint shader);
 	void renderEnvironment();
-	void renderEntities();
+	void renderObjects();
 	void renderCharacters();
-
-	void initLabBuilding();
-	void initLinkBetweenGrids();
-	void initGeneratorRoom();
 	
+	std::vector<Entity*> panels;
 	std::vector<Entity*> objects;
-	std::vector<Entity*> entities;
 
 	const unsigned int grid_entrance = 0;
 	const unsigned int grid_corridor = 1;
@@ -111,7 +109,7 @@ private:
 	void resetPuzzle(Puzzle *puzzle);
 	void checkStep(Puzzle *puzzle, int triggerNo);
 
-	void addEntityWall(std::string modelName, glm::vec3 pos, glm::vec3 scale, std::string facing, float cullingBound, unsigned int gridNo, int p1, int p2, int s1, int s2);
+	void addEntityPanels(std::string modelName, glm::vec3 pos, glm::vec3 scale, glm::vec3 rotation, float cullingBound, unsigned int gridNo, int p1, int p2, int s1, int s2);
 #define NUM_EFFECTIVE_GRIDS 2
 	unsigned int renderGridNo[NUM_EFFECTIVE_GRIDS];
 	
