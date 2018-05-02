@@ -431,7 +431,7 @@ EntityManager::EntityManager(Camera *camera, ParticleManager* particleManager, L
 	std::cout << "1st: " << puzzle_secondTime.steps.x << puzzle_secondTime.steps.y << puzzle_secondTime.steps.z << puzzle_secondTime.steps.w << std::endl;
 }
 
-void EntityManager::renderEnvironment() {
+void EntityManager::renderPanels() {
 	GLuint shader = shaderManager->get_mapped_model_program();
 	glUseProgram(shader);
 	camera->passViewProjToShader(shader);
@@ -554,7 +554,7 @@ void EntityManager::shadow_draw(GLuint shader) {
 void EntityManager::draw() {
 	terrainManager->render(test, player->getPos());
 	renderObjects();
-	renderEnvironment();
+	renderPanels();
 	renderCharacters();	
 }
 

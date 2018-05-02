@@ -65,7 +65,7 @@ private:
 	void initObjectsToWorld();
 	void lightIDsToShader(GLuint shader, int pointLights_id1, int pointLights_id2, int spotLights_id1, int spotLights_id2);
 	void farPlane_camEye_toShader(GLuint shader);
-	void renderEnvironment();
+	void renderPanels();
 	void renderObjects();
 	void renderCharacters();
 	

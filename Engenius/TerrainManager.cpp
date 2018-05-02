@@ -7,7 +7,8 @@ TerrainManager::TerrainManager(LightingManager* lightingManager, Camera* camera,
 }
 
 void TerrainManager::initTerrainToWorld() {
-	terrains.push_back(new Terrain(glm::vec3(20.0f, 0.0f, -20.0f), 100.0f, Common::loadTexture("diffuse.png", "../Engenius/Models/Environment/Terrain/whiteTile/"), Common::loadTexture("normal.png", "../Engenius/Models/Environment/Terrain/whiteTile/"), heightsPlaneZERO));
+	//terrains.push_back(new Terrain(glm::vec3(20.0f, 0.0f, -20.0f), 100.0f, Common::loadTexture("diffuse.png", "../Engenius/Models/Environment/Terrain/whiteTile/"), Common::loadTexture("normal.png", "../Engenius/Models/Environment/Terrain/whiteTile/"), heightsPlaneZERO));
+	terrains.push_back(new Terrain(glm::vec3(-20.0f, 0.0f, -20.0f), 40.0f, Common::loadTexture("diffuse.png", "../Engenius/Models/Environment/Terrain/whiteTile/"), Common::loadTexture("normal.png", "../Engenius/Models/Environment/Terrain/whiteTile/"), heightsPlane));
 
 	terrains.resize(terrains.size());
 	mappedTerrains.resize(terrains.size());
