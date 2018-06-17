@@ -24,6 +24,11 @@ public:
 	GLuint get_particle_program();
 	GLuint get_displayNormals_program();
 	GLuint get_firstPass_program();
+	GLuint get_gBuffer_mapped_program();
+	GLuint get_deferredShading_mapped_program();
+	GLuint get_gBuffer_program();
+	GLuint get_deferredShading_program();
+	GLuint get_grass_program();
 
 private:
 	void init();
@@ -45,6 +50,11 @@ private:
 	GLuint particle_program;
 	GLuint displayNormals_program;
 	GLuint firstPass_program;
+	GLuint gBuffer_mapped_program;
+	GLuint deferredShading_mapped_program;
+	GLuint gBuffer_program;
+	GLuint deferredShading_program;
+	GLuint grass_program;
 
 	GLuint depthShader_program;
 };

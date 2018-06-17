@@ -16,7 +16,6 @@ uniform mat4 view;
 
 const int MAX_BONES = 50;
 uniform mat4 boneLocation[MAX_BONES];
-uniform mat4 lightSpaceMatrix;
 
 out VS_OUT {
 	vec2 TexCoords;

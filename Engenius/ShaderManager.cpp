@@ -202,6 +202,31 @@ void ShaderManager::init() {
 	depthMapRender_program = initShaders("../Engenius/Shaders/DepthMap.vert", "../Engenius/Shaders/DepthMap.frag");
 	displayNormals_program = initShaders("../Engenius/Shaders/displayNormals.vert", "../Engenius/Shaders/displayNormals.frag", "../Engenius/Shaders/displayNormals.gs");
 	firstPass_program = initShaders("../Engenius/Shaders/screenSpace.vert", "../Engenius/Shaders/firstPass.frag");
+	gBuffer_mapped_program = initShaders("../Engenius/Shaders/mapped_modelGBuffer.vert", "../Engenius/Shaders/mapped_modelGBuffer.frag");
+	deferredShading_mapped_program = initShaders("../Engenius/Shaders/screenSpace.vert", "../Engenius/Shaders/mapped_modelDeferredShading.frag");
+	gBuffer_program = initShaders("../Engenius/Shaders/modelGBuffer.vert", "../Engenius/Shaders/modelGBuffer.frag");
+	deferredShading_program = initShaders("../Engenius/Shaders/screenSpace.vert", "../Engenius/Shaders/modelDeferredShading.frag");
+	grass_program = initShaders("../Engenius/Shaders/grass.vert", "../Engenius/Shaders/grass.frag", "../Engenius/Shaders/grass.gs");
+}
+
+GLuint ShaderManager::get_grass_program() {
+	return grass_program;
+}
+
+GLuint ShaderManager::get_gBuffer_program() {
+	return gBuffer_program;
+}
+
+GLuint ShaderManager::get_deferredShading_program() {
+	return deferredShading_program;
+}
+
+GLuint ShaderManager::get_gBuffer_mapped_program() {
+	return gBuffer_mapped_program;
+}
+
+GLuint ShaderManager::get_deferredShading_mapped_program() {
+	return deferredShading_mapped_program;
 }
 
 GLuint ShaderManager::get_firstPass_program() {

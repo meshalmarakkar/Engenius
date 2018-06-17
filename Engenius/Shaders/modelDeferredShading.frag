@@ -28,27 +28,22 @@ struct SpotLight {
     vec3 specular;       
 };
 
-uniform sampler2D texture_diffuse1;
-uniform sampler2D texture_specular1;
+uniform sampler2D gPosition;
+uniform sampler2D gNormal;
+uniform sampler2D gAlbedoSpecular;
+uniform sampler2D gPointLightIDs;
+uniform sampler2D gSpotLightIDs;
 
-in VS_OUT {
-	vec2 TexCoords;
-	vec3 FragPos;
-	vec3 Normal;
-} fs_in;
+in vec2 texCoords;
 
 uniform PointLight pointLights[5];
 uniform SpotLight spotLights[MAX_PER_LIGHT_TYPE];
-
-uniform int pointLightIDs[MAX_PER_LIGHT_TYPE];
-uniform int spotLightIDs[MAX_PER_LIGHT_TYPE];
 
 uniform float far_plane;
 uniform samplerCube depthMap[MAX_PER_LIGHT_TYPE];
 uniform bool depthMap_ifRender[MAX_PER_LIGHT_TYPE];
 
 uniform vec3 viewPos;
-uniform bool hasSpecularMap;
 uniform bool displayShadow;
 
 layout(location = 0) out vec4 out_Color;
@@ -64,9 +59,8 @@ vec3 sampleOffsetDirections[20] = vec3[]
 );   
 
 ////-- Function prototypes --////
-float ShadowCalculation(vec3 lightPosition, samplerCube shadowCube);
-float ShadowCalculation_DirLight(vec4 fragPosLightSpace, vec3 normal);
-vec3 CalcPointLight(PointLight light, vec3 viewDir, vec3 norm, float shadow, vec3 colour, vec3 specMap);
+float ShadowCalculation(vec3 lightPosition, vec3 fragPos, samplerCube shadowCube);
+vec3 CalcPointLight(PointLight light, vec3 viewDir, vec3 fragPos, vec3 norm, float shadow, vec3 colour, vec3 specMap);
 vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec3 colour, vec3 specMap);
 
 float near = 0.01; 
@@ -80,39 +74,42 @@ float LinearizeDepth(float depth)
 
 void main()
 {    
-	vec3 norm = fs_in.Normal;
-	vec4 colour4 = texture(texture_diffuse1, fs_in.TexCoords);
-	if (colour4.a < 0.5f)
-		discard;
+    // Properties 
+	vec3 fragPos = texture(gPosition, texCoords).rgb;
+	vec3 norm = texture(gNormal, texCoords).rgb;
+	vec3 colour = texture(gAlbedoSpecular, texCoords).rgb;
+	vec3 specMap = vec3(texture(gAlbedoSpecular, texCoords).a);
+	vec3 ptLightIDs = texture(gPointLightIDs, texCoords).rgb;
+	vec3 spLightIDs = texture(gSpotLightIDs, texCoords).rgb;
 
-	vec3 colour = colour4.rgb;
-	vec3 specMap = hasSpecularMap ? texture(texture_specular1, fs_in.TexCoords).rgb : vec3(1.0f);
+	vec3 viewDir = normalize(viewPos - fragPos);
+	int pointLightIDs[MAX_PER_LIGHT_TYPE] = {int(ptLightIDs.x), int(ptLightIDs.y), int(ptLightIDs.z)};
+	int spotLightIDs[MAX_PER_LIGHT_TYPE] = {int(spLightIDs.x), int(spLightIDs.y), int(spLightIDs.z)};
 
-	vec3 viewDir = normalize(viewPos - fs_in.FragPos);
-    
-	float shadow = 0.0;
+    float shadow = 0.0;
 	vec3 result;
 
 	for(int i = 0; i < MAX_PER_LIGHT_TYPE; i++){
-		shadow = displayShadow && depthMap_ifRender[i] ? ShadowCalculation(pointLights[i].position, depthMap[i]) : 0.0f;	
-		result += pointLightIDs[i] > -1 ? CalcPointLight(pointLights[pointLightIDs[i]], viewDir, norm, shadow, colour, specMap) : vec3(0.0f);
-		result += spotLightIDs[i] > -1 ? CalcSpotLight(spotLights[spotLightIDs[i]], norm, fs_in.FragPos, viewDir, colour, specMap) : vec3(0.0f);  
+		shadow = 0.0f;//displayShadow && depthMap_ifRender[i] ? ShadowCalculation(pointLights[i].position, fragPos, depthMap[i]) : 0.0;	
+		result += pointLightIDs[i] > -1 ? CalcPointLight(pointLights[pointLightIDs[i]], viewDir, fragPos, norm, shadow, colour, specMap) : vec3(0.0f);   
+		result += spotLightIDs[i] > -1 ? CalcSpotLight(spotLights[spotLightIDs[i]], norm, fragPos, viewDir, colour, specMap) : vec3(0.0f);
 	}
-
+	
 	//eyes prefer green most and blue least
 	float brightness = dot(result, vec3(0.2126, 0.7152, 0.0722));
     if(brightness > 1.0)
-       toBlur_out_Color = vec4(result, 1.0);
+		toBlur_out_Color = vec4(result, 1.0);
 	else
 		toBlur_out_Color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
 	out_Color = vec4(result, 1.0);
+	//out_Color = vec4(colour, 1.0);
 }
 
 // Calculates the color when using a point light.
-vec3 CalcPointLight(PointLight light, vec3 viewDir, vec3 norm, float shadow, vec3 colour, vec3 specMap)
+vec3 CalcPointLight(PointLight light, vec3 viewDir, vec3 fragPos, vec3 norm, float shadow, vec3 colour, vec3 specMap)
 {  
-	vec3 lightDir = normalize(light.position - fs_in.FragPos);
+	vec3 lightDir = normalize(light.position - fragPos);
 	
 	// Ambient shading
 	vec3 ambient = light.ambient * colour;
@@ -131,7 +128,7 @@ vec3 CalcPointLight(PointLight light, vec3 viewDir, vec3 norm, float shadow, vec
     vec3 specular = light.specular * spec * specMap;
 
 	// Attenuation
-    float distance = length(light.position - fs_in.FragPos);
+    float distance = length(light.position - fragPos);
     float attenuation = 1.0f / (light.constant + light.linear * distance + light.quadratic * (distance * distance));    
     
 	// Combine results
@@ -145,12 +142,10 @@ vec3 CalcPointLight(PointLight light, vec3 viewDir, vec3 norm, float shadow, vec
 // calculates the color when using a spot light.
 vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec3 colour, vec3 specMap)
 {
-	
     vec3 lightDir = normalize(light.position - fragPos);
 	float theta = dot(lightDir, normalize(-light.direction)); 
-	
+    
 	if(theta > light.outerCutOff){ //or just cutOff
-
 		// diffuse shading
 		float diff = max(dot(normal, lightDir), 0.0);
 
@@ -166,7 +161,7 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec
 		float distance = length(light.position - fragPos);
 		float attenuation = 1.0 / (light.constant + light.linear * distance + light.quadratic * (distance * distance));    
 
-		// spotlight intensity 
+		// spotlight intensity
 		float epsilon = light.cutOff - light.outerCutOff;
 		float intensity = clamp((theta - light.outerCutOff) / epsilon, 0.0, 1.0);
 
@@ -174,22 +169,23 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal, vec3 fragPos, vec3 viewDir, vec
 		vec3 ambient = light.ambient * colour;
 		vec3 diffuse = light.diffuse * diff * colour;
 		vec3 specular = light.specular * spec * specMap;
+
 		ambient *= attenuation * intensity;
 		diffuse *= attenuation * intensity;
 		specular *= attenuation * intensity;
 
 		return (ambient + diffuse + specular);
 	}
-
-    return vec3(0.0f, 0.0f, 0.0f);
+	
+	return vec3(0.0f, 0.0f, 0.0f);
 }
 
-// Calculate shadows
-float ShadowCalculation(vec3 lightPosition, samplerCube shadowCube)
-{
 
+// Calculate shadows
+float ShadowCalculation(vec3 lightPosition, vec3 fragPos, samplerCube shadowCube)
+{
     // Get vector between fragment position and light position
-    vec3 fragToLight = fs_in.FragPos - lightPosition;
+    vec3 fragToLight = fragPos - lightPosition;
 
     // Now get current linear depth as the length between the fragment and light position
     float currentDepth = length(fragToLight);
@@ -198,7 +194,7 @@ float ShadowCalculation(vec3 lightPosition, samplerCube shadowCube)
     float shadow = 0.0;
 	float bias = 0.15;
 	int samples = 20;
-	float viewDistance = length(viewPos - fs_in.FragPos);
+	float viewDistance = length(viewPos - fragPos);
 	float diskRadius = (1.0 + (viewDistance / far_plane)) / 25.0;  
 	for(int i = 0; i < samples; ++i)
 	{

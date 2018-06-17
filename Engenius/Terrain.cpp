@@ -1,13 +1,13 @@
 #include "Terrain.h"
 #include <iostream>
 
-Terrain::Terrain(glm::vec3 position, float size, GLuint texture, const float vertHeights[], GLuint specularMap) : position(position), TERRAIN_SIZE(size), texture(texture), mapped(false), hasSpecular(false) {
+Terrain::Terrain(glm::vec3 position, float size, GLuint texture, float tiling, const float vertHeights[], GLuint specularMap) : position(position), TERRAIN_SIZE(size), texture(texture), tiling(tiling), mapped(false), hasSpecular(false) {
 	if (specularMap == 0)
 		hasSpecular = false;
 	init(vertHeights);
 }
 
-Terrain::Terrain(glm::vec3 position, float size, GLuint texture, GLuint normalMap, const float vertHeights[], GLuint specularMap) : position(position), TERRAIN_SIZE(size), texture(texture), normalMap(normalMap), specularMap(specularMap), mapped(true){
+Terrain::Terrain(glm::vec3 position, float size, GLuint texture, GLuint normalMap, float tiling,  const float vertHeights[], GLuint specularMap) : position(position), TERRAIN_SIZE(size), texture(texture), tiling(tiling), normalMap(normalMap), specularMap(specularMap), mapped(true){
 	if (specularMap == 0)
 		hasSpecular = false;
 	init(vertHeights);
@@ -213,6 +213,10 @@ void Terrain::init(const float vertHeights[]) {
 	terrain_up = position.z;
 	terrain_down = position.z + TERRAIN_SIZE;
 
+	std::cout << "terrain centre: " << terrain_centre.x << ", " << terrain_centre.y << ", " << terrain_centre.z << 
+		"\nterrain_left" << terrain_left << "\nterrain_right" << terrain_right <<
+		"\nterrain_up" << terrain_up << "\nterrain_down" << terrain_down << std::endl;
+
 	glGenVertexArrays(1, &VAOHeightmap); // Create one VAO
 	glGenBuffers(1, &VBOVertices);
 	glGenBuffers(1, &VBONormals);
@@ -324,6 +328,56 @@ void Terrain::init(const float vertHeights[]) {
 	const float HM_SIZE_X = VERTEX_COUNT;
 	const float HM_SIZE_Y = VERTEX_COUNT;
 	indicesCount = static_cast<unsigned int>(HM_SIZE_X*(HM_SIZE_Y - 1) * 2 + HM_SIZE_Y - 2);
+	
+	////GRASS////
+	glGenBuffers(1, &VBOGrassData);
+	float grassPatchOffsetMin = 1.5f;
+	float grassPatchOffsetMax = 2.5f;
+	float grassPatchHeight = 5.0f;
+
+	//float HALF_TERRAIN_SIZE = TERRAIN_SIZE * 0.5f;
+	//terrain_centre = glm::vec3(position.x + HALF_TERRAIN_SIZE, position.y, position.z + HALF_TERRAIN_SIZE);
+
+	//terrain_left = position.x;
+	//terrain_right = position.x + TERRAIN_SIZE;
+	//terrain_up = position.z;
+	//terrain_down = position.z + TERRAIN_SIZE;
+
+	//	terrain centre : 6, 0, 14
+	//	terrain_left - 4
+	//	terrain_right16
+	//	terrain_up4
+	//	terrain_down24
+	//	num of triangles : 85
+
+	glm::vec3 currentPatchPos(terrain_left + grassPatchOffsetMin, 0.0f, terrain_down - grassPatchOffsetMin);
+	numGrassTriangles = 0;
+
+	while (currentPatchPos.x < terrain_right) {
+		currentPatchPos.z = terrain_down - grassPatchOffsetMin;
+
+		while (currentPatchPos.z > terrain_up)
+		{
+			currentPatchPos.y = getTerrainHeight(currentPatchPos.x, currentPatchPos.z) - 0.3f;
+			patchPositions.push_back(&currentPatchPos);
+
+			numGrassTriangles += 1;
+
+			currentPatchPos.z -= grassPatchOffsetMin + (grassPatchOffsetMax - grassPatchOffsetMin) * float(rand() % 1000) * 0.001f;
+		}
+
+		currentPatchPos.x += grassPatchOffsetMin + (grassPatchOffsetMax - grassPatchOffsetMin) * float(rand() % 1000) * 0.001f;
+	}
+
+	timePassed = 0.0f;
+	std::cout << "num of triangles: " << numGrassTriangles << std::endl;
+
+	glGenVertexArrays(1, &VAOGrass);
+	glBindVertexArray(VAOGrass);
+	glBindBuffer(GL_ARRAY_BUFFER, VBOGrassData);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * patchPositions.size(), &patchPositions.at(0), GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+
 
 	glEnableVertexAttribArray(0);
 	glBindVertexArray(0);
@@ -334,7 +388,7 @@ void Terrain::Draw(GLuint shader) {
 	Common::enableVertexAttribArray(0, 2);
 
 	glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
-	glUniform1f(glGetUniformLocation(shader, "tiling"), 32.0f);
+	glUniform1f(glGetUniformLocation(shader, "tiling"), tiling);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
@@ -361,7 +415,7 @@ void Terrain::DrawMapped(GLuint shader) {
 	Common::enableVertexAttribArray(0, 4);
 
 	glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(model));
-	glUniform1f(glGetUniformLocation(shader, "tiling"), 32.0f);
+	glUniform1f(glGetUniformLocation(shader, "tiling"), tiling);
 
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture);
@@ -383,6 +437,22 @@ void Terrain::DrawMapped(GLuint shader) {
 
 	Common::unbindTextures(0, 2);
 	Common::disableVertexAttribArray(0, 4);
+	glBindVertexArray(0);
+}
+
+void Terrain::renderGrass(GLuint shader, float dt_secs) {
+	//GRASS
+	glBindVertexArray(VAOGrass);
+	Common::enableVertexAttribArray(0);
+	glm::mat4 grassModelMat;
+	Common::createModelMatrix(grassModelMat, terrain_centre, glm::vec3(0.5f), glm::vec3(0.0f));
+	glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(grassModelMat));
+	
+	glUniform1f(glGetUniformLocation(shader, "timePassed"), timePassed);
+	timePassed += dt_secs; 
+
+	glDrawArrays(GL_POINTS, 0, numGrassTriangles);
+	Common::disableVertexAttribArray(0, 0);
 	glBindVertexArray(0);
 }
 
@@ -437,18 +507,20 @@ bool Terrain::get_ifMapped() {
 	return mapped;
 }
 
-void Terrain::setPointLightIDs(int id1, int id2) {
+void Terrain::setPointLightIDs(int id1, int id2, int id3) {
 	pointLightIDs[0] = id1;
 	pointLightIDs[1] = id2;
+	pointLightIDs[2] = id3;
 }
 
 int Terrain::getPointLightID(unsigned int i) {
 	return pointLightIDs[i];
 }
 
-void Terrain::setSpotLightIDs(int id1, int id2) {
+void Terrain::setSpotLightIDs(int id1, int id2, int id3) {
 	spotLightIDs[0] = id1;
 	spotLightIDs[1] = id2;
+	spotLightIDs[2] = id3;
 }
 
 int Terrain::getSpotLightID(unsigned int i) {

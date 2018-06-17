@@ -307,7 +307,7 @@ void EditModeManager::addFunction() {
 				p1 = 2;
 				p2 = 3;
 			}
-			entityManager->addEntityObject(edit_ModelIterator->first, mode_selected->edit_pos, mode_selected->edit_scale, glm::vec3(mode_selected->edit_pitch, mode_selected->edit_yaw, mode_selected->edit_roll), 1.0f, gridNo, p1, p2, -1, -1);
+			entityManager->addEntityObject(edit_ModelIterator->first, mode_selected->edit_pos, mode_selected->edit_scale, glm::vec3(mode_selected->edit_pitch, mode_selected->edit_yaw, mode_selected->edit_roll), 1.0f, gridNo, p1, p2, 2, -1, -1, -1);
 			edit_ObjectIterator = entityManager->getEnviObject_Begin();
 		}
 		if (mode_selected == mode_bounding) {

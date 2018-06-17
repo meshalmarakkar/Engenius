@@ -55,18 +55,20 @@ Model* Entity::getModel() {
 	return model;
 }
 
-void Entity::setPointLightIDs(int id1, int id2) {
+void Entity::setPointLightIDs(int id1, int id2, int id3) {
 	pointLightIDs[0] = id1;
 	pointLightIDs[1] = id2;
+	pointLightIDs[2] = id3;
 }
 
 int Entity::getPointLightID(unsigned int i) {
 	return pointLightIDs[i];
 }
 
-void Entity::setSpotLightIDs(int id1, int id2) {
+void Entity::setSpotLightIDs(int id1, int id2, int id3) {
 	spotLightIDs[0] = id1;
 	spotLightIDs[1] = id2;
+	spotLightIDs[2] = id3;
 }
 
 int Entity::getSpotLightID(unsigned int i) {

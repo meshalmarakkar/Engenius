@@ -166,7 +166,7 @@ void Character::draw(GLuint shader) {
 	}
 	glm::mat4 modelMatrix;
 	//Common::createModelMatrix(modelMatrix, position, rotation, scale);
-	Common::createModelMatrix(modelMatrix, glm::vec3(0.0f, 1.0f, -10.0f), scale, rotation);
+	Common::createModelMatrix(modelMatrix, glm::vec3(-1.0f, 0.5f, 8.5f), scale, rotation);
 //	glUniform1i(glGetUniformLocation(shader, "animated"), animated);
 	model->Draw(shader, modelMatrix);
 }

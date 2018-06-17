@@ -6,18 +6,19 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <vector>
 #include <string>
+#include <tuple>
 #include <iostream>
 
 class LightingManager {
 public:
 	LightingManager(glm::vec3 cameraEye, glm::vec3 cameraAt);
 	unsigned int getNumOfLights();
-	void lightIDsToShader(GLuint shader, int point_id1, int point_id2, int spot_id1, int spot_id2);
+	void lightIDsToShader(GLuint shader, int po_1, int po_2, int po_3, int sp_1, int sp_2, int sp_3);
 	void lightsToShader(GLuint shader);
-	std::pair<int, int> getClosestLights(glm::vec3 pos);
-	std::pair<int, int> getClosestSpotLights(glm::vec3 pos);
+	std::tuple<int, int, int> getClosestLights(glm::vec3 pos);
+	std::tuple<int, int, int> getClosestSpotLights(glm::vec3 pos);
 	void setUpShadowRender_Pointlights(GLuint shader, int lightIndex);
-	void shadowMapsToShader(GLuint shader, int point_id1, int point_id2, int spot_id1, int spot_id2);
+	void shadowMapsToShader(GLuint shader, int po_1, int po_2, int po_3, int sp_1, int sp_2, int sp_3);
 	void noShadowMessage(GLuint shader);
 
 	GLuint getDepthCubeMap(unsigned int i);
@@ -61,7 +62,6 @@ private:
 	int postProcessNum;
 
 	bool editMode;
-	bool pointL;
 
 	struct DirectionalLight {
 		glm::vec3 direction;
@@ -123,7 +123,7 @@ private:
 	const float valueChangeRate = 0.05f;
 
 	unsigned int numOfLights = 0;
-	const int MAX_LIGHTS = 2; //max lights to affect an object
+	const int MAX_LIGHTS = 3; //max lights to affect an object
 
 	void addSpotLight(glm::vec3 position, glm::vec3 direction, float cutOff, float outerCutOff, float att_constant, float att_linear, float att_quadratic, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular);
 	void addPointLight(glm::vec3 position, float att_constant, float att_linear, float att_quadratic, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular);

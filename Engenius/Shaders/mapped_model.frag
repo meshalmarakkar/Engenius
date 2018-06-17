@@ -11,7 +11,7 @@ struct PointLight {
     vec3 diffuse;
     vec3 specular;
 };
-const int MAX_PER_LIGHT_TYPE = 2;
+const int MAX_PER_LIGHT_TYPE = 3;
 
 struct SpotLight {
     vec3 position;
@@ -43,7 +43,7 @@ in VS_OUT {
 	vec2 spotIDs;
 } fs_in;
 
-uniform PointLight pointLights[4];
+uniform PointLight pointLights[5];
 uniform SpotLight spotLights[MAX_PER_LIGHT_TYPE];
 
 uniform int pointLightIDs[MAX_PER_LIGHT_TYPE];

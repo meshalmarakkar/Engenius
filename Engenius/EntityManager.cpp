@@ -78,32 +78,32 @@ void initCharacterModels(unordered_map<std::string, AnimatedModel*> &models) {
 	models.erase("batmanWalkBack");	
 }
 
-void EntityManager::addEntityObject(std::string modelName, glm::vec3 pos, glm::vec3 scale, glm::vec3 rotation, float cullingBound, unsigned int gridNo, int p1, int p2, int s1, int s2) {
+void EntityManager::addEntityObject(std::string mdlName, glm::vec3 pos, glm::vec3 scale, glm::vec3 rot, float culBound, unsigned int gridNo, int p1, int p2, int p3, int s1, int s2, int s3) {
 	std::pair<int, int> lights;
 	std::pair<int, int> lights2;
 
-	objects.emplace_back(new Entity(enviModels.at(modelName), pos, scale, rotation, gridNo));
-	objects.back()->setCullingBound(cullingBound);
+	objects.emplace_back(new Entity(enviModels.at(mdlName), pos, scale, rot, gridNo));
+	objects.back()->setCullingBound(culBound);
 	//lights = lightingManager->getClosestLights(objects.back()->getPos());
-	objects.back()->setPointLightIDs(p1, p2);
+	objects.back()->setPointLightIDs(p1, p2, p3);
 	//lights2 = lightingManager->getClosestSpotLights(objects.back()->getPos());
-	objects.back()->setSpotLightIDs(s1, s2);
+	objects.back()->setSpotLightIDs(s1, s2, s3);
 
 	objects.resize(objects.size());
 }
 
-void EntityManager::addEntityPanels(std::string modelName, glm::vec3 pos, glm::vec3 scale, glm::vec3 rotation, float cullingBound, unsigned int gridNo, int p1, int p2, int s1, int s2) {
+void EntityManager::addEntityPanels(std::string mdlName, glm::vec3 pos, glm::vec3 scale, glm::vec3 rot, float culBound, unsigned int gridNo, int p1, int p2, int p3, int s1, int s2, int s3) {
 	std::pair<int, int> lights;
 	std::pair<int, int> lights2;
 
-	float tiling = (cullingBound / 2.0f) * 2.0f;
+	float tiling = (culBound / 2.0f) * 2.0f;
 
-	panels.emplace_back(new Entity(enviModels.at(modelName), pos, scale, rotation, gridNo));
-	panels.back()->setCullingBound(cullingBound + (cullingBound * 0.5f));
+	panels.emplace_back(new Entity(enviModels.at(mdlName), pos, scale, rot, gridNo));
+	panels.back()->setCullingBound(culBound + (culBound * 0.5f));
 	//	lights = lightingManager->getClosestLights(walls.back()->getPos());
-	panels.back()->setPointLightIDs(p1, p2);
+	panels.back()->setPointLightIDs(p1, p2, p3);
 	//	lights2 = lightingManager->getClosestSpotLights(walls.back()->getPos());
-	panels.back()->setSpotLightIDs(s1, s2);
+	panels.back()->setSpotLightIDs(s1, s2, s3);
 	panels.back()->setTiling(tiling);
 }
 
@@ -112,7 +112,7 @@ bool EntityManager::writeFile() {
 	ofstream myfile("../Engenius/Levels/Level.dat");
 	if (myfile.is_open())
 	{
-		myfile << "ModelName | Positions | Scale | Rotation | CullBound | GridNum | PointL1 | PointL2 \t//numberOfBodies on first line\n";
+		myfile << "ModelName | Positions | Scale | Rotation | CullBound | GridNum | PointL1 | PointL2 | PointL3 \t//numberOfBodies on first line\n";
 		myfile << objects.size() << "#\n";
 
 		for (unsigned int objNo = 0; objNo < objects.size(); objNo++) {
@@ -140,6 +140,7 @@ bool EntityManager::writeFile() {
 			myfile << objects.at(objNo)->getGridNo() << ",";
 			myfile << objects.at(objNo)->getPointLightID(0) << ",";
 			myfile << objects.at(objNo)->getPointLightID(1) << ",";
+			myfile << objects.at(objNo)->getPointLightID(2) << ",";
 			myfile << "\n";
 			cout << "Boxes Saved\n";
 		}
@@ -171,10 +172,10 @@ bool EntityManager::readFile() {
 			glm::vec3 rotation;
 			float cullingBound;
 			unsigned int gridNo;
-			int pointL1, pointL2;
+			int pointL1, pointL2, pointL3;
 
 			string asString;
-			int variables = 14;
+			int variables = 15;
 			if (!gotNumber) {
 				string numAsString;
 				getline(myfile, numAsString, '#');
@@ -199,10 +200,11 @@ bool EntityManager::readFile() {
 					case 11: gridNo = stoi(asString);	break;
 					case 12: pointL1 = stoi(asString);	break;
 					case 13: pointL2 = stoi(asString);	break;
+					case 14: pointL3 = stoi(asString);	break;
 					}
 				}//for loop
 				bodyNo++;
-				addEntityObject(modelName, position, scale, rotation, cullingBound, gridNo, pointL1, pointL2, -1, -1);
+				addEntityObject(modelName, position, scale, rotation, cullingBound, gridNo, pointL1, pointL2, pointL3, -1, -1, -1);
 
 				//std::cout << modelName << "," << position.x << "," << position.y << "," << position.z << "," << scale.x << "," << scale.y << "," << scale.z << "," << rotation.x << "," << rotation.y << "," << rotation.z << ", " << cullingBound << ", " << gridNo << std::endl;
 			}
@@ -220,7 +222,7 @@ bool EntityManager::writeFile_Panels() {
 	ofstream myfile("../Engenius/Levels/LevelPanels.dat");
 	if (myfile.is_open())
 	{
-		myfile << "ModelName | Positions | Scale | Rotation | CullBound | GridNum | PointL1 | PointL2 \t//numberOfBodies on first line\n";
+		myfile << "ModelName | Positions | Scale | Rotation | CullBound | GridNum | PointL1 | PointL2 | PointL3 \t//numberOfBodies on first line\n";
 		myfile << panels.size() << "#\n";
 
 		for (unsigned int objNo = 0; objNo < panels.size(); objNo++) {
@@ -248,6 +250,7 @@ bool EntityManager::writeFile_Panels() {
 			myfile << panels.at(objNo)->getGridNo() << ",";
 			myfile << panels.at(objNo)->getPointLightID(0) << ",";
 			myfile << panels.at(objNo)->getPointLightID(1) << ",";
+			myfile << panels.at(objNo)->getPointLightID(2) << ",";
 			myfile << "\n";
 			cout << "Boxes Saved\n";
 		}
@@ -279,10 +282,10 @@ bool EntityManager::readFile_Panels() {
 			glm::vec3 rotation;
 			float cullingBound;
 			unsigned int gridNo;
-			int pointL1, pointL2;
+			int pointL1, pointL2, pointL3;
 
 			string asString;
-			int variables = 14;
+			int variables = 15;
 			if (!gotNumber) {
 				string numAsString;
 				getline(myfile, numAsString, '#');
@@ -307,10 +310,11 @@ bool EntityManager::readFile_Panels() {
 					case 11: gridNo = stoi(asString);	break;
 					case 12: pointL1 = stoi(asString);	break;
 					case 13: pointL2 = stoi(asString);	break;
+					case 14: pointL3 = stoi(asString);	break;
 					}
 				}//for loop
 				bodyNo++;
-				addEntityPanels(modelName, position, scale, rotation, cullingBound, gridNo, pointL1, pointL2, -1, -1);
+				addEntityPanels(modelName, position, scale, rotation, cullingBound, gridNo, pointL1, pointL2, pointL3, -1, -1, -1);
 
 				//std::cout << modelName << "," << position.x << "," << position.y << "," << position.z << "," << scale.x << "," << scale.y << "," << scale.z << "," << rotation.x << "," << rotation.y << "," << rotation.z << ", " << cullingBound << ", " << gridNo << std::endl;
 			}
@@ -326,6 +330,7 @@ bool EntityManager::readFile_Panels() {
 void EntityManager::initObjectsToWorld() {
 	readFile();
 	readFile_Panels();
+	//writeFile_Panels();
 
 	panels.resize(panels.size());
 	objects.resize(objects.size());
@@ -376,11 +381,12 @@ void EntityManager::initPlayer() {
 
 	colManager->addGhostToWorld(playerGhost, COL_PLAYER, playerCollidesWith);
 
-	player = new Character(charModels.at("batman"), pos, glm::vec3(1.0f), 0.0f, playerBody, playerGhost);
-	std::pair<unsigned int, unsigned int> lights = lightingManager->getClosestLights(player->getPos());
-	player->setPointLightIDs(lights.first, lights.second);
+	player = new Character(charModels.at("batman"), pos, glm::vec3(1.0f), 90.0f, playerBody, playerGhost);
+	std::tuple<int, int, int> lights(lightingManager->getClosestLights(player->getPos()));
+	player->setPointLightIDs(std::get<0>(lights), std::get<1>(lights), std::get<2>(lights));
+	std::cout << "p: " << player->getPointLightID(0) << ", " << player->getPointLightID(1) << ", " << player->getPointLightID(2) << std::endl;
 	lights = lightingManager->getClosestSpotLights(player->getPos());
-	player->setSpotLightIDs(lights.first, lights.second);
+	player->setSpotLightIDs(std::get<0>(lights), std::get<1>(lights), std::get<2>(lights));
 }
 
 EntityManager::EntityManager(Camera *camera, ParticleManager* particleManager, LightingManager* lightingManager, ShaderManager* shaderManager, CollisionManager* colManager, TerrainManager* terrainManager, AudioManager * audioManager) : camera(camera), particleManager(particleManager), lightingManager(lightingManager), shaderManager(shaderManager), colManager(colManager), terrainManager(terrainManager), audioManager(audioManager){
@@ -400,6 +406,7 @@ EntityManager::EntityManager(Camera *camera, ParticleManager* particleManager, L
 
 	pause = true;
 	endGame = false;
+	deferredShading = false;
 
 	controlReset_1 = false;
 	controlReset_2 = false;
@@ -432,7 +439,8 @@ EntityManager::EntityManager(Camera *camera, ParticleManager* particleManager, L
 }
 
 void EntityManager::renderPanels() {
-	GLuint shader = shaderManager->get_mapped_model_program();
+	GLuint shader = shaderManager->get_mapped_model_program(); 
+	//GLuint shader = shaderManager->get_model_program();
 	glUseProgram(shader);
 	camera->passViewProjToShader(shader);
 	farPlane_camEye_toShader(shader);
@@ -450,7 +458,33 @@ void EntityManager::renderPanels() {
 				if (panels.at(iter)->getGridNo() == renderGridNo[i] && rendered == false) {
 					Model *objModel = panels.at(iter)->getModel();
 					const glm::mat4 objMatrix = panels.at(iter)->getModelMatrix();
-					lightIDsToShader(shader, panels[iter]->getPointLightID(0), panels[iter]->getPointLightID(1), panels[iter]->getSpotLightID(0), panels[iter]->getSpotLightID(1));
+					lightIDsToShader(shader, panels[iter]->getPointLightID(0), panels[iter]->getPointLightID(1), panels[iter]->getPointLightID(2), panels[iter]->getSpotLightID(0), panels[iter]->getSpotLightID(1), panels[iter]->getSpotLightID(2));
+					glUniform1f(glGetUniformLocation(shader, "tiling"), panels.at(iter)->getTiling());
+					objModel->drawWall(shader, objMatrix);
+					rendered = true;
+				}
+			}
+		}
+	}
+	enviModels.at("surround")->unbindWall();
+}
+
+void EntityManager::renderPanels_GBuffer() {
+	GLuint shader = shaderManager->get_gBuffer_mapped_program();
+	//GLuint shader = shaderManager->get_gBuffer_program();
+	glUseProgram(shader);
+	camera->passViewProjToShader(shader);
+	farPlane_camEye_toShader(shader);
+
+	enviModels.at("surround")->bindWall(shader);
+	for (unsigned int iter = 0; iter < panels.size(); iter++) {
+		if (frustumCulling->sphereInFrustum(panels.at(iter)->getPos(), panels.at(iter)->getCullingBound()) != 0) {
+			bool rendered = false;
+			for (int i = 0; i < NUM_EFFECTIVE_GRIDS; i++) {
+				if (panels.at(iter)->getGridNo() == renderGridNo[i] && rendered == false) {
+					Model *objModel = panels.at(iter)->getModel();
+					const glm::mat4 objMatrix = panels.at(iter)->getModelMatrix();
+					lightIDsToShader(shader, panels[iter]->getPointLightID(0), panels[iter]->getPointLightID(1), panels[iter]->getPointLightID(2), panels[iter]->getSpotLightID(0), panels[iter]->getSpotLightID(1), panels[iter]->getSpotLightID(2));
 					glUniform1f(glGetUniformLocation(shader, "tiling"), panels.at(iter)->getTiling());
 					objModel->drawWall(shader, objMatrix);
 					rendered = true;
@@ -462,7 +496,8 @@ void EntityManager::renderPanels() {
 }
 
 void EntityManager::renderObjects() {
-	GLuint shader = shaderManager->get_mapped_model_program();
+	GLuint shader = shaderManager->get_mapped_model_program(); 
+	//GLuint shader = shaderManager->get_model_program();
 	glUseProgram(shader);
 	camera->passViewProjToShader(shader);
 	farPlane_camEye_toShader(shader);
@@ -479,7 +514,31 @@ void EntityManager::renderObjects() {
 				if (objects.at(iter)->getGridNo() == renderGridNo[i] && rendered == false) {
 					Model *objModel = objects.at(iter)->getModel();
 					const glm::mat4 objMatrix = objects.at(iter)->getModelMatrix();
-					lightIDsToShader(shader, objects[iter]->getPointLightID(0), objects[iter]->getPointLightID(1), objects[iter]->getSpotLightID(0), objects[iter]->getSpotLightID(1));
+					lightIDsToShader(shader, objects[iter]->getPointLightID(0), objects[iter]->getPointLightID(1), objects[iter]->getPointLightID(2), objects[iter]->getSpotLightID(0), objects[iter]->getSpotLightID(1), objects[iter]->getSpotLightID(2));
+					glUniform1f(glGetUniformLocation(shader, "tiling"), objects.at(iter)->getTiling());
+					objModel->Draw(shader, objMatrix);
+					rendered = true;
+				}
+			}
+		}
+	}
+}
+
+void EntityManager::renderObjects_GBuffer() {
+	GLuint shader = shaderManager->get_gBuffer_mapped_program();
+	//GLuint shader = shaderManager->get_gBuffer_program();
+	glUseProgram(shader);
+	camera->passViewProjToShader(shader);
+	farPlane_camEye_toShader(shader);
+	
+	for (unsigned int iter = 0; iter < objects.size(); iter++) {
+		if (frustumCulling->sphereInFrustum(objects.at(iter)->getPos(), objects.at(iter)->getCullingBound()) != 0) {
+			bool rendered = false;
+			for (int i = 0; i < NUM_EFFECTIVE_GRIDS; i++) {
+				if (objects.at(iter)->getGridNo() == renderGridNo[i] && rendered == false) {
+					Model *objModel = objects.at(iter)->getModel();
+					const glm::mat4 objMatrix = objects.at(iter)->getModelMatrix();
+					lightIDsToShader(shader, objects[iter]->getPointLightID(0), objects[iter]->getPointLightID(1), objects[iter]->getPointLightID(2), objects[iter]->getSpotLightID(0), objects[iter]->getSpotLightID(1), objects[iter]->getSpotLightID(2));
 					glUniform1f(glGetUniformLocation(shader, "tiling"), objects.at(iter)->getTiling());
 					objModel->Draw(shader, objMatrix);
 					rendered = true;
@@ -500,15 +559,29 @@ void EntityManager::renderCharacters() {
 	farPlane_camEye_toShader(shader);
 	camera->passViewProjToShader(shader);
 	lightingManager->lightsToShader(shader);
-	lightIDsToShader(shader, player->getPointLightID(0), player->getPointLightID(1), player->getSpotLightID(0), player->getSpotLightID(1));
-	
-	player->draw(shader);
+	if (frustumCulling->sphereInFrustum(player->getPos(), player->getCullingBound()) != 0) {
+		lightIDsToShader(shader, player->getPointLightID(0), player->getPointLightID(1), player->getPointLightID(2), player->getSpotLightID(0), player->getSpotLightID(1), player->getSpotLightID(2));
+		player->draw(shader);
+	}
 }
 
-void EntityManager::lightIDsToShader(GLuint shader, int pointLights_id1, int pointLights_id2, int spotLights_id1, int spotLights_id2) {
-	lightingManager->lightIDsToShader(shader, pointLights_id1, pointLights_id2, spotLights_id1, spotLights_id2);
+void EntityManager::renderCharacters_GBuffer() {
+	//Player
+	GLuint shader = shaderManager->get_animated_model_program();
+	glUseProgram(shader);
+
+	farPlane_camEye_toShader(shader);
+	camera->passViewProjToShader(shader);
+	if (frustumCulling->sphereInFrustum(player->getPos(), player->getCullingBound()) != 0) {
+		lightIDsToShader(shader, player->getPointLightID(0), player->getPointLightID(1), player->getPointLightID(2), player->getSpotLightID(0), player->getSpotLightID(1), player->getSpotLightID(2));
+		player->draw(shader);
+	}
+}
+
+void EntityManager::lightIDsToShader(GLuint shader, int point_id1, int point_id2, int point_id3, int spot_id1, int spot_id2, int spot_id3) {
+	lightingManager->lightIDsToShader(shader, point_id1, point_id2, point_id3, spot_id1, spot_id2, spot_id3);
 	if (lightingManager->getIfShadow() == true) {
-		lightingManager->shadowMapsToShader(shader, pointLights_id1, pointLights_id2, spotLights_id1, spotLights_id2);
+		lightingManager->shadowMapsToShader(shader, point_id1, point_id2, point_id3, spot_id1, spot_id2, spot_id3);
 	}
 	else {
 		lightingManager->noShadowMessage(shader);
@@ -551,11 +624,17 @@ void EntityManager::shadow_draw(GLuint shader) {
 	player->draw(shader);
 }
 
-void EntityManager::draw() {
-	terrainManager->render(test, player->getPos());
+void EntityManager::draw(float dt_secs) {
+	terrainManager->render(test, player->getPos(), dt_secs);
 	renderObjects();
 	renderPanels();
-	renderCharacters();	
+//	renderCharacters();	
+}
+
+void EntityManager::draw_GBuffer() {
+	renderObjects_GBuffer();
+	renderPanels_GBuffer();
+	//renderCharacters_GBuffer();	
 }
 
 void EntityManager::areaControl() {
@@ -702,6 +781,13 @@ bool EntityManager::getIfPause() {
 }
 void EntityManager::setPause(bool newVal) {
 	pause = newVal;
+}
+
+bool EntityManager::getIfDef() {
+	return deferredShading;
+}
+void EntityManager::toggleDeferredShading() {
+	deferredShading = !deferredShading;
 }
 
 void EntityManager::changeAnimation() {

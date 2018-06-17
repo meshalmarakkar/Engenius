@@ -6,7 +6,6 @@ LightingManager::LightingManager(glm::vec3 cameraEye, glm::vec3 cameraAt) {
 	exposure = 5.0f;
 	bloom = false;
 	editMode = false;
-	pointL = true;
 	shadow = false;
 	postProcessNum = 0;
 }
@@ -62,6 +61,7 @@ void LightingManager::initPointLights() {
 	//const glm::vec3 specular(0.1f, 0.1f, 0.1f);
 
 	addPointLight(glm::vec3(0.0f, 3.9f, -2.0f), att_const, att_lin, att_quad, ambient, diffuse, specular);
+	addPointLight(glm::vec3(0.0f, 3.9f, -13.0f), att_const, att_lin, att_quad, ambient, diffuse, specular);
 	addPointLight(glm::vec3(0.0f, 3.9f, -25.0f), att_const, att_lin, att_quad, ambient, diffuse, specular);
 	addPointLight(glm::vec3(0.0f, 3.9f, -32.0f), att_const, att_lin, att_quad, ambient, diffuse, specular);
 	addPointLight(glm::vec3(0.0f, 3.9f, -48.0f), att_const, att_lin, att_quad, ambient, diffuse, specular);
@@ -99,10 +99,10 @@ void LightingManager::addPointLight(glm::vec3 position, float att_constant, floa
 		diffuse,
 		specular,
 		0,
-		400.0f
+		25.0f
 	};
 	pointLights.push_back(light);
-	pointLights.back().id = pointLights.size();
+	pointLights.back().id = pointLights.size() - 1;
 	numOfLights++;
 }
 
@@ -151,23 +151,31 @@ void LightingManager::lightsToShader(GLuint shader) {
 	}
 }
 
-void LightingManager::lightIDsToShader(GLuint shader, int point_id1, int point_id2, int spot_id1, int spot_id2) {
+void LightingManager::lightIDsToShader(GLuint shader, int po_1, int po_2, int po_3, int sp_1, int sp_2, int sp_3) {
 	GLuint uniformIndex;
-	int id = -1;
 	std::string number;
 	for (int lightNo = 0; lightNo < MAX_LIGHTS; lightNo++) {
-		if (lightNo == 0)
-			id = point_id1; 
-		else
-			id = point_id2; 
+		int id = -1; //only checks calc in shader if id greater than -1
+		switch (lightNo) {
+			case 0:
+				id = po_1;
+				break;
+			case 1:
+				id = po_2;
+				break;
+			case 2:
+				id = po_3;
+				break;
+		}
+
 		number = std::to_string(lightNo);
 		uniformIndex = glGetUniformLocation(shader, ("pointLightIDs[" + number + "]").c_str());
 		glUniform1i(uniformIndex, id);
 
 		if (lightNo == 0)
-			id = spot_id1; 
+			id = sp_1; 
 		else
-			id = spot_id2; 
+			id = sp_2; 
 		number = std::to_string(lightNo);
 		uniformIndex = glGetUniformLocation(shader, ("spotLightIDs[" + number + "]").c_str());
 		glUniform1i(uniformIndex, id);
@@ -208,14 +216,22 @@ void LightingManager::setUpShadowRender_Pointlights(GLuint shader, int lightInde
 	}
 }
 
-void LightingManager::shadowMapsToShader(GLuint shader, int point_id1, int point_id2, int spot_id1, int spot_id2) {
+void LightingManager::shadowMapsToShader(GLuint shader, int po_1, int po_2, int po_3, int sp_1, int sp_2, int sp_3) {
 	// pass in the shadowmap 
 	for (int iter = 0; iter < MAX_LIGHTS; iter++) {
-		int i;
-		if (iter == 0)
-			i = point_id1; // -1 as ids start at 1;
-		else
-			i = point_id2;
+		int i = -1;// -1 as ids start at 0;
+		switch (iter) {
+			case 0:
+				i = po_1;
+				break;
+			case 1:
+				i = po_2;
+				break;
+			case 2:
+				i = po_3;
+				break;
+		}
+
 		if (i > -1) {
 			std::string number = std::to_string(iter);
 			// pass in the shadowmaps, each in a different texture unit
@@ -403,54 +419,52 @@ void LightingManager::displayLightDetails() {
 	}
 }
 
-std::pair<int, int> LightingManager::getClosestLights(glm::vec3 pos) {
-	unsigned int id1 = 0; 
-	unsigned int id2 = 0;
+std::tuple<int, int, int> LightingManager::getClosestLights(glm::vec3 pos) {
+	int id1 = -1; 
+	int id2 = -1;
+	int id3 = -1;
 	for (unsigned int i = 0; i < pointLights.size(); i++) {
-		float lightDistToObj = std::hypotf(pos.x - pointLights.at(i).position.x, pos.z - pointLights.at(i).position.z);
-		if (lightDistToObj < pointLights.at(i).range) {
-			if (id1 == 0)
+		std::pair<int, float> lightDistToObj = std::make_pair(i, std::hypotf(pos.x - pointLights.at(i).position.x, pos.z - pointLights.at(i).position.z));
+		if (lightDistToObj.second < pointLights.at(i).range) {
+			if (id1 < 0)
 				id1 = pointLights.at(i).id;
-			else if (id2 == 0)
+			else if (id2 < 0)
 				id2 = pointLights.at(i).id;
+			else if (id3 < 0)
+				id3 = pointLights.at(i).id;
 			else {
-				float lightDistToObj1 = std::hypotf(pos.x - pointLights.at(id1).position.x, pos.z - pointLights.at(id1).position.z);
-				float lightDistToObj2 = std::hypotf(pos.x - pointLights.at(id2).position.x, pos.z - pointLights.at(id2).position.z);
+				std::pair<int, float> lightDistToObj1 = std::make_pair(id1, std::hypotf(pos.x - pointLights.at(id1).position.x, pos.z - pointLights.at(id1).position.z));
+				std::pair<int, float> lightDistToObj2 = std::make_pair(id2, std::hypotf(pos.x - pointLights.at(id2).position.x, pos.z - pointLights.at(id2).position.z));
+				std::pair<int, float> lightDistToObj3 = std::make_pair(id3, std::hypotf(pos.x - pointLights.at(id3).position.x, pos.z - pointLights.at(id3).position.z));
 				
-				int tempid1 = id1;
-				int tempid2 = id2;
-
-				if (lightDistToObj < lightDistToObj1) {
-					tempid1 = i;
-					if (lightDistToObj1 < lightDistToObj2)
-						tempid2 = id1;
-					else
-						tempid2 = id2;
+				std::pair<int, float> dists[4]{ lightDistToObj, lightDistToObj1, lightDistToObj2, lightDistToObj3 };
+				for (int it = 0; it < 4; it++) {
+					for (int itt = it + 1; itt < 4; itt++) {
+						if (dists[itt].second < dists[it].second) {
+							std::pair<int, float> tempToAdd = dists[itt];
+							std::pair<int, float> tempToChange = dists[it];
+							dists[it] = tempToAdd;
+							dists[itt] = tempToChange;
+						}
+					}
 				}
-				if (lightDistToObj < lightDistToObj2) {
-					tempid2 = i;
-					if (lightDistToObj2 < lightDistToObj1)
-						tempid1 = id2;
-					else
-						tempid1 = id1;
-				}
+				//pair add??
 
-				id1 = tempid1;
-				id2 = tempid2;
+				id1 = dists[0].first;
+				id2 = dists[1].first;
+				id3 = dists[2].first;
 			}
 		}		
 	}
 
-	int int_id1 = id1;
-	int int_id2 = id2;
-
-	return std::pair<int, int>(int_id1 - 1, int_id2 - 1);
+	return std::tuple<int, int, int>(id1, id2, id3);
 }
 
-std::pair<int, int> LightingManager::getClosestSpotLights(glm::vec3 pos) {
+std::tuple<int, int, int> LightingManager::getClosestSpotLights(glm::vec3 pos) {
 	int id1 = -1;
 	int id2 = -1;
+	int id3 = -1;
 	
 
-	return std::pair<int, int>(id1, id2);
+	return std::tuple<int, int, int>(id1, id2, id3);
 }

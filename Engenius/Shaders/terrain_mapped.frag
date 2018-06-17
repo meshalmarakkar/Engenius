@@ -19,7 +19,7 @@ struct PointLight {
     vec3 diffuse;
     vec3 specular;
 };
-const int MAX_PER_LIGHT_TYPE = 2;
+const int MAX_PER_LIGHT_TYPE = 3;
 
 struct SpotLight {
     vec3 position;

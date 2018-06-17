@@ -46,13 +46,16 @@ public:
 	void update(float _dt_secs);
 	void draw();
 	bool ControlCheck(const float dt_secs);
+	void toggleDeferredRendering();
 
 private:	
 
 	unsigned int quadVAO, quadVBO;
 
 	void initOtherFBOs();
+	void initDeferredRendering();
 	void renderScene();
+	void renderScene_GBuffer();
 
 	GLuint particle_program;
 	ParticleManager* particleGenerator;
@@ -74,6 +77,21 @@ private:
 	unsigned int rboDepth;
 	unsigned int pingpongFBO[2];
 	unsigned int pingpongColorbuffers[2];
+
+	//Deferred Rendering
+	unsigned int gBuffer; 
+
+	unsigned int gPosition; 
+	unsigned int gNormal; 
+	unsigned int gAlbedoSpecular;
+	unsigned int gPointLightID;
+	unsigned int gSpotLightID;
+	unsigned int gTBN_T;
+	unsigned int gTBN_B;
+	unsigned int gTBN_N;
+
+	unsigned int rboDepthDefer;
+	////////////////////
 
 	GLuint tex_pause;
 	GLuint tex_end;

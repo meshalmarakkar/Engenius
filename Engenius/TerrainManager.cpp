@@ -8,14 +8,20 @@ TerrainManager::TerrainManager(LightingManager* lightingManager, Camera* camera,
 
 void TerrainManager::initTerrainToWorld() {
 	//terrains.push_back(new Terrain(glm::vec3(20.0f, 0.0f, -20.0f), 100.0f, Common::loadTexture("diffuse.png", "../Engenius/Models/Environment/Terrain/whiteTile/"), Common::loadTexture("normal.png", "../Engenius/Models/Environment/Terrain/whiteTile/"), heightsPlaneZERO));
-	terrains.push_back(new Terrain(glm::vec3(-20.0f, 0.0f, -20.0f), 40.0f, Common::loadTexture("diffuse.png", "../Engenius/Models/Environment/Terrain/whiteTile/"), Common::loadTexture("normal.png", "../Engenius/Models/Environment/Terrain/whiteTile/"), heightsPlane));
+	//2.01921,-0.0575006,4.57893 - security door position
+	terrains.push_back(new Terrain(glm::vec3(-4.0, 0.0f, 4.0f), 20.0f, Common::loadTexture("diffuse.png", "../Engenius/Models/Environment/Terrain/whiteTile/"), Common::loadTexture("normal.png", "../Engenius/Models/Environment/Terrain/whiteTile/"), 16.0f, heightsPlaneBumpy));
+	//terrains.push_back(new Terrain(glm::vec3(-20.0f, 0.0f, -20.0f), 40.0f, Common::loadTexture("diffuse.png", "../Engenius/Models/Environment/Terrain/whiteTile/"), Common::loadTexture("normal.png", "../Engenius/Models/Environment/Terrain/whiteTile/"), 32.0f, heightsPlaneBumpy));
 
 	terrains.resize(terrains.size());
 	mappedTerrains.resize(terrains.size());
+
+	alphaTest = 0.25f;
+	alphaMultiplier = 1.5f;
+	grassTexture = Common::loadTexture("grassPack.png", "../Engenius/Textures/");// Common::loadTexture("grassPack.dds", "../Engenius/Textures/");
 }
 
 
-void TerrainManager::render(GLuint ifShadow, glm::vec3 playerPos) {
+void TerrainManager::render(GLuint ifShadow, glm::vec3 playerPos, float dt_secs) {
 	GLuint shader = shaderManager->get_terrain_program();
 
 	glUseProgram(shader);
@@ -35,12 +41,12 @@ void TerrainManager::render(GLuint ifShadow, glm::vec3 playerPos) {
 				numOfMapped++;
 			}
 			else {
-				lightsToShader(shader, terrains[iter]->getPointLightID(0), terrains[iter]->getPointLightID(1), terrains[iter]->getSpotLightID(0), terrains[iter]->getSpotLightID(1));
+				lightsToShader(shader, terrains[iter]->getPointLightID(0), terrains[iter]->getPointLightID(1), terrains[iter]->getPointLightID(2), terrains[iter]->getSpotLightID(0), terrains[iter]->getSpotLightID(1), terrains[iter]->getSpotLightID(2));
 				terrains[iter]->Draw(shader);
 			}
 		}
 		else {
-			lightsToShader(shader, terrains[iter]->getPointLightID(0), terrains[iter]->getPointLightID(1), terrains[iter]->getSpotLightID(0), terrains[iter]->getSpotLightID(1));
+			lightsToShader(shader, terrains[iter]->getPointLightID(0), terrains[iter]->getPointLightID(1), terrains[iter]->getPointLightID(2), terrains[iter]->getSpotLightID(0), terrains[iter]->getSpotLightID(1), terrains[iter]->getSpotLightID(2));
 			terrains[iter]->Draw(shader);
 		}
 	}
@@ -57,10 +63,28 @@ void TerrainManager::render(GLuint ifShadow, glm::vec3 playerPos) {
 		lightingManager->lightsToShader(shader);
 
 		for (int i = 0; i < numOfMapped; i++) {
-			lightsToShader(shader, mappedTerrains[i]->getPointLightID(0), mappedTerrains[i]->getPointLightID(1), mappedTerrains[i]->getSpotLightID(0), mappedTerrains[i]->getSpotLightID(1));
+			lightsToShader(shader, mappedTerrains[i]->getPointLightID(0), mappedTerrains[i]->getPointLightID(1), mappedTerrains[i]->getPointLightID(2), mappedTerrains[i]->getSpotLightID(0), mappedTerrains[i]->getSpotLightID(1), mappedTerrains[i]->getSpotLightID(2));
 			mappedTerrains[i]->DrawMapped(shader);
 		}
 	}
+
+	////GRASS////
+	shader = shaderManager->get_grass_program();
+	glUseProgram(shader);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, grassTexture);
+	glUniform1i(glGetUniformLocation(shader, "texture_diffuse1"), 0);
+
+	glUniformMatrix4fv(glGetUniformLocation(shader, "additionalColour"), 1, GL_FALSE, glm::value_ptr(glm::vec4(1.0f)));
+	glUniform1f(glGetUniformLocation(shader, "alphaTest"), alphaTest);
+	glUniform1f(glGetUniformLocation(shader, "alphaMultiplier"), alphaMultiplier);
+
+	camera->passViewProjToShader(shader);
+
+	for (unsigned int iter = 0; iter < terrains.size(); iter++) {
+		terrains[iter]->renderGrass(shader, dt_secs);
+	}
+	Common::unbindTextures(0);
 }
 
 void TerrainManager::shadowDraw(GLuint shader) {
@@ -69,9 +93,9 @@ void TerrainManager::shadowDraw(GLuint shader) {
 	}
 }
 
-void TerrainManager::lightsToShader(GLuint shader, unsigned int pointLights_id1, unsigned int pointLights_id2, unsigned int spotLights_id1, unsigned int spotLights_id2) {
-	lightingManager->lightIDsToShader(shader, pointLights_id1, pointLights_id2, spotLights_id1, spotLights_id2);
-	lightingManager->shadowMapsToShader(shader, pointLights_id1, pointLights_id2, spotLights_id1, spotLights_id2);
+void TerrainManager::lightsToShader(GLuint shader, int point_id1, int point_id2, int point_id3, int spot_id1, int spot_id2, int spot_id3) {
+	lightingManager->lightIDsToShader(shader, point_id1, point_id2, point_id3, spot_id1, spot_id2, spot_id3);
+	lightingManager->shadowMapsToShader(shader, point_id1, point_id2, point_id3, spot_id1, spot_id2, spot_id3);
 	//lightingManager->spotShadowMapsToShader(shader, spotLights_id1, spotLights_id2);
 }
 
@@ -89,15 +113,15 @@ float TerrainManager::getTerrainHeight(const float x, const float z) {
 }
 
 void TerrainManager::addLightIDs() {
-	std::pair<int, int> lightIDs;
-	std::pair<int, int> lightIDs2;
+	std::tuple<int, int, int> lightIDs;
+	std::tuple<int, int, int> lightIDs2;
 
 	for (unsigned int i = 0; i < terrains.size(); i++) {
 		lightIDs = lightingManager->getClosestLights(terrains.at(i)->getCentre());
-		terrains.at(i)->setPointLightIDs(lightIDs.first, lightIDs.second);
-		std::cout << "TPointL: " << lightIDs.first << ", " << lightIDs.second << std::endl;
+		terrains.at(i)->setPointLightIDs(std::get<0>(lightIDs), std::get<1>(lightIDs), std::get<2>(lightIDs));
+		std::cout << "PointL: " << std::get<0>(lightIDs) << ", " << std::get<1>(lightIDs) << ", " << std::get<2>(lightIDs) << std::endl;
 		lightIDs2 = lightingManager->getClosestSpotLights(terrains.at(i)->getCentre());
-		terrains.at(i)->setSpotLightIDs(lightIDs2.first, lightIDs2.second);
-		std::cout << "SpotL: " << lightIDs2.first << ", " << lightIDs2.second << std::endl;
+		terrains.at(i)->setSpotLightIDs(std::get<0>(lightIDs2), std::get<1>(lightIDs2), std::get<2>(lightIDs2));
+		std::cout << "SpotL: " << std::get<0>(lightIDs2) << ", " << std::get<1>(lightIDs2) << ", " << std::get<2>(lightIDs2) << std::endl;
 	}
 }

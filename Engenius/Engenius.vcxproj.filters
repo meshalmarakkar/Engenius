@@ -34,6 +34,9 @@
     <Filter Include="Shader\ScreenSpace">
       <UniqueIdentifier>{e9aa339b-b5cf-4c3a-abc6-0f8a2568731f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shader\Grass">
+      <UniqueIdentifier>{4493deb4-065d-44e5-a46d-97cb454a1ac9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common.h">
@@ -273,6 +276,33 @@
     </None>
     <None Include="Shaders\firstPass.frag">
       <Filter>Shader\ScreenSpace</Filter>
+    </None>
+    <None Include="Shaders\mapped_modelGBuffer.frag">
+      <Filter>Shader\ModelLoading</Filter>
+    </None>
+    <None Include="Shaders\mapped_modelGBuffer.vert">
+      <Filter>Shader\ModelLoading</Filter>
+    </None>
+    <None Include="Shaders\mapped_modelDeferredShading.frag">
+      <Filter>Shader\ScreenSpace</Filter>
+    </None>
+    <None Include="Shaders\modelGBuffer.frag">
+      <Filter>Shader\ModelLoading</Filter>
+    </None>
+    <None Include="Shaders\modelGBuffer.vert">
+      <Filter>Shader\ModelLoading</Filter>
+    </None>
+    <None Include="Shaders\modelDeferredShading.frag">
+      <Filter>Shader\ScreenSpace</Filter>
+    </None>
+    <None Include="Shaders\grass.frag">
+      <Filter>Shader\Grass</Filter>
+    </None>
+    <None Include="Shaders\grass.gs">
+      <Filter>Shader\Grass</Filter>
+    </None>
+    <None Include="Shaders\grass.vert">
+      <Filter>Shader\Grass</Filter>
     </None>
   </ItemGroup>
 </Project>

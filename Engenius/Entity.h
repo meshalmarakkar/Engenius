@@ -29,10 +29,10 @@ public:
 	void setCullingBound(const float newVal);
 	float getCullingBound();
 
-	void setPointLightIDs(int id1, int id2);
+	void setPointLightIDs(int id1, int id2, int id3);
 	int getPointLightID(unsigned int i);
 
-	void setSpotLightIDs(int id1, int id2);
+	void setSpotLightIDs(int id1, int id2, int id3);
 	int getSpotLightID(unsigned int i);
 
 	int getZone();
@@ -57,8 +57,8 @@ protected:
 	unsigned int gridNo;
 
 private:
-	int pointLightIDs[2]; //lights that effect object
-	int spotLightIDs[2]; //lights that effect object
+	int pointLightIDs[3]; //lights that effect object
+	int spotLightIDs[3]; //lights that effect object
 	float shininess;
 	int zone;
 	float tiling;

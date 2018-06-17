@@ -25,6 +25,14 @@ void InputManager::EditModeControls(const Uint8 *keys, const float dt_secs) {
 		entityManager->changeAnimation();
 	}
 
+	if (keys[SDL_SCANCODE_Y]) {
+		lightingManager->toggleShadow();
+	}
+
+	if (keys[SDL_SCANCODE_U]) {
+		lightingManager->toggleBloom();
+	}
+
 	if (keys[SDL_SCANCODE_X]) {
 		editModeManager->toggleModes();
 	}
@@ -300,6 +308,10 @@ bool InputManager::KeyboardControls(SDL_Window * window, const float dt_secs) {
 
 				if (keys[SDL_SCANCODE_Z]) {
 					editModeManager->toggleEditMode();
+				}
+
+				if (keys[SDL_SCANCODE_F]) {
+					entityManager->toggleDeferredShading();
 				}
 			}
 			else {

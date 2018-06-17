@@ -20,17 +20,20 @@
 #include "AudioManager.h"
 #include <stdlib.h>     /* srand, rand */
 #include <time.h>       /* time */
+//#include <tuple>
 
 class EntityManager {
 public:
 	EntityManager(Camera *camera, ParticleManager* particleManager, LightingManager* lightingManager, ShaderManager* shaderManager, CollisionManager * colManager, TerrainManager* terrainManager, AudioManager* audioManager);
 
-	void draw();
+	void draw(float dt_secs);
+	void draw_GBuffer();
 	void shadow_draw(GLuint shader);
 	void Update(const float dt_secs);
 	Character* getPlayer();
 	Model* getENVModel(const std::string name);
-	void addEntityObject(std::string modelName, glm::vec3 pos, glm::vec3 scale, glm::vec3 rotation, float cullingBound, unsigned int gridNo, int p1, int p2, int s1, int s2);
+	void addEntityObject(std::string mdlName, glm::vec3 pos, glm::vec3 scale, glm::vec3 rot, float culBound, unsigned int gridNo, int p1, int p2, int p3, int s1, int s2, int s3);
+	void farPlane_camEye_toShader(GLuint shader);
 
 	Entity* getObject(unsigned int i);
 	void checkTrigger();
@@ -48,7 +51,12 @@ public:
 	bool getIfPause();
 	void setPause(bool newVal);
 
+	bool getIfDef();
+	void toggleDeferredShading();
+
 private:
+	bool deferredShading;
+
 	Camera* camera;
 	CollisionManager* colManager;
 	FrustumCulling* frustumCulling;
@@ -63,11 +71,13 @@ private:
 	bool readFile_Panels();
 
 	void initObjectsToWorld();
-	void lightIDsToShader(GLuint shader, int pointLights_id1, int pointLights_id2, int spotLights_id1, int spotLights_id2);
-	void farPlane_camEye_toShader(GLuint shader);
+	void lightIDsToShader(GLuint shader, int point_id1, int point_id2, int point_id3, int spot_id1, int spot_id2, int spot_id3);
 	void renderPanels();
 	void renderObjects();
 	void renderCharacters();
+	void renderPanels_GBuffer();
+	void renderObjects_GBuffer();
+	void renderCharacters_GBuffer();
 	
 	std::vector<Entity*> panels;
 	std::vector<Entity*> objects;
@@ -109,7 +119,7 @@ private:
 	void resetPuzzle(Puzzle *puzzle);
 	void checkStep(Puzzle *puzzle, int triggerNo);
 
-	void addEntityPanels(std::string modelName, glm::vec3 pos, glm::vec3 scale, glm::vec3 rotation, float cullingBound, unsigned int gridNo, int p1, int p2, int s1, int s2);
+	void addEntityPanels(std::string mdlName, glm::vec3 pos, glm::vec3 scale, glm::vec3 rot, float culBound, unsigned int gridNo, int p1, int p2, int p3, int s1, int s2, int s3);
 #define NUM_EFFECTIVE_GRIDS 2
 	unsigned int renderGridNo[NUM_EFFECTIVE_GRIDS];
 	
