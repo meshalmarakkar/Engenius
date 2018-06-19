@@ -16,7 +16,9 @@ void TerrainManager::initTerrainToWorld() {
 	mappedTerrains.resize(terrains.size());
 
 	alphaTest = 0.25f;
-	alphaMultiplier = 1.5f;
+	windStrength = 4.0f;
+	windDirection = glm::vec3(1.0, 0.0, 1.0);
+	windDirection = glm::normalize(windDirection);
 	grassTexture = Common::loadTexture("grassPack.png", "../Engenius/Textures/");// Common::loadTexture("grassPack.dds", "../Engenius/Textures/");
 }
 
@@ -74,10 +76,9 @@ void TerrainManager::render(GLuint ifShadow, glm::vec3 playerPos, float dt_secs)
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, grassTexture);
 	glUniform1i(glGetUniformLocation(shader, "texture_diffuse1"), 0);
-
-	glUniformMatrix4fv(glGetUniformLocation(shader, "additionalColour"), 1, GL_FALSE, glm::value_ptr(glm::vec4(1.0f)));
 	glUniform1f(glGetUniformLocation(shader, "alphaTest"), alphaTest);
-	glUniform1f(glGetUniformLocation(shader, "alphaMultiplier"), alphaMultiplier);
+	glUniform1f(glGetUniformLocation(shader, "windStrength"), windStrength);
+	glUniform3fv(glGetUniformLocation(shader, "windDirection"), 1, glm::value_ptr(windDirection));
 
 	camera->passViewProjToShader(shader);
 

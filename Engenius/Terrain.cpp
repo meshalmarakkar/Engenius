@@ -206,16 +206,12 @@ void Terrain::init(const float vertHeights[]) {
 	LAST_VERTEX = VERTEX_COUNT - 1;
 
 	float HALF_TERRAIN_SIZE = TERRAIN_SIZE * 0.5f;
-	terrain_centre = glm::vec3(position.x + HALF_TERRAIN_SIZE, position.y, position.z + HALF_TERRAIN_SIZE);
+	terrain_centre = glm::vec3(position.x + HALF_TERRAIN_SIZE, position.y, position.z - HALF_TERRAIN_SIZE);
 
 	terrain_left = position.x;
 	terrain_right = position.x + TERRAIN_SIZE;
 	terrain_up = position.z;
 	terrain_down = position.z + TERRAIN_SIZE;
-
-	std::cout << "terrain centre: " << terrain_centre.x << ", " << terrain_centre.y << ", " << terrain_centre.z << 
-		"\nterrain_left" << terrain_left << "\nterrain_right" << terrain_right <<
-		"\nterrain_up" << terrain_up << "\nterrain_down" << terrain_down << std::endl;
 
 	glGenVertexArrays(1, &VAOHeightmap); // Create one VAO
 	glGenBuffers(1, &VBOVertices);
@@ -358,8 +354,8 @@ void Terrain::init(const float vertHeights[]) {
 
 		while (currentPatchPos.z > terrain_up)
 		{
-			currentPatchPos.y = getTerrainHeight(currentPatchPos.x, currentPatchPos.z) - 0.3f;
-			patchPositions.push_back(&currentPatchPos);
+			currentPatchPos.y = getTerrainHeight(currentPatchPos.x, currentPatchPos.z);// -0.2f;
+			patchPositions.push_back(currentPatchPos);
 
 			numGrassTriangles += 1;
 
@@ -371,6 +367,14 @@ void Terrain::init(const float vertHeights[]) {
 
 	timePassed = 0.0f;
 	std::cout << "num of triangles: " << numGrassTriangles << std::endl;
+
+	for (int p = 0; p < patchPositions.size(); p++) {
+		std::cout << p << " -> x:" << (patchPositions[p]).x << ", y:" << patchPositions[p].y << ", z:" << (patchPositions[p]).z << "\n";
+	}
+
+	std::cout << "terrain centre: " << terrain_centre.x << ", " << terrain_centre.y << ", " << terrain_centre.z <<
+		"\nterrain_left" << terrain_left << "\nterrain_right" << terrain_right <<
+		"\nterrain_up" << terrain_up << "\nterrain_down" << terrain_down << std::endl;
 
 	glGenVertexArrays(1, &VAOGrass);
 	glBindVertexArray(VAOGrass);
@@ -445,15 +449,20 @@ void Terrain::renderGrass(GLuint shader, float dt_secs) {
 	glBindVertexArray(VAOGrass);
 	Common::enableVertexAttribArray(0);
 	glm::mat4 grassModelMat;
-	Common::createModelMatrix(grassModelMat, terrain_centre, glm::vec3(0.5f), glm::vec3(0.0f));
+	Common::createModelMatrix(grassModelMat, this->position, glm::vec3(1.0f), glm::vec3(0.0f));
+	//Common::createModelMatrix(grassModelMat, glm::vec3(terrain_left, 0.0f, terrain_up), glm::vec3(1.0f), glm::vec3(0.0f));
+	//Common::createModelMatrix(grassModelMat, terrain_centre, glm::vec3(1.0f), glm::vec3(0.0f));
 	glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(grassModelMat));
 	
 	glUniform1f(glGetUniformLocation(shader, "timePassed"), timePassed);
 	timePassed += dt_secs; 
 
+	glDisable(GL_CULL_FACE);
+
 	glDrawArrays(GL_POINTS, 0, numGrassTriangles);
 	Common::disableVertexAttribArray(0, 0);
 	glBindVertexArray(0);
+	glEnable(GL_CULL_FACE);
 }
 
 float barryCentric(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec2 pos) {

@@ -52,7 +52,7 @@ private:
 	float heights[VERTEX_COUNT][VERTEX_COUNT];
 
 	int numGrassTriangles;
-	std::vector<glm::vec3*> patchPositions;
+	std::vector<glm::vec3> patchPositions;
 	float timePassed;
 	
 	GLuint VBOTexCoords;

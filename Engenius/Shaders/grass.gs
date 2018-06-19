@@ -8,10 +8,10 @@ uniform mat4 model;
 uniform mat4 view;
 
 uniform float timePassed;
+uniform float windStrength;
+uniform vec3 windDirection;
 
 smooth out vec2 texCoord;
-smooth out vec3 worldPos;
-smooth out vec4 eyeSpacePos;
 
 vec3 localSeed;
 
@@ -27,24 +27,23 @@ void main()
 	vec3 grassFieldPos = gl_in[0].gl_Position.xyz;
 
 	float PIover180 = 3.1415/180.0;
+	//The facing of the three quads
 	vec3 baseDirection[] =
 	{
 		vec3(1.0, 0.0, 0.0),
 		vec3(float(cos(45.0 * PIover180)), 0.0f, float(sin(45.0 * PIover180))),
 		vec3(float(cos(-45.0 * PIover180)), 0.0f, float(sin(-45.0 * PIover180)))
-	};
+	}; 
 
 	float grassPatchSize = 5.0f;
-	float windStrength = 4.0f;
-	
-	vec3 windDirection = vec3(1.0, 0.0, 1.0);
-	windDirection = normalize(windDirection);
 
 	for (int i = 0; i < 3; i++){
 		// grass patch top left vertex
 		vec3 baseDirectionRotated = (rotationMatrix(vec3(0, 1, 0), sin(timePassed * 0.7f) * 0.1f) * vec4(baseDirection[i], 1.0)).xyz;
 		
 		localSeed = grassFieldPos * float(i);
+		//to change the seed for different random values
+
 		int grassPatch = randomInt(0, 3);
 		
 		float grassPatchHeight = 3.5f + randZeroOne() * 2.0f;
@@ -64,37 +63,38 @@ void main()
 		topLeft.y += grassPatchHeight;   
 		gl_Position = matrix_MVP * vec4(topLeft, 1.0);
 		texCoord = vec2(topCentreStartX, 1.0);
-		worldPos = topLeft;
-		eyeSpacePos = matrix_MV * vec4(topLeft, 1.0);
 		EmitVertex();
 		
 		// Grass patch bottom left vertex
 		vec3 bottomLeft = grassFieldPos - baseDirection[i] * grassPatchSize*0.5f;  
 		gl_Position = matrix_MVP * vec4(bottomLeft, 1.0);
 		texCoord = vec2(topCentreStartX, 0.0);
-		worldPos = bottomLeft;
-		eyeSpacePos = matrix_MV * vec4(bottomLeft, 1.0);
 		EmitVertex();
 		                               
 		// Grass patch top right vertex
-		vec3 topRIght = grassFieldPos + baseDirectionRotated * grassPatchSize * 0.5f + windDirection * windPower;
-		topRIght.y += grassPatchHeight;  
-		gl_Position = matrix_MVP * vec4(topRIght, 1.0);
+		vec3 topRight = grassFieldPos + baseDirectionRotated * grassPatchSize * 0.5f + windDirection * windPower;
+		topRight.y += grassPatchHeight;  
+		gl_Position = matrix_MVP * vec4(topRight, 1.0);
 		texCoord = vec2(topCentreEndX, 1.0);
-		worldPos = topRIght;
-		eyeSpacePos = matrix_MV * vec4(topRIght, 1.0);
 		EmitVertex();
 		
 		// Grass patch bottom right vertex
 		vec3 bottomRight = grassFieldPos + baseDirection[i] * grassPatchSize * 0.5f;  
 		gl_Position = matrix_MVP * vec4(bottomRight, 1.0);
 		texCoord = vec2(topCentreEndX, 0.0);
-		worldPos = bottomRight;
-		eyeSpacePos = matrix_MV * vec4(bottomRight, 1.0);
 		EmitVertex();
 		
 		EndPrimitive();
 	}
+
+	//Each loop creates a rotated quad. 4 vertices in order - TL,BL,TR,BR. 
+	//Top vertices will be animated a bit.
+	//Height of grass random. Is calculated and saved in grassPatchHeight.
+	
+	//Waving - time passed in and sine calculated based on it. The rotation is based on that (rotationMatrix)
+	//Sine of time multiplied by constants(0.7 & 0.1) to get small angle in radians.
+	//Wind - Sine of time multiplied by grass position so whole field doesnt move the same.
+	//	   - windPower ranges from -0.5 to 0.5. the multiplications just because it looks better.
 }
 
 mat4 rotationMatrix(vec3 axis, float angle)

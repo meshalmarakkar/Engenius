@@ -24,7 +24,8 @@ private:
 
 	////GRASS////
 	float alphaTest;
-	float alphaMultiplier;
+	float windStrength;
+	glm::vec3 windDirection;
 	GLuint grassTexture;
 
 
