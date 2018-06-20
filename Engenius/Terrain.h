@@ -54,6 +54,7 @@ private:
 	int numGrassTriangles;
 	std::vector<glm::vec3> patchPositions;
 	float timePassed;
+	glm::mat4 grassModelMat;
 	
 	GLuint VBOTexCoords;
 	GLuint VBONormals; 

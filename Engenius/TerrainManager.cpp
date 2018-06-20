@@ -9,7 +9,7 @@ TerrainManager::TerrainManager(LightingManager* lightingManager, Camera* camera,
 void TerrainManager::initTerrainToWorld() {
 	//terrains.push_back(new Terrain(glm::vec3(20.0f, 0.0f, -20.0f), 100.0f, Common::loadTexture("diffuse.png", "../Engenius/Models/Environment/Terrain/whiteTile/"), Common::loadTexture("normal.png", "../Engenius/Models/Environment/Terrain/whiteTile/"), heightsPlaneZERO));
 	//2.01921,-0.0575006,4.57893 - security door position
-	terrains.push_back(new Terrain(glm::vec3(-4.0, 0.0f, 4.0f), 20.0f, Common::loadTexture("diffuse.png", "../Engenius/Models/Environment/Terrain/whiteTile/"), Common::loadTexture("normal.png", "../Engenius/Models/Environment/Terrain/whiteTile/"), 16.0f, heightsPlaneBumpy));
+	terrains.push_back(new Terrain(glm::vec3(-4.0, 0.0f, 4.0f), 20.0f, Common::loadTexture("diffuse.png", "../Engenius/Models/Environment/Terrain/grassGround/"), Common::loadTexture("normal.png", "../Engenius/Models/Environment/Terrain/grassGround/"), 16.0f, heightsPlaneBumpy));
 	//terrains.push_back(new Terrain(glm::vec3(-20.0f, 0.0f, -20.0f), 40.0f, Common::loadTexture("diffuse.png", "../Engenius/Models/Environment/Terrain/whiteTile/"), Common::loadTexture("normal.png", "../Engenius/Models/Environment/Terrain/whiteTile/"), 32.0f, heightsPlaneBumpy));
 
 	terrains.resize(terrains.size());

@@ -331,21 +331,6 @@ void Terrain::init(const float vertHeights[]) {
 	float grassPatchOffsetMax = 2.5f;
 	float grassPatchHeight = 5.0f;
 
-	//float HALF_TERRAIN_SIZE = TERRAIN_SIZE * 0.5f;
-	//terrain_centre = glm::vec3(position.x + HALF_TERRAIN_SIZE, position.y, position.z + HALF_TERRAIN_SIZE);
-
-	//terrain_left = position.x;
-	//terrain_right = position.x + TERRAIN_SIZE;
-	//terrain_up = position.z;
-	//terrain_down = position.z + TERRAIN_SIZE;
-
-	//	terrain centre : 6, 0, 14
-	//	terrain_left - 4
-	//	terrain_right16
-	//	terrain_up4
-	//	terrain_down24
-	//	num of triangles : 85
-
 	glm::vec3 currentPatchPos(terrain_left + grassPatchOffsetMin, 0.0f, terrain_down - grassPatchOffsetMin);
 	numGrassTriangles = 0;
 
@@ -354,7 +339,7 @@ void Terrain::init(const float vertHeights[]) {
 
 		while (currentPatchPos.z > terrain_up)
 		{
-			currentPatchPos.y = getTerrainHeight(currentPatchPos.x, currentPatchPos.z);// -0.2f;
+			currentPatchPos.y = getTerrainHeight(currentPatchPos.x, currentPatchPos.z) - 0.3f;
 			patchPositions.push_back(currentPatchPos);
 
 			numGrassTriangles += 1;
@@ -365,16 +350,9 @@ void Terrain::init(const float vertHeights[]) {
 		currentPatchPos.x += grassPatchOffsetMin + (grassPatchOffsetMax - grassPatchOffsetMin) * float(rand() % 1000) * 0.001f;
 	}
 
-	timePassed = 0.0f;
-	std::cout << "num of triangles: " << numGrassTriangles << std::endl;
-
-	for (int p = 0; p < patchPositions.size(); p++) {
-		std::cout << p << " -> x:" << (patchPositions[p]).x << ", y:" << patchPositions[p].y << ", z:" << (patchPositions[p]).z << "\n";
-	}
-
-	std::cout << "terrain centre: " << terrain_centre.x << ", " << terrain_centre.y << ", " << terrain_centre.z <<
-		"\nterrain_left" << terrain_left << "\nterrain_right" << terrain_right <<
-		"\nterrain_up" << terrain_up << "\nterrain_down" << terrain_down << std::endl;
+	timePassed = 0.0f;	
+	//has to be at origin. position respective of this. think unity objects and position respective of group
+	Common::createModelMatrix(grassModelMat, glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(0.0f));
 
 	glGenVertexArrays(1, &VAOGrass);
 	glBindVertexArray(VAOGrass);
@@ -448,10 +426,6 @@ void Terrain::renderGrass(GLuint shader, float dt_secs) {
 	//GRASS
 	glBindVertexArray(VAOGrass);
 	Common::enableVertexAttribArray(0);
-	glm::mat4 grassModelMat;
-	Common::createModelMatrix(grassModelMat, this->position, glm::vec3(1.0f), glm::vec3(0.0f));
-	//Common::createModelMatrix(grassModelMat, glm::vec3(terrain_left, 0.0f, terrain_up), glm::vec3(1.0f), glm::vec3(0.0f));
-	//Common::createModelMatrix(grassModelMat, terrain_centre, glm::vec3(1.0f), glm::vec3(0.0f));
 	glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(grassModelMat));
 	
 	glUniform1f(glGetUniformLocation(shader, "timePassed"), timePassed);
