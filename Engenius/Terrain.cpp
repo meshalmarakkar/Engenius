@@ -327,9 +327,9 @@ void Terrain::init(const float vertHeights[]) {
 	
 	////GRASS////
 	glGenBuffers(1, &VBOGrassData);
-	float grassPatchOffsetMin = 1.5f;
-	float grassPatchOffsetMax = 2.5f;
-	float grassPatchHeight = 5.0f;
+	float grassPatchOffsetMin = 0.25f;//1.5f
+	float grassPatchOffsetMax =	0.75f;//2.5f
+	//float grassPatchHeight = 5.0f;
 
 	glm::vec3 currentPatchPos(terrain_left + grassPatchOffsetMin, 0.0f, terrain_down - grassPatchOffsetMin);
 	numGrassTriangles = 0;
@@ -339,7 +339,7 @@ void Terrain::init(const float vertHeights[]) {
 
 		while (currentPatchPos.z > terrain_up)
 		{
-			currentPatchPos.y = getTerrainHeight(currentPatchPos.x, currentPatchPos.z) - 0.3f;
+			currentPatchPos.y = getTerrainHeight(currentPatchPos.x, currentPatchPos.z) - 0.15f;// 0.3f;
 			patchPositions.push_back(currentPatchPos);
 
 			numGrassTriangles += 1;
@@ -352,7 +352,7 @@ void Terrain::init(const float vertHeights[]) {
 
 	timePassed = 0.0f;	
 	//has to be at origin. position respective of this. think unity objects and position respective of group
-	Common::createModelMatrix(grassModelMat, glm::vec3(0.0f), glm::vec3(1.0f), glm::vec3(0.0f));
+	Common::createModelMatrix(grassModelMat, glm::vec3(0.0f), glm::vec3(1.0f, 0.25f, 1.0f), glm::vec3(0.0f));
 
 	glGenVertexArrays(1, &VAOGrass);
 	glBindVertexArray(VAOGrass);

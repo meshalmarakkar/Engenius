@@ -15,7 +15,7 @@ void TerrainManager::initTerrainToWorld() {
 	terrains.resize(terrains.size());
 	mappedTerrains.resize(terrains.size());
 
-	alphaTest = 0.25f;
+	alphaTest = 0.25f; //0.9f;
 	windStrength = 4.0f;
 	windDirection = glm::vec3(1.0, 0.0, 1.0);
 	windDirection = glm::normalize(windDirection);
@@ -80,9 +80,14 @@ void TerrainManager::render(GLuint ifShadow, glm::vec3 playerPos, float dt_secs)
 	glUniform1f(glGetUniformLocation(shader, "windStrength"), windStrength);
 	glUniform3fv(glGetUniformLocation(shader, "windDirection"), 1, glm::value_ptr(windDirection));
 
+	glUniform1i(glGetUniformLocation(shader, "displayShadow"), ifShadow);
+
+	farPlane_camEye_toShader(shader);
 	camera->passViewProjToShader(shader);
+	lightingManager->lightsToShader(shader);
 
 	for (unsigned int iter = 0; iter < terrains.size(); iter++) {
+		lightsToShader(shader, terrains[iter]->getPointLightID(0), terrains[iter]->getPointLightID(1), terrains[iter]->getPointLightID(2), terrains[iter]->getSpotLightID(0), terrains[iter]->getSpotLightID(1), terrains[iter]->getSpotLightID(2));
 		terrains[iter]->renderGrass(shader, dt_secs);
 	}
 	Common::unbindTextures(0);

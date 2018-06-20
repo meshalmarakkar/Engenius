@@ -11,7 +11,11 @@ uniform float timePassed;
 uniform float windStrength;
 uniform vec3 windDirection;
 
-smooth out vec2 texCoord;
+out VS_OUT{
+	vec2 TexCoords;
+	vec3 FragPos;
+	vec3 Normal;
+} vs_out;
 
 vec3 localSeed;
 
@@ -35,7 +39,7 @@ void main()
 		vec3(float(cos(-45.0 * PIover180)), 0.0f, float(sin(-45.0 * PIover180)))
 	}; 
 
-	float grassPatchSize = 5.0f;
+	float grassPatchSize = 1.25f; //5.0f;
 
 	for (int i = 0; i < 3; i++){
 		// grass patch top left vertex
@@ -44,9 +48,9 @@ void main()
 		localSeed = grassFieldPos * float(i);
 		//to change the seed for different random values
 
-		int grassPatch = randomInt(0, 3);
+		int grassPatch = randomInt(0, 3); //for random grass type in texture
 		
-		float grassPatchHeight = 3.5f + randZeroOne() * 2.0f;
+		float grassPatchHeight = 3.5f + randZeroOne() * 2.0f; //3.5f
 	
 		float topCentreStartX = float(grassPatch) * 0.25f;
 		float topCentreEndX = topCentreStartX+0.25f;
@@ -62,26 +66,38 @@ void main()
 		vec3 topLeft = grassFieldPos - baseDirectionRotated * grassPatchSize * 0.5f + windDirection * windPower;
 		topLeft.y += grassPatchHeight;   
 		gl_Position = matrix_MVP * vec4(topLeft, 1.0);
-		texCoord = vec2(topCentreStartX, 1.0);
+		vs_out.TexCoords = vec2(topCentreStartX, 1.0);
+		vs_out.FragPos = vec3(model * vec4(topLeft, 1.0f));
+		vs_out.Normal = transpose(inverse(mat3(model))) * baseDirectionRotated;
+		vs_out.Normal = normalize(vs_out.Normal);
 		EmitVertex();
 		
 		// Grass patch bottom left vertex
 		vec3 bottomLeft = grassFieldPos - baseDirection[i] * grassPatchSize*0.5f;  
 		gl_Position = matrix_MVP * vec4(bottomLeft, 1.0);
-		texCoord = vec2(topCentreStartX, 0.0);
+		vs_out.TexCoords = vec2(topCentreStartX, 0.0);
+		vs_out.FragPos = vec3(model * vec4(bottomLeft, 1.0f));
+		vs_out.Normal = transpose(inverse(mat3(model))) * baseDirection[i];
+		vs_out.Normal = normalize(vs_out.Normal);
 		EmitVertex();
 		                               
 		// Grass patch top right vertex
 		vec3 topRight = grassFieldPos + baseDirectionRotated * grassPatchSize * 0.5f + windDirection * windPower;
 		topRight.y += grassPatchHeight;  
 		gl_Position = matrix_MVP * vec4(topRight, 1.0);
-		texCoord = vec2(topCentreEndX, 1.0);
+		vs_out.TexCoords = vec2(topCentreEndX, 1.0);
+		vs_out.FragPos = vec3(model * vec4(topRight, 1.0f));
+		vs_out.Normal = transpose(inverse(mat3(model))) * baseDirectionRotated;
+		vs_out.Normal = normalize(vs_out.Normal);
 		EmitVertex();
 		
 		// Grass patch bottom right vertex
 		vec3 bottomRight = grassFieldPos + baseDirection[i] * grassPatchSize * 0.5f;  
 		gl_Position = matrix_MVP * vec4(bottomRight, 1.0);
-		texCoord = vec2(topCentreEndX, 0.0);
+		vs_out.TexCoords = vec2(topCentreEndX, 0.0);
+		vs_out.FragPos = vec3(model * vec4(bottomRight, 1.0f));
+		vs_out.Normal = transpose(inverse(mat3(model))) * baseDirection[i];
+		vs_out.Normal = normalize(vs_out.Normal);
 		EmitVertex();
 		
 		EndPrimitive();
