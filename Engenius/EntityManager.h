@@ -28,12 +28,12 @@ public:
 
 	void draw(float dt_secs);
 	void draw_GBuffer();
-	void shadow_draw(GLuint shader);
+	void shadow_draw(unsigned int shader);
 	void Update(const float dt_secs);
 	Character* getPlayer();
 	Model* getENVModel(const std::string name);
 	void addEntityObject(std::string mdlName, glm::vec3 pos, glm::vec3 scale, glm::vec3 rot, float culBound, unsigned int gridNo, int p1, int p2, int p3, int s1, int s2, int s3);
-	void farPlane_camEye_toShader(GLuint shader);
+	void farPlane_camEye_toShader(unsigned int shader);
 
 	Entity* getObject(unsigned int i);
 	void checkTrigger();
@@ -54,6 +54,16 @@ public:
 	bool getIfDef();
 	void toggleDeferredShading();
 
+	int tempnum = 0;
+	void increNum() {
+		tempnum++;
+		if (tempnum > 7)
+			tempnum = 0;
+	}
+	int getNum() {
+		return tempnum;
+	}
+
 private:
 	bool deferredShading;
 
@@ -71,7 +81,7 @@ private:
 	bool readFile_Panels();
 
 	void initObjectsToWorld();
-	void lightIDsToShader(GLuint shader, int point_id1, int point_id2, int point_id3, int spot_id1, int spot_id2, int spot_id3);
+	void lightIDsToShader(unsigned int shader, int point_id1, int point_id2, int point_id3, int spot_id1, int spot_id2, int spot_id3);
 	void renderPanels();
 	void renderObjects();
 	void renderCharacters();

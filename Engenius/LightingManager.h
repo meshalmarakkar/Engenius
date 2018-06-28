@@ -13,15 +13,15 @@ class LightingManager {
 public:
 	LightingManager(glm::vec3 cameraEye, glm::vec3 cameraAt);
 	unsigned int getNumOfLights();
-	void lightIDsToShader(GLuint shader, int po_1, int po_2, int po_3, int sp_1, int sp_2, int sp_3);
-	void lightsToShader(GLuint shader);
+	void lightIDsToShader(unsigned int shader, int po_1, int po_2, int po_3, int sp_1, int sp_2, int sp_3);
+	void lightsToShader(unsigned int shader);
 	std::tuple<int, int, int> getClosestLights(glm::vec3 pos);
 	std::tuple<int, int, int> getClosestSpotLights(glm::vec3 pos);
-	void setUpShadowRender_Pointlights(GLuint shader, int lightIndex);
-	void shadowMapsToShader(GLuint shader, int po_1, int po_2, int po_3, int sp_1, int sp_2, int sp_3);
-	void noShadowMessage(GLuint shader);
+	void setUpShadowRender_Pointlights(unsigned int shader, int lightIndex);
+	void shadowMapsToShader(unsigned int shader, int po_1, int po_2, int po_3, int sp_1, int sp_2, int sp_3);
+	void noShadowMessage(unsigned int shader);
 
-	GLuint getDepthCubeMap(unsigned int i);
+	unsigned int getDepthCubeMap(unsigned int i);
 	unsigned int getNumOfPointLights();
 	glm::vec3 getPointLightPosition(unsigned int i);
 	void changeExposure(bool increase);
@@ -70,8 +70,8 @@ private:
 		glm::vec3 diffuse;
 		glm::vec3 specular;
 
-		GLuint depthMapFBO;
-		GLuint depthMap;
+		unsigned int depthMapFBO;
+		unsigned int depthMap;
 	};
 
 	struct PointLight {
@@ -89,8 +89,8 @@ private:
 		float range;
 
 		std::vector<unsigned int> id_objectsInRange;
-		GLuint depthMapFBO;
-		GLuint depthCubeMap;
+		unsigned int depthMapFBO;
+		unsigned int depthCubeMap;
 	};
 
 	struct SpotLight {
@@ -112,8 +112,8 @@ private:
 
 		std::vector<unsigned int> id_objectsInRange;
 
-		GLuint depthMapFBO;
-		GLuint depthMap;
+		unsigned int depthMapFBO;
+		unsigned int depthMap;
 	};
 
 	DirectionalLight dirLight;

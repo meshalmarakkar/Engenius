@@ -113,20 +113,20 @@ public:
 	std::string getName();
 	
 	// Draws the model, and thus all its meshes
-	void InstancedDraw(GLuint shader, const std::vector<glm::mat4> modelMatrices, const std::vector<glm::vec2> pointIDs, const std::vector<glm::vec2> spotIDs);
-	void Draw(GLuint shader, const glm::mat4 modelMatrices);
+	void InstancedDraw(unsigned int shader, const std::vector<glm::mat4> modelMatrices, const std::vector<glm::vec2> pointIDs, const std::vector<glm::vec2> spotIDs);
+	void Draw(unsigned int shader, const glm::mat4 modelMatrices);
 
-	void bindWall(GLuint shader);
+	void bindWall(unsigned int shader);
 	void unbindWall();
-	void drawWall(GLuint shader, const glm::mat4 modelMatrix);
+	void drawWall(unsigned int shader, const glm::mat4 modelMatrix);
 
 protected:
 	const aiScene* scene;
 	std::string path;
 
 	#define NUM_BONES_PER_VERTEX 4
-	std::unordered_map<string, GLuint> m_BoneMapping; // maps a bone name to its index
-	GLuint m_NumBones;
+	std::unordered_map<string, unsigned int> m_BoneMapping; // maps a bone name to its index
+	unsigned int m_NumBones;
 	struct BoneInfo
 	{
 		Matrix4f BoneOffset;

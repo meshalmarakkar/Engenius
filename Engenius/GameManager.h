@@ -18,6 +18,7 @@
 #include "CollisionManager.h"
 #include "WindowManager.h"
 #include "TerrainManager.h"
+#include "Framebuffer.h"
 
 #include <iostream>
 #include <math.h>
@@ -46,7 +47,6 @@ public:
 	void update(float _dt_secs);
 	void draw();
 	bool ControlCheck(const float dt_secs);
-	void toggleDeferredRendering();
 
 private:	
 
@@ -57,7 +57,7 @@ private:
 	void renderScene();
 	void renderScene_GBuffer();
 
-	GLuint particle_program;
+	unsigned int particle_program;
 	ParticleManager* particleGenerator;
 	LightingManager* lightingManager;
 	Camera* camera;
@@ -72,29 +72,16 @@ private:
 	//CollisionManager * colManager;
 	WindowManager * windowManager;
 
-	unsigned int postProcessFBO;
-	unsigned int colourBuffer[2];
-	unsigned int rboDepth;
-	unsigned int pingpongFBO[2];
-	unsigned int pingpongColorbuffers[2];
+	Framebuffer* FBO_postProcess;
+	
+	//Bloom - "ping pong" buffers to do horizontal and vertical blurring separately to save performance
+	Framebuffer* FBO_pingpong[2];
 
 	//Deferred Rendering
-	unsigned int gBuffer; 
+	Framebuffer* FBO_gBuffer;
 
-	unsigned int gPosition; 
-	unsigned int gNormal; 
-	unsigned int gAlbedoSpecular;
-	unsigned int gPointLightID;
-	unsigned int gSpotLightID;
-	unsigned int gTBN_T;
-	unsigned int gTBN_B;
-	unsigned int gTBN_N;
-
-	unsigned int rboDepthDefer;
-	////////////////////
-
-	GLuint tex_pause;
-	GLuint tex_end;
+	unsigned int tex_pause;
+	unsigned int tex_end;
 	
 	float dt_secs;
 

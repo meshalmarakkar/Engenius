@@ -22,7 +22,7 @@ public:
 	EditModeManager(EntityManager* entityManager, CollisionManager* colManager, ParticleManager* particleManager, HUDManager* hudManager, LightingManager* lightingManager, AudioManager* audioManager, ShaderManager* shaderManager);
 
 	void update(const glm::vec3 currentTerrainPointOfMouse, float dt_secs);
-	void draw(GLuint shader);
+	void draw(unsigned int shader);
 
 	int getViewMode();
 	void toggleViewMode();

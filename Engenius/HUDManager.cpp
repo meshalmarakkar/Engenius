@@ -1,6 +1,6 @@
 #include "HUDManager.h"
 
-GLuint textToTexture(const char * str, TTF_Font* font) {
+unsigned int textToTexture(const char * str, TTF_Font* font) {
 
 	SDL_Surface * stringImage = TTF_RenderText_Blended(font, str, { 255, 255, 255 });
 
@@ -8,7 +8,7 @@ GLuint textToTexture(const char * str, TTF_Font* font) {
 		std::cout << "String surface not created." << std::endl;
 	}
 
-	GLuint texID;
+	unsigned int texID;
 	glGenTextures(1, &texID);
 
 	glBindTexture(GL_TEXTURE_2D, texID);
@@ -23,7 +23,7 @@ GLuint textToTexture(const char * str, TTF_Font* font) {
 	return texID;
 }
 
-GLint textureFromFile(const std::string path)
+int textureFromFile(const std::string path)
 {
 	const char* pathToFile = path.c_str();
 
@@ -35,7 +35,7 @@ GLint textureFromFile(const std::string path)
 	else
 		return 0;
 
-	GLuint texID;
+	unsigned int texID;
 	glGenTextures(1, &texID); // generate texture ID
 
 	glBindTexture(GL_TEXTURE_2D, texID);
@@ -51,7 +51,7 @@ GLint textureFromFile(const std::string path)
 }
 
 // initialize hud manager, open font
-HUDManager::HUDManager(WindowManager* windowManager, GLuint shader) : windowManager(windowManager), shader(shader) {
+HUDManager::HUDManager(WindowManager* windowManager, unsigned int shader) : windowManager(windowManager), shader(shader) {
 
 	glm::vec2 uv_up_left = glm::vec2(0.0f, 0.0f);
 	glm::vec2 uv_up_right = glm::vec2(1.0f, 0.0f);
@@ -146,17 +146,17 @@ void HUDManager::lightingSubOptions() {
 
 }
 
-void HUDManager::addHUD(int x, int y, int sizeX, int sizeY, const std::string storageName, const GLuint texture, bool allowLowTransparency, float transparency) {
+void HUDManager::addHUD(int x, int y, int sizeX, int sizeY, const std::string storageName, const unsigned int texture, bool allowLowTransparency, float transparency) {
 	HUDItem * h = new HUDItem(windowManager->getScreenWidth(), windowManager->getScreenHeight(), x, y, sizeX, sizeY, texture, allowLowTransparency);
 	HUDs.insert(std::pair<std::string, HUDItem*>(storageName, h));
 }
 void HUDManager::addHUD(int x, int y, int sizeX, int sizeY, const std::string storageName, const std::string text, TTF_Font* font, bool allowLowTransparency, float transparency) {
 	const char *cstr = text.c_str();
-	GLuint texture = textToTexture(cstr, textFont);
+	unsigned int texture = textToTexture(cstr, textFont);
 	addHUD(x, y, sizeX, sizeY, storageName, allowLowTransparency, texture);
 }
 
-void HUDManager::addSubOptions(std::unordered_map<std::string, HUDItem*> &subOptions, int x, int y, int sizeX, int sizeY, std::string storageName, GLuint texture, bool allowLowTransparency, float transparency) {
+void HUDManager::addSubOptions(std::unordered_map<std::string, HUDItem*> &subOptions, int x, int y, int sizeX, int sizeY, std::string storageName, unsigned int texture, bool allowLowTransparency, float transparency) {
 	int newx = x;
 	int newy = y - sizeY - spacing;
 	HUDItem * h = new HUDItem(windowManager->getScreenWidth(), windowManager->getScreenHeight(), newx, newy, sizeX, sizeY, texture, allowLowTransparency, transparency);
@@ -167,7 +167,7 @@ void HUDManager::addSubOptions(std::unordered_map<std::string, HUDItem*> &subOpt
 	addSubOptions(subOptions, x, y, sizeX, sizeY, storageName, allowLowTransparency, textToTexture(cstr, font));
 }
 
-void HUDManager::addMenuBarHUD(int x, int y, int sizeX, int sizeY, const std::string storageName, const GLuint texture, bool allowLowTransparency, float transparency) {
+void HUDManager::addMenuBarHUD(int x, int y, int sizeX, int sizeY, const std::string storageName, const unsigned int texture, bool allowLowTransparency, float transparency) {
 	MenubarHUD * menuh = new MenubarHUD(windowManager->getScreenWidth(), windowManager->getScreenHeight(), x, y, sizeX, sizeY, texture, allowLowTransparency, transparency);
 	int temp_x;
 	temp_x = x + subBar_SpaceFromEnd;
@@ -183,11 +183,11 @@ void HUDManager::addMenuBarHUD(int x, int y, int sizeX, int sizeY, const std::st
 
 void HUDManager::addMenuBarHUD(int x, int y, int sizeX, int sizeY, const std::string storageName, const std::string text, TTF_Font* font, bool allowLowTransparency, float transparency) {
 	const char *cstr = text.c_str();
-	GLuint texture = textToTexture(cstr, font);
+	unsigned int texture = textToTexture(cstr, font);
 	addMenuBarHUD(x, y, sizeX, sizeY, storageName, allowLowTransparency, texture);
 }
 
-void HUDManager::addAnimatedHUD(int x, int y, int sizeX, int sizeY, GLuint texture, bool allowLowTransparency, float transparency) {
+void HUDManager::addAnimatedHUD(int x, int y, int sizeX, int sizeY, unsigned int texture, bool allowLowTransparency, float transparency) {
 	AnimatedHUD * h = new AnimatedHUD(windowManager->getScreenWidth(), windowManager->getScreenHeight(), x, y, sizeX, sizeY, texture, allowLowTransparency, transparency);
 	h->UVs.resize(6);
 	h->duration = 0.0f;
@@ -230,7 +230,7 @@ void HUDManager::update(float dt_secs) {
 	}
 }
 
-void HUDManager::render(const std::vector<glm::vec2> verts, const std::vector<glm::vec2> UVs, const GLuint texture, bool allowLowTransparency, float transparency) {
+void HUDManager::render(const std::vector<glm::vec2> verts, const std::vector<glm::vec2> UVs, const unsigned int texture, bool allowLowTransparency, float transparency) {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnableVertexAttribArray(0); // Enable attribute index 0

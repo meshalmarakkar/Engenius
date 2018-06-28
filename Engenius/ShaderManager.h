@@ -2,6 +2,9 @@
 #define SHADERMANAGER
 
 #include <GL/glew.h>
+#include "SOIL.h"
+#include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 #include <fstream>
 
@@ -9,54 +12,83 @@ class ShaderManager {
 public:
 	ShaderManager();
 
-	GLuint get_postProcessing_program();
-	GLuint get_simple_program();
-	GLuint get_model_program();
-	GLuint get_gaussianBlur_program();
-	GLuint get_mapped_model_program();
-	GLuint get_animated_model_program();
-	GLuint get_terrain_program();
-	GLuint get_terrain_mapped_program();
-	GLuint get_hud_program();
-	GLuint get_depthMapRender_program();
-	GLuint get_depthShader_program();
-	GLuint get_skybox_program();
-	GLuint get_particle_program();
-	GLuint get_displayNormals_program();
-	GLuint get_firstPass_program();
-	GLuint get_gBuffer_mapped_program();
-	GLuint get_deferredShading_mapped_program();
-	GLuint get_gBuffer_program();
-	GLuint get_deferredShading_program();
-	GLuint get_grass_program();
+	void gl_UseProgram(unsigned int shader);
+	void gl_ClearError();
+	void gl_CheckError();
+
+	unsigned int loadTexture(const std::string type, const std::string path);
+	unsigned int loadTextureNonTransparent(const std::string type, const std::string path);
+	unsigned int loadCubeMap(const char *fname[6]);
+
+	void createModelMatrix(glm::mat4 &model, glm::vec3 position);
+	void createModelMatrix(glm::mat4 &model, glm::vec3 position, float yaw);
+	void createModelMatrix(glm::mat4 &model, glm::vec3 position, glm::vec3 scale);
+	void createModelMatrix(glm::mat4 &model, glm::vec3 position, float yaw, glm::vec3 scale);
+	void createModelMatrix(glm::mat4 &model, glm::vec3 position, float pitch, float yaw, glm::vec3 scale);
+	void createModelMatrix(glm::mat4 &model, glm::vec3 position, glm::vec3 scale, glm::vec3 rotation);
+
+	void enableVertexAttribArray(unsigned int first, unsigned int last);
+	void disableVertexAttribArray(unsigned int first, unsigned int last);
+	void enableVertexAttribArray(unsigned int num);
+	void disableVertexAttribArray(unsigned int num);
+	void bindTexture(const unsigned int shader, const unsigned int texture, const GLchar* name);
+	void bindCubeMapTexture(const unsigned int shader, const unsigned int texture, const GLchar* name);
+	void unbindTextures(unsigned int num);
+	void unbindTextures(unsigned int first, unsigned int last);
+
+	unsigned int get_postProcessing_program();
+	unsigned int get_simple_program();
+	unsigned int get_model_program();
+	unsigned int get_gaussianBlur_program();
+	unsigned int get_mapped_model_program();
+	unsigned int get_animated_model_program();
+	unsigned int get_terrain_program();
+	unsigned int get_terrain_mapped_program();
+	unsigned int get_hud_program();
+	unsigned int get_depthMapRender_program();
+	unsigned int get_depthShader_program();
+	unsigned int get_skybox_program();
+	unsigned int get_particle_program();
+	unsigned int get_displayNormals_program();
+	unsigned int get_firstPass_program();
+	unsigned int get_gBuffer_mapped_program();
+	unsigned int get_deferredShading_mapped_program();
+	unsigned int get_gBuffer_program();
+	unsigned int get_deferredShading_program();
+	unsigned int get_grass_program();
 
 private:
 	void init();
-	char* loadFile(const char *fname, GLint &fSize);
-	GLuint initShaders(const char *vertFile, const char *fragFile);
-	GLuint initShaders(const char *vertFile, const char *fragFile, const char *geomFile);
+	char* loadFile(const char *fname, int &fSize);
+	unsigned int initShaders(const char *vertFile, const char *fragFile);
+	unsigned int initShaders(const char *vertFile, const char *fragFile, const char *geomFile);
 
-	GLuint postProcessing_program;
-	GLuint simple_program;
-	GLuint model_program;
-	GLuint gaussianBlur_program;
-	GLuint mapped_model_program;
-	GLuint animated_model_program;
-	GLuint terrain_program;
-	GLuint terrain_mapped_program;
-	GLuint hud_program;
-	GLuint depthMapRender_program;
-	GLuint skybox_program;
-	GLuint particle_program;
-	GLuint displayNormals_program;
-	GLuint firstPass_program;
-	GLuint gBuffer_mapped_program;
-	GLuint deferredShading_mapped_program;
-	GLuint gBuffer_program;
-	GLuint deferredShading_program;
-	GLuint grass_program;
+	const float DEGREE_TO_RADIAN = 0.017453293f;
+	const float PIE = 3.14159265359f;
 
-	GLuint depthShader_program;
+	unsigned int postProcessing_program;
+	unsigned int simple_program;
+	unsigned int model_program;
+	unsigned int gaussianBlur_program;
+	unsigned int mapped_model_program;
+	unsigned int animated_model_program;
+	unsigned int terrain_program;
+	unsigned int terrain_mapped_program;
+	unsigned int hud_program;
+	unsigned int depthMapRender_program;
+	unsigned int skybox_program;
+	unsigned int particle_program;
+	unsigned int displayNormals_program;
+	unsigned int firstPass_program;
+	unsigned int gBuffer_mapped_program;
+	unsigned int deferredShading_mapped_program;
+	unsigned int gBuffer_program;
+	unsigned int deferredShading_program;
+	unsigned int grass_program;
+
+	unsigned int depthShader_program;
+
+	unsigned int currentShader;
 };
 
 #endif

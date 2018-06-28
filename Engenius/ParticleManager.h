@@ -24,7 +24,7 @@ static const glm::vec2 VERTICES[] = {
 
 class ParticleManager {
 public:
-	ParticleManager(GLuint shader);
+	ParticleManager(unsigned int shader);
 	~ParticleManager();
 	void Update(float dt, glm::vec3 cameraPos);
 
@@ -43,7 +43,7 @@ private:
 		SMOKE = 3
 	};
 	struct ParticleTexture {
-		GLuint texture = 0;
+		unsigned int texture = 0;
 		unsigned int num_of_rows = 0;
 		float optimumSize = 0.0f;
 		float optimumLifeLength = 0.0f;
@@ -78,7 +78,7 @@ private:
 	const int MAX_PER_TYPE = 20;
 	int particlesInUse = 0;
 
-	GLuint shader;
+	unsigned int shader;
 
 
 	struct ToRender {
@@ -92,22 +92,22 @@ private:
 	Particle * particleContainer;
 	ParticleTexture * particleTextures;
 
-	GLuint vao;
-	GLuint vboVertices;
-	GLuint vboPositions;
-	GLuint vboUVs;
-	GLuint vboBlend;
+	unsigned int vao;
+	unsigned int vboVertices;
+	unsigned int vboPositions;
+	unsigned int vboUVs;
+	unsigned int vboBlend;
 };
 
 
 //class ParticleManager {
 //public:
 //	ParticleManager();
-//	void render(GLuint shader, glm::mat4 view, glm::mat4 projection);
+//	void render(unsigned int shader, glm::mat4 view, glm::mat4 projection);
 //
 //private:
 //	const float VERTICES[8] = { -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f, -0.5f };
-//	GLuint vao, vboVertices, vboPositions, vboUVs;
+//	unsigned int vao, vboVertices, vboPositions, vboUVs;
 //	const int MAX_PER_TYPE = 20;
 //
 //};

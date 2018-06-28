@@ -1,13 +1,13 @@
 #include "Terrain.h"
 #include <iostream>
 
-Terrain::Terrain(glm::vec3 position, float size, GLuint texture, float tiling, const float vertHeights[], GLuint specularMap) : position(position), TERRAIN_SIZE(size), texture(texture), tiling(tiling), mapped(false), hasSpecular(false) {
+Terrain::Terrain(glm::vec3 position, float size, unsigned int texture, float tiling, const float vertHeights[], unsigned int specularMap) : position(position), TERRAIN_SIZE(size), texture(texture), tiling(tiling), mapped(false), hasSpecular(false) {
 	if (specularMap == 0)
 		hasSpecular = false;
 	init(vertHeights);
 }
 
-Terrain::Terrain(glm::vec3 position, float size, GLuint texture, GLuint normalMap, float tiling,  const float vertHeights[], GLuint specularMap) : position(position), TERRAIN_SIZE(size), texture(texture), tiling(tiling), normalMap(normalMap), specularMap(specularMap), mapped(true){
+Terrain::Terrain(glm::vec3 position, float size, unsigned int texture, unsigned int normalMap, float tiling,  const float vertHeights[], unsigned int specularMap) : position(position), TERRAIN_SIZE(size), texture(texture), tiling(tiling), normalMap(normalMap), specularMap(specularMap), mapped(true){
 	if (specularMap == 0)
 		hasSpecular = false;
 	init(vertHeights);
@@ -365,7 +365,7 @@ void Terrain::init(const float vertHeights[]) {
 	glBindVertexArray(0);
 }
 
-void Terrain::Draw(GLuint shader) {
+void Terrain::Draw(unsigned int shader) {
 	glBindVertexArray(VAOHeightmap);
 	Common::enableVertexAttribArray(0, 2);
 
@@ -392,7 +392,7 @@ void Terrain::Draw(GLuint shader) {
 	glBindVertexArray(0);
 }
 
-void Terrain::DrawMapped(GLuint shader) {
+void Terrain::DrawMapped(unsigned int shader) {
 	glBindVertexArray(VAOHeightmap);
 	Common::enableVertexAttribArray(0, 4);
 
@@ -422,7 +422,7 @@ void Terrain::DrawMapped(GLuint shader) {
 	glBindVertexArray(0);
 }
 
-void Terrain::renderGrass(GLuint shader, float dt_secs) {
+void Terrain::renderGrass(unsigned int shader, float dt_secs) {
 	//GRASS
 	glBindVertexArray(VAOGrass);
 	Common::enableVertexAttribArray(0);

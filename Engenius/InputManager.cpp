@@ -318,6 +318,10 @@ bool InputManager::KeyboardControls(SDL_Window * window, const float dt_secs) {
 					glm::vec3 playerPos = entityManager->getPlayer()->getPos();
 					std::cout << "P Pos: " << playerPos.x << ", " << playerPos.y << ", " << playerPos.z << "\n";
 				}
+
+				if (keys[SDL_SCANCODE_H]) {
+					entityManager->increNum();
+				}
 			}
 			else {
 				if (keys[SDL_SCANCODE_1]) {

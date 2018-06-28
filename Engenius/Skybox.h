@@ -13,13 +13,13 @@
 
 class Skybox {
 public:
-	Skybox(GLuint _skyboxProgram, Model* modelForSkybox);
+	Skybox(unsigned int _skyboxProgram, Model* modelForSkybox);
 	void renderSkybox(const glm::mat4 projection, const glm::mat4 view);
-	void renderSkybox(const glm::mat4 projection, const glm::mat4 view, GLuint texture);
+	void renderSkybox(const glm::mat4 projection, const glm::mat4 view, unsigned int texture);
 
 private:
-	GLuint skyboxProgram;
-	GLuint skyboxTexture;
+	unsigned int skyboxProgram;
+	unsigned int skyboxTexture;
 	const char *nightSkyTexFiles[6] = {
 		"../Engenius/star-skybox/sky_right.bmp", 
 		"../Engenius/star-skybox/sky_left.bmp", 

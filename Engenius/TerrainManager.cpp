@@ -23,8 +23,8 @@ void TerrainManager::initTerrainToWorld() {
 }
 
 
-void TerrainManager::render(GLuint ifShadow, glm::vec3 playerPos, float dt_secs) {
-	GLuint shader = shaderManager->get_terrain_program();
+void TerrainManager::render(unsigned int ifShadow, glm::vec3 playerPos, float dt_secs) {
+	unsigned int shader = shaderManager->get_terrain_program();
 
 	glUseProgram(shader);
 	
@@ -93,19 +93,19 @@ void TerrainManager::render(GLuint ifShadow, glm::vec3 playerPos, float dt_secs)
 	Common::unbindTextures(0);
 }
 
-void TerrainManager::shadowDraw(GLuint shader) {
+void TerrainManager::shadowDraw(unsigned int shader) {
 	for (unsigned int iter = 0; iter < terrains.size(); iter++) {
 		terrains[iter]->Draw(shader);
 	}
 }
 
-void TerrainManager::lightsToShader(GLuint shader, int point_id1, int point_id2, int point_id3, int spot_id1, int spot_id2, int spot_id3) {
+void TerrainManager::lightsToShader(unsigned int shader, int point_id1, int point_id2, int point_id3, int spot_id1, int spot_id2, int spot_id3) {
 	lightingManager->lightIDsToShader(shader, point_id1, point_id2, point_id3, spot_id1, spot_id2, spot_id3);
 	lightingManager->shadowMapsToShader(shader, point_id1, point_id2, point_id3, spot_id1, spot_id2, spot_id3);
 	//lightingManager->spotShadowMapsToShader(shader, spotLights_id1, spotLights_id2);
 }
 
-void TerrainManager::farPlane_camEye_toShader(GLuint shader) {
+void TerrainManager::farPlane_camEye_toShader(unsigned int shader) {
 	glUniform1f(glGetUniformLocation(shader, "far_plane"), camera->getFarPlane());
 	glUniform3fv(glGetUniformLocation(shader, "viewPos"), 1, glm::value_ptr(camera->getCameraEye()));
 }

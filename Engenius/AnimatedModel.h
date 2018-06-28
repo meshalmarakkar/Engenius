@@ -14,7 +14,7 @@ public:
 	std::pair<std::unordered_map<string, aiNodeAnim*>, std::pair<float, float>> getAnims();
 	void setMovementAnims(const std::pair<std::unordered_map<string, aiNodeAnim*>, std::pair<float, float>> animationDetails);
 	void getBoneDetails();
-	GLuint getNumBones();
+	unsigned int getNumBones();
 	std::pair<glm::vec4, glm::vec3> getRightHandPos();
 
 	void idleAnimation();

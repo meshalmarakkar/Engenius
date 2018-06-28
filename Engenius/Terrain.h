@@ -9,14 +9,14 @@
 
 class Terrain {
 public:
-	Terrain(glm::vec3 position, float size, GLuint texture, float tiling, const float vertHeights[], GLuint specularMap = 0);
-	Terrain(glm::vec3 position, float size, GLuint texture, GLuint normalMap, float tiling, const float vertHeights[], GLuint specularMap = 0);
+	Terrain(glm::vec3 position, float size, unsigned int texture, float tiling, const float vertHeights[], unsigned int specularMap = 0);
+	Terrain(glm::vec3 position, float size, unsigned int texture, unsigned int normalMap, float tiling, const float vertHeights[], unsigned int specularMap = 0);
 	float getTerrainHeight(float const worldX, const float worldZ);
 	glm::vec3 getCentre();
 	bool get_ifMapped();
-	void Draw(GLuint shader);
-	void DrawMapped(GLuint shader);
-	void renderGrass(GLuint shader, float dt_secs);
+	void Draw(unsigned int shader);
+	void DrawMapped(unsigned int shader);
+	void renderGrass(unsigned int shader, float dt_secs);
 	bool ifInTerrain(const float x, const float y);
 	
 	void setPointLightIDs(int id1, int id2, int id3);
@@ -36,9 +36,9 @@ private:
 	float terrain_right;
 	float terrain_up;
 	float terrain_down;
-	GLuint texture;
-	GLuint normalMap;
-	GLuint specularMap;
+	unsigned int texture;
+	unsigned int normalMap;
+	unsigned int specularMap;
 	bool hasSpecular;
 	bool mapped;
 	float tiling;
@@ -56,17 +56,17 @@ private:
 	float timePassed;
 	glm::mat4 grassModelMat;
 	
-	GLuint VBOTexCoords;
-	GLuint VBONormals; 
-	GLuint VBOVertices; 
-	GLuint VBOIndices;
-	GLuint VBOTangents;
-	GLuint VBOBitangents;
-	GLuint VAOHeightmap; // One VAO for heightmap
+	unsigned int VBOTexCoords;
+	unsigned int VBONormals; 
+	unsigned int VBOVertices; 
+	unsigned int VBOIndices;
+	unsigned int VBOTangents;
+	unsigned int VBOBitangents;
+	unsigned int VAOHeightmap; // One VAO for heightmap
 	
 	
-	GLuint VBOGrassData;
-	GLuint VAOGrass;
+	unsigned int VBOGrassData;
+	unsigned int VAOGrass;
 };
 
 #endif

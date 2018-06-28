@@ -15,12 +15,12 @@
 
 class HUDManager {
 public:
-	HUDManager(WindowManager* windowManager, GLuint shader);
+	HUDManager(WindowManager* windowManager, unsigned int shader);
 	void addHUD(int x, int y, int sizeX, int sizeY, const std::string storageName, const std::string text, TTF_Font* font, bool allowLowTransparency, float transparency = 0.0f);
-	void addHUD(int x, int y, int sizeX, int sizeY, const std::string storageName, GLuint texture, bool allowLowTransparency, float transparency = 0.0f);
-	void addMenuBarHUD(int x, int y, int sizeX, int sizeY, const std::string storageName, const GLuint texture, bool allowLowTransparency, float transparency = 0.0f);
+	void addHUD(int x, int y, int sizeX, int sizeY, const std::string storageName, unsigned int texture, bool allowLowTransparency, float transparency = 0.0f);
+	void addMenuBarHUD(int x, int y, int sizeX, int sizeY, const std::string storageName, const unsigned int texture, bool allowLowTransparency, float transparency = 0.0f);
 	void addMenuBarHUD(int x, int y, int sizeX, int sizeY, const std::string storageName, const std::string text, TTF_Font* font, bool allowLowTransparency, float transparency = 0.0f);
-	void addAnimatedHUD(int x, int y, int sizeX, int sizeY, GLuint texture, bool allowLowTransparency, float transparency = 0.0f);
+	void addAnimatedHUD(int x, int y, int sizeX, int sizeY, unsigned int texture, bool allowLowTransparency, float transparency = 0.0f);
 	void render();
 
 	void update(float dt_secs);
@@ -34,33 +34,33 @@ private:
 	std::vector<glm::vec2> UVs;
 
 	struct AnimatedHUD : public HUDItem {
-		AnimatedHUD(int screenWidth, int screenHeight, int x, int y, int sizeX, int sizeY, GLuint texture, bool allowLowTransparency, float transparency) : HUDItem(screenWidth, screenHeight, x, y, sizeX, sizeY, texture, allowLowTransparency, transparency) { ; }
+		AnimatedHUD(int screenWidth, int screenHeight, int x, int y, int sizeX, int sizeY, unsigned int texture, bool allowLowTransparency, float transparency) : HUDItem(screenWidth, screenHeight, x, y, sizeX, sizeY, texture, allowLowTransparency, transparency) { ; }
 		std::vector<glm::vec2> UVs;
 		float duration;
 	};
 
 	struct MenubarHUD : public HUDItem {
-		MenubarHUD(int screenWidth, int screenHeight, int x, int y, int sizeX, int sizeY, GLuint texture, bool allowLowTransparency, float transparency) : HUDItem(screenWidth, screenHeight, x, y, sizeX, sizeY, texture, allowLowTransparency, transparency) { ; }
+		MenubarHUD(int screenWidth, int screenHeight, int x, int y, int sizeX, int sizeY, unsigned int texture, bool allowLowTransparency, float transparency) : HUDItem(screenWidth, screenHeight, x, y, sizeX, sizeY, texture, allowLowTransparency, transparency) { ; }
 		std::unordered_map<std::string, HUDItem*> subOptions;
 	};
 
 	std::unordered_map<std::string, HUDItem*> HUDs;
 	std::vector<AnimatedHUD*> AnimatedHUDs;
 	std::unordered_map<std::string, MenubarHUD*> menuBarHUDs;
-	void render(const std::vector<glm::vec2> verts, const std::vector<glm::vec2> UVs, const GLuint texture, bool allowLowTransparency, float transparency);
-	void addSubOptions(std::unordered_map<std::string, HUDItem*> &subOptions, int x, int y, int sizeX, int sizeY, std::string storageName, GLuint texture, bool allowLowTransparency, float transparency = 0.0f);
+	void render(const std::vector<glm::vec2> verts, const std::vector<glm::vec2> UVs, const unsigned int texture, bool allowLowTransparency, float transparency);
+	void addSubOptions(std::unordered_map<std::string, HUDItem*> &subOptions, int x, int y, int sizeX, int sizeY, std::string storageName, unsigned int texture, bool allowLowTransparency, float transparency = 0.0f);
 	void addSubOptions(std::unordered_map<std::string, HUDItem*> &subOptions, int x, int y, int sizeX, int sizeY, std::string storageName, const std::string text, TTF_Font* font, bool allowLowTransparency, float transparency = 0.0f);
 
 	void lightingSubOptions();
 
 	WindowManager* windowManager;
 
-	GLuint shader;
-	GLuint vao;
-	GLuint vbo[2];
+	unsigned int shader;
+	unsigned int vao;
+	unsigned int vbo[2];
 	TTF_Font * textFont;
-	GLuint crosshairTexture;
-	GLuint fireTexture;
+	unsigned int crosshairTexture;
+	unsigned int fireTexture;
 
 	//EDITMODE
 	const int menuBar_SizeX = 128;
@@ -73,21 +73,21 @@ private:
 	const int subBar_SizeX = 32;
 	const int subBar_SizeY = 32;
 
-	GLuint tex_background;
-	GLuint tex_objects;
-	GLuint tex_bounding;
-	GLuint tex_lighting;
-	GLuint tex_audio;
+	unsigned int tex_background;
+	unsigned int tex_objects;
+	unsigned int tex_bounding;
+	unsigned int tex_lighting;
+	unsigned int tex_audio;
 
-	std::unordered_map<std::string, GLuint> components;
-	std::unordered_map<std::string, GLuint>::iterator componentIter;
+	std::unordered_map<std::string, unsigned int> components;
+	std::unordered_map<std::string, unsigned int>::iterator componentIter;
 
-	GLuint tex_eye;
-	GLuint tex_add;
-	GLuint tex_move;
+	unsigned int tex_eye;
+	unsigned int tex_add;
+	unsigned int tex_move;
 
-	GLuint tex_increase;
-	GLuint tex_decrease;
+	unsigned int tex_increase;
+	unsigned int tex_decrease;
 };
 
 #endif

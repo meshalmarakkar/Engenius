@@ -54,7 +54,7 @@ public:
 	bool readBoundFile();
 	bool writeBoundFile();
 
-	void renderBoundingBoxes(GLuint shader, bool addMode, bool rigidBodyMode, glm::mat4 edit_modelMatrix);
+	void renderBoundingBoxes(unsigned int shader, bool addMode, bool rigidBodyMode, glm::mat4 edit_modelMatrix);
 
 	float getHeirarchicalGridScale();
 
@@ -71,8 +71,8 @@ public:
 	btRigidBody* addBox(float width, float height, float depth, float x, float y, float z, float mass, collisiontype group, collisiontype mask);
 	btRigidBody* addCapsule(float rad, float height, float x, float y, float z, float mass);
 
-	void renderBox(btRigidBody* box, GLuint shader);
-	void renderCapsule(btRigidBody* capsule, Model *modelData, GLuint shader, GLuint texture);
+	void renderBox(btRigidBody* box, unsigned int shader);
+	void renderCapsule(btRigidBody* capsule, Model *modelData, unsigned int shader, unsigned int texture);
 	void addToWorld(btRigidBody* body);
 	void addToWorld(btRigidBody* body, collisiontype COLL_TYPE, int collidesWith);
 	void addGhostToWorld(btPairCachingGhostObject* ghost);

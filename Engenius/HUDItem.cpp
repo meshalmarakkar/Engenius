@@ -1,10 +1,10 @@
 #include "HUDItem.h"
 
-HUDItem::HUDItem(int screenWidth, int screenHeight, int x, int y, int sizeX, int sizeY, GLuint texture, bool allowLowTransparency, float transparency) {
+HUDItem::HUDItem(int screenWidth, int screenHeight, int x, int y, int sizeX, int sizeY, unsigned int texture, bool allowLowTransparency, float transparency) {
 	init(screenWidth, screenHeight, x, y, sizeX, sizeY, texture, allowLowTransparency, transparency);
 }
 
-void HUDItem::init(int screenWidth, int screenHeight, int x, int y, int sizeX, int sizeY, GLuint texture, bool allowLowTransparency, float transparency) {
+void HUDItem::init(int screenWidth, int screenHeight, int x, int y, int sizeX, int sizeY, unsigned int texture, bool allowLowTransparency, float transparency) {
 	this->xy.x = static_cast<float>(x);
 	this->xy.y = static_cast<float>(y);
 	this->size.x = static_cast<float>(sizeX);
@@ -46,7 +46,7 @@ void HUDItem::convert_ClipSpace_to_HomogeneousSpace(int screenWidth, int screenH
 
 
 
-void HUDItem::setTexture(GLuint newTex) { texture = newTex; }
+void HUDItem::setTexture(unsigned int newTex) { texture = newTex; }
 void HUDItem::setIfClicked(bool newVal) { clicked = newVal; }
 void HUDItem::setTransparency(float newVal) { this->transparency = newVal; }
 void HUDItem::setAllowLowTransparency(bool newVal) { allowLowTransparency = newVal; }
@@ -58,4 +58,4 @@ glm::vec2 HUDItem::getXY() { return xy; }
 glm::vec2 HUDItem::getSize() { return size; }
 bool HUDItem::getIfClicked() { return clicked; }
 const std::vector<glm::vec2> HUDItem::getVerts() { return verts; }
-GLuint HUDItem::getTexture() { return texture; }
+unsigned int HUDItem::getTexture() { return texture; }

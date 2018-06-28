@@ -76,7 +76,7 @@ void Camera::ToggleZoom() {
 	}
 }
 
-void Camera::passViewProjToShader(GLuint shader) {
+void Camera::passViewProjToShader(unsigned int shader) {
 	glUniformMatrix4fv(glGetUniformLocation(shader, "view"), 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(glGetUniformLocation(shader, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 }

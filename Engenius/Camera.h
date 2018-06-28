@@ -11,7 +11,7 @@ public:
 	Camera(int screenWidth, int screenHeight);
 
 	void Update(const glm::vec3 playerPos, const int viewMode);
-	void passViewProjToShader(GLuint shader);
+	void passViewProjToShader(unsigned int shader);
 
 	void updateScreenDimensions(int screenWidth, int screenHeight);
 

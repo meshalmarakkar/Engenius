@@ -155,12 +155,12 @@ btRigidBody* Character::getBounding() {
 	return bounding;
 }
 
-void Character::draw(GLuint shader) {
+void Character::draw(unsigned int shader) {
 	if (animated) {
-		for (GLuint i = 0; i < transforms.size(); i++) {
-			const GLuint MAX_BONES = 50;
+		for (unsigned int i = 0; i < transforms.size(); i++) {
+			const unsigned int MAX_BONES = 50;
 			assert(i < MAX_BONES);
-			GLuint uniformIndex = glGetUniformLocation(shader, ("boneLocation[" + to_string(i) + "]").c_str());
+			unsigned int uniformIndex = glGetUniformLocation(shader, ("boneLocation[" + to_string(i) + "]").c_str());
 			glUniformMatrix4fv(uniformIndex, 1, GL_TRUE, (const GLfloat*)transforms.at(i));
 		}
 	}

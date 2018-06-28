@@ -79,6 +79,6 @@ void Entity::setShininess(const float newVal) {
 	shininess = newVal;
 }
 
-void Entity::shininessToShader(GLuint shader) {
+void Entity::shininessToShader(unsigned int shader) {
 	glUniform1f(glGetUniformLocation(shader, "shininess"), shininess);
 }

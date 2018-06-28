@@ -13,140 +13,45 @@ void GameManager::initOtherFBOs() {
 	const GLsizei SCREEN_WIDTH = (GLsizei)windowManager->getScreenWidth();
 	const GLsizei SCREEN_HEIGHT = (GLsizei)windowManager->getScreenHeight();
 
-	glGenFramebuffers(1, &postProcessFBO);
-	glBindFramebuffer(GL_FRAMEBUFFER, postProcessFBO);
+	const unsigned int width = windowManager->getScreenWidth();
+	const unsigned int height = windowManager->getScreenHeight();
+	FBO_postProcess = new Framebuffer(width, height, true);
+	FBO_postProcess->createTexturesAndAttach(2, width, height, Tex_Options::gl_linear, Tex_Options::gl_linear, Tex_Options::gl_clamp_to_edge, Tex_Options::gl_clamp_to_edge);
 
-	// create a floating point colour buffer
-	glGenTextures(2, colourBuffer);
-	for (unsigned int i = 0; i < 2; i++)
-	{
-		glBindTexture(GL_TEXTURE_2D, colourBuffer[i]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, GL_TEXTURE_2D, colourBuffer[i], 0);
-	}
+	FBO_pingpong[0] = new Framebuffer(width, height, false);
+	FBO_pingpong[0]->createTexturesAndAttach(1, width, height, Tex_Options::gl_linear, Tex_Options::gl_linear, Tex_Options::gl_clamp_to_edge, Tex_Options::gl_clamp_to_edge);
 
-	// tell OpenGL which color attachments of this framebuffer we'll use as defualt is just the first one
-	unsigned int attachments[2] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1 };
-	glDrawBuffers(2, attachments);
-
-	// create a depth buffer renderbuffer object
-	glGenRenderbuffers(1, &rboDepth);
-	glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCREEN_WIDTH, SCREEN_HEIGHT);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
-
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "Framebuffer not complete!" << std::endl;
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-	glGenFramebuffers(2, pingpongFBO);
-	glGenTextures(2, pingpongColorbuffers);
-	for (unsigned int i = 0; i < 2; i++)
-	{
-		glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[i]);
-		glBindTexture(GL_TEXTURE_2D, pingpongColorbuffers[i]);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, pingpongColorbuffers[i], 0);
-		// also check if framebuffers are complete (no need for depth buffer)
-		if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-			std::cout << "Framebuffer not complete!" << std::endl;
-	}
-	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	FBO_pingpong[1] = new Framebuffer(width, height, false);
+	FBO_pingpong[1]->createTexturesAndAttach(1, width, height, Tex_Options::gl_linear, Tex_Options::gl_linear, Tex_Options::gl_clamp_to_edge, Tex_Options::gl_clamp_to_edge);
 }
 
 void GameManager::initDeferredRendering() {
 	const GLsizei SCREEN_WIDTH = (GLsizei)windowManager->getScreenWidth();
 	const GLsizei SCREEN_HEIGHT = (GLsizei)windowManager->getScreenHeight();
-	//configure g-buffer framebuffer
-	glGenFramebuffers(1, &gBuffer);
-	glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
 
-	//position colour buffer
-	glGenTextures(1, &gPosition);
-	glBindTexture(GL_TEXTURE_2D, gPosition);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
+	const unsigned int width = (GLsizei)windowManager->getScreenWidth();
+	const unsigned int height = (GLsizei)windowManager->getScreenHeight();
 
-	// normal color buffer
-	glGenTextures(1, &gNormal);
-	glBindTexture(GL_TEXTURE_2D, gNormal);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
+	FBO_gBuffer = new Framebuffer(width, height, true);
+	//positions
+	FBO_gBuffer->createSingleTexture(Tex_Options::gl_rgb16f, width, height, Tex_Options::gl_rgb, Tex_Options::gl_float, Tex_Options::gl_nearest, Tex_Options::gl_nearest);
+	//normals
+	FBO_gBuffer->createSingleTexture(Tex_Options::gl_rgb16f, width, height, Tex_Options::gl_rgb, Tex_Options::gl_float, Tex_Options::gl_nearest, Tex_Options::gl_nearest);
+	//albedospecular
+	FBO_gBuffer->createSingleTexture(Tex_Options::gl_rgba, width, height, Tex_Options::gl_rgba, Tex_Options::gl_unsigned_byte, Tex_Options::gl_nearest, Tex_Options::gl_nearest);
+	//pointLight ID
+	FBO_gBuffer->createSingleTexture(Tex_Options::gl_rgb16, width, height, Tex_Options::gl_rgb, Tex_Options::gl_int, Tex_Options::gl_nearest, Tex_Options::gl_nearest);
+	//spotLight ID
+	FBO_gBuffer->createSingleTexture(Tex_Options::gl_rgb16, width, height, Tex_Options::gl_rgb, Tex_Options::gl_int, Tex_Options::gl_nearest, Tex_Options::gl_nearest);
+	//TBN_T
+	FBO_gBuffer->createSingleTexture(Tex_Options::gl_rgb16f, width, height, Tex_Options::gl_rgb, Tex_Options::gl_float, Tex_Options::gl_nearest, Tex_Options::gl_nearest);
+	//TBN__B
+	FBO_gBuffer->createSingleTexture(Tex_Options::gl_rgb16f, width, height, Tex_Options::gl_rgb, Tex_Options::gl_float, Tex_Options::gl_nearest, Tex_Options::gl_nearest);
+	//TBN__N
+	FBO_gBuffer->createSingleTexture(Tex_Options::gl_rgb16f, width, height, Tex_Options::gl_rgb, Tex_Options::gl_float, Tex_Options::gl_nearest, Tex_Options::gl_nearest);
 
-	// color + specular color buffer
-	glGenTextures(1, &gAlbedoSpecular);
-	glBindTexture(GL_TEXTURE_2D, gAlbedoSpecular);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedoSpecular, 0);
+	FBO_gBuffer->attachDrawBuffers();
 
-	// PointLight ID buffer
-	glGenTextures(1, &gPointLightID);
-	glBindTexture(GL_TEXTURE_2D, gPointLightID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_INT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT3, GL_TEXTURE_2D, gPointLightID, 0);
-
-	// SpotLight ID buffer
-	glGenTextures(1, &gSpotLightID);
-	glBindTexture(GL_TEXTURE_2D, gSpotLightID);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_INT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT4, GL_TEXTURE_2D, gSpotLightID, 0);
-
-	// TBN_T buffer
-	glGenTextures(1, &gTBN_T);
-	glBindTexture(GL_TEXTURE_2D, gTBN_T);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT5, GL_TEXTURE_2D, gTBN_T, 0);
-
-	// TBN_B buffer
-	glGenTextures(1, &gTBN_B);
-	glBindTexture(GL_TEXTURE_2D, gTBN_B);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT6, GL_TEXTURE_2D, gTBN_B, 0);
-
-	// TBN_N buffer
-	glGenTextures(1, &gTBN_N);
-	glBindTexture(GL_TEXTURE_2D, gTBN_N);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F, SCREEN_WIDTH, SCREEN_HEIGHT, 0, GL_RGB, GL_FLOAT, NULL);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT7, GL_TEXTURE_2D, gTBN_N, 0);
-
-	// tell OpenGL which color attachments we'll use (of this framebuffer) for rendering m
-	unsigned int attachments[8] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2, GL_COLOR_ATTACHMENT3, 
-									GL_COLOR_ATTACHMENT4, GL_COLOR_ATTACHMENT5, GL_COLOR_ATTACHMENT6, GL_COLOR_ATTACHMENT7 };
-	glDrawBuffers(8, attachments);
-	// create and attach depth buffer (renderbuffer)
-
-	glGenRenderbuffers(1, &rboDepthDefer);
-	glBindRenderbuffer(GL_RENDERBUFFER, rboDepthDefer);
-	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCREEN_WIDTH, SCREEN_HEIGHT);
-	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepthDefer);
-
-	// finally check if framebuffer is complete
-	if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-		std::cout << "Framebuffer not complete!" << std::endl;
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
@@ -210,7 +115,7 @@ void GameManager::renderScene() {
 
 	entityManager->draw(dt_secs);
 
-	GLuint shader;
+	unsigned int shader;
 	if (editModeManager->get_ifEditMode()) {
 		shader = shaderManager->get_simple_program();
 		glUseProgram(shader);
@@ -253,7 +158,7 @@ bool done = false;
 void GameManager::draw() {
 	if (lightingManager->getIfShadow() == true && done ==false) {
 		for (unsigned int i = 0; i < lightingManager->getNumOfPointLights(); i++) {
-			GLuint shader = shaderManager->get_depthShader_program();
+			unsigned int shader = shaderManager->get_depthShader_program();
 			lightingManager->setUpShadowRender_Pointlights(shader, i); // render using light's point of view
 			entityManager->shadow_draw(shader);
 			done = true;
@@ -262,47 +167,47 @@ void GameManager::draw() {
 
 	if (entityManager->getIfDef()) {
 		//G-Buffer Render (DEFERRED SHADING P.1)
-		glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-		glViewport(0, 0, (GLsizei)windowManager->getScreenWidth(), (GLsizei)windowManager->getScreenHeight());
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		FBO_gBuffer->bind();
+		FBO_gBuffer->edit_viewport(windowManager->getScreenWidth(), windowManager->getScreenHeight());
+		FBO_gBuffer->clearBuffers();
+		FBO_gBuffer->clearScreen();
 
 		renderScene_GBuffer();
 
 		//Deferred Shading (DEFERRED SHADING P.2)
-		glBindFramebuffer(GL_FRAMEBUFFER, postProcessFBO);
-		glViewport(0, 0, (GLsizei)windowManager->getScreenWidth(), (GLsizei)windowManager->getScreenHeight());
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		FBO_postProcess->bind();
+		FBO_postProcess->edit_viewport(windowManager->getScreenWidth(), windowManager->getScreenHeight());
+		FBO_postProcess->clearBuffers();
+		FBO_postProcess->clearScreen();
 
-		//GLuint shader = shaderManager->get_deferredShading_program();
-		GLuint shader = shaderManager->get_deferredShading_mapped_program();
+		//unsigned int shader = shaderManager->get_deferredShading_program();
+		unsigned int shader = shaderManager->get_deferredShading_mapped_program();
 		glUseProgram(shader);
 		entityManager->farPlane_camEye_toShader(shader);
 
 		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, gPosition);
+		glBindTexture(GL_TEXTURE_2D, FBO_gBuffer->getColourBuffer(0));
 		glUniform1i(glGetUniformLocation(shader, "gPosition"), 0);
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, gNormal);
+		glBindTexture(GL_TEXTURE_2D, FBO_gBuffer->getColourBuffer(1));
 		glUniform1i(glGetUniformLocation(shader, "gNormal"), 1);
 		glActiveTexture(GL_TEXTURE2);
-		glBindTexture(GL_TEXTURE_2D, gAlbedoSpecular);
+		glBindTexture(GL_TEXTURE_2D, FBO_gBuffer->getColourBuffer(2));
 		glUniform1i(glGetUniformLocation(shader, "gAlbedoSpecular"), 2);
 		glActiveTexture(GL_TEXTURE3);
-		glBindTexture(GL_TEXTURE_2D, gPointLightID);
+		glBindTexture(GL_TEXTURE_2D, FBO_gBuffer->getColourBuffer(3));
 		glUniform1i(glGetUniformLocation(shader, "gPointLightIDs"), 3);
 		glActiveTexture(GL_TEXTURE4);
-		glBindTexture(GL_TEXTURE_2D, gSpotLightID);
+		glBindTexture(GL_TEXTURE_2D, FBO_gBuffer->getColourBuffer(4));
 		glUniform1i(glGetUniformLocation(shader, "gSpotLightIDs"), 4);
 		glActiveTexture(GL_TEXTURE5);
-		glBindTexture(GL_TEXTURE_2D, gTBN_T);
+		glBindTexture(GL_TEXTURE_2D, FBO_gBuffer->getColourBuffer(5));
 		glUniform1i(glGetUniformLocation(shader, "gTBN_T"), 5);
 		glActiveTexture(GL_TEXTURE6);
-		glBindTexture(GL_TEXTURE_2D, gTBN_B);
+		glBindTexture(GL_TEXTURE_2D, FBO_gBuffer->getColourBuffer(6));
 		glUniform1i(glGetUniformLocation(shader, "gTBN_B"), 6);
 		glActiveTexture(GL_TEXTURE7);
-		glBindTexture(GL_TEXTURE_2D, gTBN_N);
+		glBindTexture(GL_TEXTURE_2D, FBO_gBuffer->getColourBuffer(7));
 		glUniform1i(glGetUniformLocation(shader, "gTBN_N"), 7);
 
 		lightingManager->lightsToShader(shader);
@@ -319,10 +224,10 @@ void GameManager::draw() {
 	}
 	else {
 		//RENDER OBJECTS
-		glBindFramebuffer(GL_FRAMEBUFFER, postProcessFBO);
-		glViewport(0, 0, (GLsizei)windowManager->getScreenWidth(), (GLsizei)windowManager->getScreenHeight());
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		FBO_postProcess->bind();
+		FBO_postProcess->edit_viewport(windowManager->getScreenWidth(), windowManager->getScreenHeight());
+		FBO_postProcess->clearBuffers();
+		FBO_postProcess->clearScreen();
 
 		renderScene();
 		////////////////////////////////
@@ -341,14 +246,14 @@ void GameManager::draw() {
 		glUseProgram(shaderManager->get_gaussianBlur_program());
 		for (unsigned int i = 0; i < amount; i++)
 		{
-			glBindFramebuffer(GL_FRAMEBUFFER, pingpongFBO[horizontal]);/*
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			FBO_pingpong[horizontal]->bind();
+			/*glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);*/
 			glUniform1i(glGetUniformLocation(shaderManager->get_gaussianBlur_program(), ("horizontal")), horizontal);
 					
 			// bind texture of other framebuffer (or scene if first iteration)
 			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, first_iteration ? colourBuffer[1] : pingpongColorbuffers[!horizontal]);
+			glBindTexture(GL_TEXTURE_2D, first_iteration ? FBO_postProcess->getColourBuffer(1)/*colourBuffer[1]*/ : FBO_pingpong[!horizontal]->getColourBuffer(0)/*pingpongColorbuffers[!horizontal]*/);
 			glUniform1i(glGetUniformLocation(shaderManager->get_gaussianBlur_program(), "textureToBlur"), 0);
 
 			glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -359,7 +264,7 @@ void GameManager::draw() {
 
 				
 		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, pingpongColorbuffers[!horizontal]);
+		glBindTexture(GL_TEXTURE_2D, FBO_pingpong[!horizontal]->getColourBuffer(0));// pingpongColorbuffers[!horizontal]);
 		glUniform1i(glGetUniformLocation(shaderManager->get_postProcessing_program(), "bloomBlur"), 1);
 	}		
 //	glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -390,7 +295,8 @@ void GameManager::draw() {
 	}
 	else {
 		//glBindTexture(GL_TEXTURE_2D, gNormal);
-		glBindTexture(GL_TEXTURE_2D, colourBuffer[0]);
+		//glBindTexture(GL_TEXTURE_2D, FBO_gBuffer->getColourBuffer(entityManager->getNum()));
+		glBindTexture(GL_TEXTURE_2D, FBO_postProcess->getColourBuffer(0));
 	}
 	glUniform1i(glGetUniformLocation(shaderManager->get_postProcessing_program(), "screenTexture"), 0);
 
@@ -417,7 +323,7 @@ void GameManager::draw() {
 //	glDrawArrays(GL_TRIANGLES, 0, 6);
 
 	Common::unbindTextures(0, 1);
-	glBindVertexArray(0);
+//	glBindVertexArray(0);
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	//At end to see objects with transparency

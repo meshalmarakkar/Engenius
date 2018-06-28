@@ -12,7 +12,7 @@ LightingManager::LightingManager(glm::vec3 cameraEye, glm::vec3 cameraAt) {
 
 void LightingManager::initShadows() {
 	//for less precision...
-	GLint internal_format = GL_DEPTH_COMPONENT24;
+	int internal_format = GL_DEPTH_COMPONENT24;
 	GLenum data_type = GL_UNSIGNED_INT;
 
 	for (unsigned int i = 0; i < pointLights.size(); i++) {
@@ -24,7 +24,7 @@ void LightingManager::initShadows() {
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-		for (GLuint face = 0; face < 6; ++face)
+		for (unsigned int face = 0; face < 6; ++face)
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face, 0, GL_DEPTH_COMPONENT32, (GLsizei)SHADOW_WIDTH, (GLsizei)SHADOW_WIDTH, 0, GL_DEPTH_COMPONENT, GL_FLOAT, NULL);
 		
 		// Attach cubemap as depth map FBO's color buffer
@@ -106,11 +106,11 @@ void LightingManager::addPointLight(glm::vec3 position, float att_constant, floa
 	numOfLights++;
 }
 
-void LightingManager::lightsToShader(GLuint shader) {
+void LightingManager::lightsToShader(unsigned int shader) {
 	//UPDATE ARRAY SIZE IN SHADERS!!
 	for (unsigned int lightNo = 0; lightNo < pointLights.size(); lightNo++) {
 		std::string number = std::to_string(lightNo);
-		GLuint uniformIndex = glGetUniformLocation(shader, ("pointLights[" + number + "].position").c_str());
+		unsigned int uniformIndex = glGetUniformLocation(shader, ("pointLights[" + number + "].position").c_str());
 		glUniform3fv(uniformIndex, 1, glm::value_ptr(pointLights.at(lightNo).position));
 		uniformIndex = glGetUniformLocation(shader, ("pointLights[" + number + "].ambient").c_str());
 		glUniform3fv(uniformIndex, 1, glm::value_ptr(pointLights.at(lightNo).ambient));
@@ -128,7 +128,7 @@ void LightingManager::lightsToShader(GLuint shader) {
 
 	for (unsigned int lightNo = 0; lightNo < spotLights.size(); lightNo++) {
 		std::string number = std::to_string(lightNo);
-		GLuint uniformIndex = glGetUniformLocation(shader, ("spotLights[" + number + "].position").c_str());
+		unsigned int uniformIndex = glGetUniformLocation(shader, ("spotLights[" + number + "].position").c_str());
 		glUniform3fv(uniformIndex, 1, glm::value_ptr(spotLights.at(lightNo).position));
 		uniformIndex = glGetUniformLocation(shader, ("spotLights[" + number + "].direction").c_str());
 		glUniform3fv(uniformIndex, 1, glm::value_ptr(spotLights.at(lightNo).direction));
@@ -151,8 +151,8 @@ void LightingManager::lightsToShader(GLuint shader) {
 	}
 }
 
-void LightingManager::lightIDsToShader(GLuint shader, int po_1, int po_2, int po_3, int sp_1, int sp_2, int sp_3) {
-	GLuint uniformIndex;
+void LightingManager::lightIDsToShader(unsigned int shader, int po_1, int po_2, int po_3, int sp_1, int sp_2, int sp_3) {
+	unsigned int uniformIndex;
 	std::string number;
 	for (int lightNo = 0; lightNo < MAX_LIGHTS; lightNo++) {
 		int id = -1; //only checks calc in shader if id greater than -1
@@ -182,7 +182,7 @@ void LightingManager::lightIDsToShader(GLuint shader, int po_1, int po_2, int po
 	}
 }
 
-void LightingManager::setUpShadowRender_Pointlights(GLuint shader, int lightIndex) {
+void LightingManager::setUpShadowRender_Pointlights(unsigned int shader, int lightIndex) {
 	glBindFramebuffer(GL_FRAMEBUFFER, pointLights[lightIndex].depthMapFBO);
 	glViewport(0, 0, (GLsizei)SHADOW_WIDTH, (GLsizei)SHADOW_WIDTH);
 	glClear(GL_DEPTH_BUFFER_BIT); // clear FBO
@@ -216,7 +216,7 @@ void LightingManager::setUpShadowRender_Pointlights(GLuint shader, int lightInde
 	}
 }
 
-void LightingManager::shadowMapsToShader(GLuint shader, int po_1, int po_2, int po_3, int sp_1, int sp_2, int sp_3) {
+void LightingManager::shadowMapsToShader(unsigned int shader, int po_1, int po_2, int po_3, int sp_1, int sp_2, int sp_3) {
 	// pass in the shadowmap 
 	for (int iter = 0; iter < MAX_LIGHTS; iter++) {
 		int i = -1;// -1 as ids start at 0;
@@ -235,7 +235,7 @@ void LightingManager::shadowMapsToShader(GLuint shader, int po_1, int po_2, int 
 		if (i > -1) {
 			std::string number = std::to_string(iter);
 			// pass in the shadowmaps, each in a different texture unit
-			GLuint uniformIndex = glGetUniformLocation(shader, ("depthMap[" + std::to_string(iter) + "]").c_str());
+			unsigned int uniformIndex = glGetUniformLocation(shader, ("depthMap[" + std::to_string(iter) + "]").c_str());
 			glActiveTexture(GL_TEXTURE8 + iter);
 			glUniform1i(uniformIndex, 8 + iter);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, pointLights[i].depthCubeMap);
@@ -246,7 +246,7 @@ void LightingManager::shadowMapsToShader(GLuint shader, int po_1, int po_2, int 
 		else {
 			std::string number = std::to_string(iter);
 			// pass in the shadowmaps, each in a different texture unit
-			GLuint uniformIndex = glGetUniformLocation(shader, ("depthMap[" + std::to_string(iter) + "]").c_str());
+			unsigned int uniformIndex = glGetUniformLocation(shader, ("depthMap[" + std::to_string(iter) + "]").c_str());
 			glActiveTexture(GL_TEXTURE8 + iter);
 			glUniform1i(uniformIndex, 8 + iter);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, pointLights[0].depthCubeMap);
@@ -257,11 +257,11 @@ void LightingManager::shadowMapsToShader(GLuint shader, int po_1, int po_2, int 
 	}
 }
 
-void LightingManager::noShadowMessage(GLuint shader) {
+void LightingManager::noShadowMessage(unsigned int shader) {
 	for (int iter = 0; iter < MAX_LIGHTS; iter++) {
 		std::string number = std::to_string(iter);
 		// pass in the shadowmaps, each in a different texture unit
-		GLuint uniformIndex = glGetUniformLocation(shader, ("depthMap[" + std::to_string(iter) + "]").c_str());
+		unsigned int uniformIndex = glGetUniformLocation(shader, ("depthMap[" + std::to_string(iter) + "]").c_str());
 		glActiveTexture(GL_TEXTURE8 + iter);
 		glUniform1i(uniformIndex, 8 + iter);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, pointLights[0].depthCubeMap);
@@ -271,7 +271,7 @@ void LightingManager::noShadowMessage(GLuint shader) {
 	}
 }
 
-GLuint LightingManager::getDepthCubeMap(unsigned int i) {
+unsigned int LightingManager::getDepthCubeMap(unsigned int i) {
 	return pointLights[i].depthCubeMap;
 }
 

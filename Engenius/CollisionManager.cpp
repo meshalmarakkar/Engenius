@@ -72,7 +72,7 @@ unsigned int CollisionManager::getRelevantGrid(const glm::vec3 pos, const glm::v
 	return 0; //for safeguard....shouldnt get here though
 }
 
-void CollisionManager::renderBoundingBoxes(GLuint shader, bool addMode, bool rigidBodyMode, glm::mat4 edit_modelMatrix) {
+void CollisionManager::renderBoundingBoxes(unsigned int shader, bool addMode, bool rigidBodyMode, glm::mat4 edit_modelMatrix) {
 	if (rigidBodyMode) {
 		for (unsigned int h = 0; h < rigidBodies.size(); h++) {
 			renderBox(rigidBodies.at(h), shader);
@@ -281,7 +281,7 @@ btRigidBody* CollisionManager::addCapsule(float rad, float height, float x, floa
 	return body;
 }
 
-void CollisionManager::renderCapsule(btRigidBody* capsule, Model *modelData, GLuint shader, GLuint texture) {
+void CollisionManager::renderCapsule(btRigidBody* capsule, Model *modelData, unsigned int shader, unsigned int texture) {
 
 	if (capsule->getCollisionShape()->getShapeType() != CAPSULE_SHAPE_PROXYTYPE) //cout << "Wrong collision shape ";	
 		return;
@@ -303,7 +303,7 @@ void CollisionManager::renderCapsule(btRigidBody* capsule, Model *modelData, GLu
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void CollisionManager::renderBox(btRigidBody* box, GLuint shader) {
+void CollisionManager::renderBox(btRigidBody* box, unsigned int shader) {
 
 	if (box->getCollisionShape()->getShapeType() != BOX_SHAPE_PROXYTYPE) 			//cout << "Wrong collision shape";
 		return;

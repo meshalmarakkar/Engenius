@@ -16,9 +16,9 @@
 #define PI 3.14159265359f
 
 namespace Common {
-	GLint loadTexture(const std::string type, const std::string path);
-	GLint loadTextureNonTransparent(const std::string type, const std::string path);
-	GLuint loadCubeMap(const char *fname[6]);
+	int loadTexture(const std::string type, const std::string path);
+	int loadTextureNonTransparent(const std::string type, const std::string path);
+	unsigned int loadCubeMap(const char *fname[6]);
 	glm::vec3 moveForwardOrBack(const glm::vec3 pos, const GLfloat angle, const GLfloat d);
 	glm::vec3 moveLateral(const glm::vec3 pos, const GLfloat angle, const GLfloat d);
 	void createModelMatrix(glm::mat4 &model, glm::vec3 position);

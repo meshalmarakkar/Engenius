@@ -1,13 +1,13 @@
 #include "Common.h"
 
 namespace Common {
-	GLint loadTexture(const std::string type, const std::string path)
+	int loadTexture(const std::string type, const std::string path)
 	{
 		std::string directory = path.substr(0, path.find_last_of('/'));
 		directory = directory + "/" + type;
 		const char* pathToFile = directory.c_str();
 
-		GLuint texID;
+		unsigned int texID;
 		glGenTextures(1, &texID); // generate texture ID
 
 		int width, height;
@@ -35,13 +35,13 @@ namespace Common {
 		return texID;	// return value of texture ID
 	}
 
-	GLint loadTextureNonTransparent(const std::string type, const std::string path)
+	int loadTextureNonTransparent(const std::string type, const std::string path)
 	{
 		std::string directory = path.substr(0, path.find_last_of('/'));
 		directory = directory + "/" + type;
 		const char* pathToFile = directory.c_str();
 
-		GLuint texID;
+		unsigned int texID;
 		glGenTextures(1, &texID); // generate texture ID
 
 		int width, height;
@@ -69,8 +69,8 @@ namespace Common {
 		return texID;	// return value of texture ID
 	}
 
-	GLuint loadCubeMap(const char *faces[6]) {
-		GLuint texID;
+	unsigned int loadCubeMap(const char *faces[6]) {
+		unsigned int texID;
 		glGenTextures(1, &texID); // generate texture ID
 		glBindTexture(GL_TEXTURE_CUBE_MAP, texID);
 
@@ -141,19 +141,19 @@ namespace Common {
 		model = glm::scale(model, scale);
 	}
 
-	void enableVertexAttribArray(GLuint first, GLuint last) {
-		for (GLuint i = first; i < last + 1; i++)
+	void enableVertexAttribArray(unsigned int first, unsigned int last) {
+		for (unsigned int i = first; i < last + 1; i++)
 			glEnableVertexAttribArray(i);
 	}
 	void enableVertexAttribArray(unsigned int num) {
 		glEnableVertexAttribArray(num);
 	}
 
-	void disableVertexAttribArray(GLuint first, GLuint last) {
-		for (GLuint i = first; i < last + 1; i++)
+	void disableVertexAttribArray(unsigned int first, unsigned int last) {
+		for (unsigned int i = first; i < last + 1; i++)
 			glDisableVertexAttribArray(i);
 	}
-	void disableVertexAttribArray(GLuint num) {
+	void disableVertexAttribArray(unsigned int num) {
 		glDisableVertexAttribArray(num);
 	}
 

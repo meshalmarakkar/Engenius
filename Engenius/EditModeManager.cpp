@@ -49,7 +49,7 @@ void EditModeManager::update( const glm::vec3 currentTerrainPointOfMouse, float 
 		edit_SetPos(currentTerrainPointOfMouse);
 }
 
-void EditModeManager::draw(GLuint shader) {
+void EditModeManager::draw(unsigned int shader) {
 	if (mode_selected == mode_bounding) {
 		glm::mat4 edit_ModelMatrix;
 		glm::vec3 scale(mode_selected->edit_scale.x, mode_selected->edit_scale.y, mode_selected->edit_scale.z);

@@ -20,7 +20,7 @@ void ParticleManager::newToRender(ToRender &tr) {
 	tr.blend->resize(MAX_PER_TYPE);
 }
 
-ParticleManager::ParticleManager(GLuint shader) : shader(shader) {
+ParticleManager::ParticleManager(unsigned int shader) : shader(shader) {
 
 	particleTextures = new ParticleTexture[4]; //the wrong heap size thing!!!
 

@@ -39,7 +39,7 @@ public:
 	void setZone(int newVal);
 
 	void setShininess(const float newVal);
-	void shininessToShader(GLuint shader);
+	void shininessToShader(unsigned int shader);
 
 	void setTiling(const float newValue);
 	float getTiling();

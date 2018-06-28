@@ -10,12 +10,12 @@ class TerrainManager {
 public:
 	TerrainManager(LightingManager* lightingManager, Camera* camera, ShaderManager* shaderManager);
 	float getTerrainHeight(const float x, const float z);
-	void render(GLuint ifShadow, glm::vec3 playerPos, float dt_secs);
-	void shadowDraw(GLuint shader);
+	void render(unsigned int ifShadow, glm::vec3 playerPos, float dt_secs);
+	void shadowDraw(unsigned int shader);
 private:
 	void initTerrainToWorld();
-	void lightsToShader(GLuint shader, int point_id1, int point_id2, int point_id3, int spot_id1, int spot_id2, int spot_id3);
-	void farPlane_camEye_toShader(GLuint shader);
+	void lightsToShader(unsigned int shader, int point_id1, int point_id2, int point_id3, int spot_id1, int spot_id2, int spot_id3);
+	void farPlane_camEye_toShader(unsigned int shader);
 	void addLightIDs();
 
 	LightingManager * lightingManager;
@@ -26,7 +26,7 @@ private:
 	float alphaTest;
 	float windStrength;
 	glm::vec3 windDirection;
-	GLuint grassTexture;
+	unsigned int grassTexture;
 
 
 	std::vector<Terrain*> terrains;

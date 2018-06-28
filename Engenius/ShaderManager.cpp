@@ -10,7 +10,7 @@ ShaderManager::ShaderManager() {
 // loadFile - loads text file from file fname as a char* 
 // Allocates memory - so remember to delete after use
 // size of file returned in fSize
-char* ShaderManager::loadFile(const char *fname, GLint &fSize) {
+char* ShaderManager::loadFile(const char *fname, int &fSize) {
 	using namespace std;
 	int size;
 	char * memblock;
@@ -20,7 +20,7 @@ char* ShaderManager::loadFile(const char *fname, GLint &fSize) {
 	ifstream file (fname, ios::in|ios::binary|ios::ate);
 	if (file.is_open()) {
 		size = (int) file.tellg(); // get location of file pointer i.e. file size
-		fSize = (GLint) size;
+		fSize = (int) size;
 		memblock = new char [size];
 		file.seekg (0, ios::beg);
 		file.read (memblock, size);
@@ -39,7 +39,7 @@ char* ShaderManager::loadFile(const char *fname, GLint &fSize) {
 
 // printShaderError
 // Display (hopefully) useful error messages if shader fails to compile or link
-void printShaderError(const GLint shader) {
+void printShaderError(const int shader) {
 	int maxLength = 0;
 	int logLength = 0;
 	GLchar *logMessage;
@@ -62,8 +62,8 @@ void printShaderError(const GLint shader) {
 	// should additionally check for OpenGL errors here
 }
 
-GLuint ShaderManager::initShaders(const char *vertFile, const char *fragFile) {
-	GLuint p, f, v;
+unsigned int ShaderManager::initShaders(const char *vertFile, const char *fragFile) {
+	unsigned int p, f, v;
 
 	char *vs,*fs;
 
@@ -71,8 +71,8 @@ GLuint ShaderManager::initShaders(const char *vertFile, const char *fragFile) {
 	f = glCreateShader(GL_FRAGMENT_SHADER);	
 
 	// load shaders & get length of each
-	GLint vlen;
-	GLint flen;
+	int vlen;
+	int flen;
 	vs = loadFile(vertFile,vlen);
 	fs = loadFile(fragFile,flen);
 	
@@ -82,19 +82,19 @@ GLuint ShaderManager::initShaders(const char *vertFile, const char *fragFile) {
 	glShaderSource(v, 1, &vv,&vlen);
 	glShaderSource(f, 1, &ff,&flen);
 	
-	GLint compiled;
+	int compiled;
 
 	glCompileShader(v);
 	glGetShaderiv(v, GL_COMPILE_STATUS, &compiled);
 	if (!compiled) {
-		std::cout << vertFile << " : Vertex shader not compiled." << std::endl;
+		std::cout << vertFile << " : Shader not compiled : [VERTEX]" << std::endl;
 		printShaderError(v);
 	} 
 
 	glCompileShader(f);
 	glGetShaderiv(f, GL_COMPILE_STATUS, &compiled);
 	if (!compiled) {
-		std::cout << fragFile << " : Fragment shader not compiled." << std::endl;
+		std::cout << fragFile << " : Shader not compiled : [FRAGMENT]" << std::endl;
 		printShaderError(f);
 	} 
 	
@@ -117,8 +117,8 @@ GLuint ShaderManager::initShaders(const char *vertFile, const char *fragFile) {
 	return p;
 }
 
-GLuint ShaderManager::initShaders(const char *vertFile, const char *fragFile, const char *geomFile) {
-	GLuint p, f, v, g;
+unsigned int ShaderManager::initShaders(const char *vertFile, const char *fragFile, const char *geomFile) {
+	unsigned int p, f, v, g;
 
 	char *vs, *fs, *gs;
 
@@ -127,9 +127,9 @@ GLuint ShaderManager::initShaders(const char *vertFile, const char *fragFile, co
 	g = glCreateShader(GL_GEOMETRY_SHADER);
 
 	// load shaders & get length of each
-	GLint vlen;
-	GLint flen;
-	GLint glen;
+	int vlen;
+	int flen;
+	int glen;
 	vs = loadFile(vertFile, vlen);
 	fs = loadFile(fragFile, flen);
 	gs = loadFile(geomFile, glen);
@@ -142,26 +142,26 @@ GLuint ShaderManager::initShaders(const char *vertFile, const char *fragFile, co
 	glShaderSource(f, 1, &ff, &flen);
 	glShaderSource(g, 1, &gg, &glen);
 
-	GLint compiled;
+	int compiled;
 
 	glCompileShader(v);
 	glGetShaderiv(v, GL_COMPILE_STATUS, &compiled);
 	if (!compiled) {
-		std::cout << vertFile << " : Vertex shader not compiled." << std::endl;
+		std::cout << vertFile << " : Shader not compiled : [VERTEX]" << std::endl;
 		printShaderError(v);
-	}
+	} 
 
 	glCompileShader(f);
 	glGetShaderiv(f, GL_COMPILE_STATUS, &compiled);
 	if (!compiled) {
-		std::cout << fragFile << " : Fragment shader not compiled." << std::endl;
+		std::cout << fragFile << " : Shader not compiled : [FRAGMENT]" << std::endl;
 		printShaderError(f);
-	}
+	} 
 
 	glCompileShader(g);
 	glGetShaderiv(g, GL_COMPILE_STATUS, &compiled);
 	if (!compiled) {
-		std::cout << geomFile << " : Geometry shader not compiled." << std::endl;
+		std::cout << geomFile << " : Shader not compiled : [GEOMETRY]" << std::endl;
 		printShaderError(g);
 	}
 
@@ -184,6 +184,195 @@ GLuint ShaderManager::initShaders(const char *vertFile, const char *fragFile, co
 	delete[] gs;
 
 	return p;
+}
+
+void ShaderManager::gl_UseProgram(unsigned int shader) {
+	glUseProgram(shader);
+	currentShader = shader;
+}
+
+void ShaderManager::gl_ClearError() {
+	while (glGetError != GL_NO_ERROR);
+}
+
+void ShaderManager::gl_CheckError() {
+	while (GLenum error = glGetError()) {
+		std::cout << "[OpenGL ERROR] : " << error << std::endl; //convert to hexadecimal before checking glew
+	}
+}
+
+unsigned int ShaderManager::loadTexture(const std::string type, const std::string path)
+{
+	std::string directory = path.substr(0, path.find_last_of('/'));
+	directory = directory + "/" + type;
+	const char* pathToFile = directory.c_str();
+
+	unsigned int texID;
+	glGenTextures(1, &texID); // generate texture ID
+
+	int width, height;
+	unsigned char* image = SOIL_load_image(pathToFile, &width, &height, 0, SOIL_LOAD_RGBA);
+
+	if (image) {
+		glBindTexture(GL_TEXTURE_2D, texID);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+
+		glGenerateMipmap(GL_TEXTURE_2D);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //or GL_CLAMP_TO_EDGE
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -0.4f);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		SOIL_free_image_data(image);
+	}
+	else
+	{
+		std::cout << "Texture failed to load at path: " << pathToFile << std::endl;
+		SOIL_free_image_data(image);
+	}
+	return texID;	// return value of texture ID
+}
+
+unsigned int ShaderManager::loadTextureNonTransparent(const std::string type, const std::string path)
+{
+	std::string directory = path.substr(0, path.find_last_of('/'));
+	directory = directory + "/" + type;
+	const char* pathToFile = directory.c_str();
+
+	unsigned int texID;
+	glGenTextures(1, &texID); // generate texture ID
+
+	int width, height;
+	unsigned char* image = SOIL_load_image(pathToFile, &width, &height, 0, SOIL_LOAD_RGB);
+
+	if (image) {
+		glBindTexture(GL_TEXTURE_2D, texID);
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+
+		glGenerateMipmap(GL_TEXTURE_2D);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //or GL_CLAMP_TO_EDGE
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -0.4f);
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		SOIL_free_image_data(image);
+	}
+	else
+	{
+		std::cout << "Texture failed to load at path: " << pathToFile << std::endl;
+		SOIL_free_image_data(image);
+	}
+	return texID;	// return value of texture ID
+}
+
+unsigned int ShaderManager::loadCubeMap(const char *faces[6]) {
+	unsigned int texID;
+	glGenTextures(1, &texID); // generate texture ID
+	glBindTexture(GL_TEXTURE_CUBE_MAP, texID);
+
+	int width, height;
+	for (unsigned int i = 0; i < 6; i++)
+	{
+		unsigned char *image = SOIL_load_image(faces[i], &width, &height, 0, SOIL_LOAD_RGB);
+		if (image)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+				0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image
+			); //GL_FLOAT for more precision?
+			SOIL_free_image_data(image);
+		}
+		else
+		{
+			std::cout << "Cubemap texture failed to load at path: " << faces[i] << std::endl;
+			SOIL_free_image_data(image);
+		}
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+	return texID;
+}
+
+void ShaderManager::enableVertexAttribArray(unsigned int first, unsigned int last) {
+	for (unsigned int i = first; i < last + 1; i++)
+		glEnableVertexAttribArray(i);
+}
+void ShaderManager::enableVertexAttribArray(unsigned int num) {
+	glEnableVertexAttribArray(num);
+}
+
+void ShaderManager::disableVertexAttribArray(unsigned int first, unsigned int last) {
+	for (unsigned int i = first; i < last + 1; i++)
+		glDisableVertexAttribArray(i);
+}
+void ShaderManager::disableVertexAttribArray(unsigned int num) {
+	glDisableVertexAttribArray(num);
+}
+
+void ShaderManager::bindTexture(const unsigned int shader, const unsigned int texture, const GLchar* name) {
+	/*glActiveTexture(GL_TEXTURE0 + num_nextAvailableTex);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glUniform1i(glGetUniformLocation(shader, name), num_nextAvailableTex);
+	num_nextAvailableTex++;*/
+}
+
+void ShaderManager::bindCubeMapTexture(const unsigned int shader, const unsigned int texture, const GLchar* name) {
+	/*	glActiveTexture(GL_TEXTURE0 + num_nextAvailableTex);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
+	glUniform1i(glGetUniformLocation(shader, name), num_nextAvailableTex);
+	num_nextAvailableTex++;*/
+}
+
+void ShaderManager::unbindTextures(unsigned int num) {
+	glActiveTexture(GL_TEXTURE0 + num);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+}
+
+void ShaderManager::unbindTextures(unsigned int first, unsigned int last) {
+	for (unsigned int i = first; i < last + 1; i++) {
+		glActiveTexture(GL_TEXTURE0 + i);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+}
+
+void ShaderManager::createModelMatrix(glm::mat4 &model, glm::vec3 position) {
+	model = glm::translate(model, position);
+}
+void ShaderManager::createModelMatrix(glm::mat4 &model, glm::vec3 position, float yaw) {
+	model = glm::translate(model, position);
+	model = glm::rotate(model, float(yaw * DEGREE_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+}
+void ShaderManager::createModelMatrix(glm::mat4 &model, glm::vec3 position, glm::vec3 scale) {
+	model = glm::translate(model, position);
+	model = glm::scale(model, scale);
+}
+void ShaderManager::createModelMatrix(glm::mat4 &model, glm::vec3 position, float yaw, glm::vec3 scale) {
+	model = glm::translate(model, position);
+	model = glm::rotate(model, float(yaw * DEGREE_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::scale(model, scale);
+}
+void ShaderManager::createModelMatrix(glm::mat4 &model, glm::vec3 position, float pitch, float yaw, glm::vec3 scale) {
+	model = glm::translate(model, position);
+	model = glm::rotate(model, float(yaw * DEGREE_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::rotate(model, float(pitch * DEGREE_TO_RADIAN), glm::vec3(1.0f, 0.0f, 0.0f));
+	//model = glm::rotate(model, float(objectsInWorld.at(iter)->getRoll() * DEG_TO_RADIAN), glm::vec3(0.0f, 0.0f, 1.0f));
+	model = glm::scale(model, scale);
+}
+void ShaderManager::createModelMatrix(glm::mat4 &model, glm::vec3 position, glm::vec3 scale, glm::vec3 rotation) {
+	model = glm::translate(model, position);
+	model = glm::rotate(model, float(rotation.y * DEGREE_TO_RADIAN), glm::vec3(0.0f, 1.0f, 0.0f));
+	model = glm::rotate(model, float(rotation.x * DEGREE_TO_RADIAN), glm::vec3(1.0f, 0.0f, 0.0f));
+	model = glm::rotate(model, float(rotation.z * DEGREE_TO_RADIAN), glm::vec3(0.0f, 0.0f, 1.0f));
+	model = glm::scale(model, scale);
 }
 
 void ShaderManager::init() {
@@ -209,80 +398,78 @@ void ShaderManager::init() {
 	grass_program = initShaders("../Engenius/Shaders/grass.vert", "../Engenius/Shaders/grass.frag", "../Engenius/Shaders/grass.gs");
 }
 
-GLuint ShaderManager::get_grass_program() {
+unsigned int ShaderManager::get_grass_program() {
 	return grass_program;
 }
 
-GLuint ShaderManager::get_gBuffer_program() {
+unsigned int ShaderManager::get_gBuffer_program() {
 	return gBuffer_program;
 }
 
-GLuint ShaderManager::get_deferredShading_program() {
+unsigned int ShaderManager::get_deferredShading_program() {
 	return deferredShading_program;
 }
 
-GLuint ShaderManager::get_gBuffer_mapped_program() {
+unsigned int ShaderManager::get_gBuffer_mapped_program() {
 	return gBuffer_mapped_program;
 }
 
-GLuint ShaderManager::get_deferredShading_mapped_program() {
+unsigned int ShaderManager::get_deferredShading_mapped_program() {
 	return deferredShading_mapped_program;
 }
 
-GLuint ShaderManager::get_firstPass_program() {
+unsigned int ShaderManager::get_firstPass_program() {
 	return firstPass_program;
 }
 
-GLuint ShaderManager::get_postProcessing_program() {
+unsigned int ShaderManager::get_postProcessing_program() {
 	return postProcessing_program;
 }
-GLuint ShaderManager::get_simple_program() {
+unsigned int ShaderManager::get_simple_program() {
 	return simple_program;
 }
-GLuint ShaderManager::get_depthMapRender_program() {
+unsigned int ShaderManager::get_depthMapRender_program() {
 	return depthMapRender_program;
 }
 
-GLuint ShaderManager::get_model_program() {
+unsigned int ShaderManager::get_model_program() {
 	return model_program;
 }
-GLuint ShaderManager::get_mapped_model_program() {
+unsigned int ShaderManager::get_mapped_model_program() {
 	return mapped_model_program;
 }
 
-GLuint ShaderManager::get_gaussianBlur_program() {
+unsigned int ShaderManager::get_gaussianBlur_program() {
 	return gaussianBlur_program;
 }
 
-GLuint ShaderManager::get_animated_model_program() {
+unsigned int ShaderManager::get_animated_model_program() {
 	return animated_model_program;
 }
 
-
-GLuint ShaderManager::get_terrain_program() {
+unsigned int ShaderManager::get_terrain_program() {
 	return terrain_program;
 }
-GLuint ShaderManager::get_terrain_mapped_program() {
+unsigned int ShaderManager::get_terrain_mapped_program() {
 	return terrain_mapped_program;
 }
 
-
-GLuint ShaderManager::get_depthShader_program() {
+unsigned int ShaderManager::get_depthShader_program() {
 	return depthShader_program;
 }
 
-GLuint ShaderManager::get_skybox_program() {
+unsigned int ShaderManager::get_skybox_program() {
 	return skybox_program;
 }
 
-GLuint ShaderManager::get_particle_program() {
+unsigned int ShaderManager::get_particle_program() {
 	return particle_program;
 }
 
-GLuint ShaderManager::get_hud_program() {
+unsigned int ShaderManager::get_hud_program() {
 	return hud_program;
 }
 
-GLuint ShaderManager::get_displayNormals_program() {
+unsigned int ShaderManager::get_displayNormals_program() {
 	return displayNormals_program;
 }

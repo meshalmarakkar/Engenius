@@ -68,25 +68,25 @@ void Model::setToInstance(const bool newValue) {
 	toInstance = newValue;
 }
 
-void Model::bindWall(GLuint shader) {
+void Model::bindWall(unsigned int shader) {
 	this->meshes.at(0).bindWall(shader);
 }
 void Model::unbindWall() {
 	this->meshes.at(0).unbindWall();
 }
-void Model::drawWall(GLuint shader, const glm::mat4 modelMatrix) {
+void Model::drawWall(unsigned int shader, const glm::mat4 modelMatrix) {
 	glUniform1f(glGetUniformLocation(shader, "hasSpecularMap"), hasSpecularMap);
 	this->meshes.at(0).drawWall(shader, modelMatrix);
 }
 
-void Model::InstancedDraw(GLuint shader, const std::vector<glm::mat4> modelMatrices, const std::vector<glm::vec2> pointIDs, const std::vector<glm::vec2> spotIDs) {
+void Model::InstancedDraw(unsigned int shader, const std::vector<glm::mat4> modelMatrices, const std::vector<glm::vec2> pointIDs, const std::vector<glm::vec2> spotIDs) {
 	glUniform1f(glGetUniformLocation(shader, "hasSpecularMap"), hasSpecularMap);
-	for (GLuint i = 0; i < this->meshes.size(); i++)
+	for (unsigned int i = 0; i < this->meshes.size(); i++)
 		this->meshes.at(i).InstancedDraw(shader, modelMatrices, pointIDs, spotIDs);
 }
-void Model::Draw(GLuint shader, const glm::mat4 modelMatrix) {
+void Model::Draw(unsigned int shader, const glm::mat4 modelMatrix) {
 	glUniform1f(glGetUniformLocation(shader, "hasSpecularMap"), hasSpecularMap);
-	for (GLuint i = 0; i < this->meshes.size(); i++)
+	for (unsigned int i = 0; i < this->meshes.size(); i++)
 		this->meshes.at(i).Draw(shader, modelMatrix);
 }
 
@@ -111,7 +111,7 @@ void Model::loadModel(bool onlyAnimation)
 		toInstance = false;
 
 		// Process all of the meshes
-		for (GLuint i = 0; i < scene->mNumMeshes; i++)
+		for (unsigned int i = 0; i < scene->mNumMeshes; i++)
 		{
 			aiMesh* mesh = scene->mMeshes[i];
 			this->meshes.push_back(this->processMesh(mesh));
@@ -124,10 +124,10 @@ Mesh Model::processMesh(aiMesh* mesh)
 {
 	// Data to fill
 	vector<Vertex> vertices;
-	vector<GLuint>indices;
+	vector<unsigned int>indices;
 
 	// Walk through each of the mesh's vertices
-	for (GLuint i = 0; i < mesh->mNumVertices; i++)
+	for (unsigned int i = 0; i < mesh->mNumVertices; i++)
 	{
 		Vertex vertex;
 		glm::vec3 vector; // We declare a placeholder vector since assimp uses its own vector class that doesn't directly convert to glm's vec3 class so we transfer the data to this placeholder glm::vec3 first.
@@ -175,11 +175,11 @@ Mesh Model::processMesh(aiMesh* mesh)
 	}
 
 	// Now walk through each of the mesh's faces (a face is a mesh its triangle) and retrieve the corresponding vertex indices.
-	for (GLuint i = 0; i < mesh->mNumFaces; i++)
+	for (unsigned int i = 0; i < mesh->mNumFaces; i++)
 	{
 		aiFace face = mesh->mFaces[i];
 		// Retrieve all indices of the face and store them in the indices vector
-		for (GLuint j = 0; j < face.mNumIndices; j++)
+		for (unsigned int j = 0; j < face.mNumIndices; j++)
 			indices.push_back(face.mIndices[j]);
 	}
 
@@ -190,8 +190,8 @@ Mesh Model::processMesh(aiMesh* mesh)
 		std::vector<float> boneWeights;
 		boneWeights.resize(boneArraysSize);
 
-		GLuint rightHandBoneNo;
-		for (GLuint i = 0; i < mesh->mNumBones; i++) {
+		unsigned int rightHandBoneNo;
+		for (unsigned int i = 0; i < mesh->mNumBones; i++) {
 			GLbyte BoneIndex = 0;
 			string BoneName(mesh->mBones[i]->mName.data);
 			if (BoneName == "mixamorig_RightHand")
@@ -214,11 +214,11 @@ Mesh Model::processMesh(aiMesh* mesh)
 			{
 				aiVertexWeight weight = mesh->mBones[i]->mWeights[j];
 				// where to start reading vertex weights
-				GLuint vertexStart = weight.mVertexId*NUM_BONES_PER_VERTEX;
+				unsigned int vertexStart = weight.mVertexId*NUM_BONES_PER_VERTEX;
 				// fill teh arrays
 
 		
-				for (GLuint k = 0; k < NUM_BONES_PER_VERTEX; k++)
+				for (unsigned int k = 0; k < NUM_BONES_PER_VERTEX; k++)
 				{
 					if (boneWeights.at(vertexStart + k) == 0.0f) //if 0 not filled with weight
 					{

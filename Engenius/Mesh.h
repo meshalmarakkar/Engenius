@@ -8,6 +8,8 @@
 #pragma comment(lib, "assimp.lib")
 #include <assimp/Importer.hpp>
 
+#include "VertexArrayObject.h"
+
 #include <string>
 #include <vector>
 using namespace std;
@@ -29,7 +31,7 @@ struct Vertex {
 
 };
 struct Texture {
-	GLuint id;
+	unsigned int id;
 	string type;
 	aiString path;
 };
@@ -37,24 +39,26 @@ class Mesh {
 public:
 	/*  Mesh Data  */
 	vector<Vertex> vertices;
-	vector<GLuint> indices;
+	vector<unsigned int> indices;
 	vector<Texture> textures;
 	/*  Functions  */
 	// Constructor
 	
-	Mesh(const vector<Vertex> vertices, const vector<GLuint> indices, const vector<Texture> textures);
+	Mesh(const vector<Vertex> vertices, const vector<unsigned int> indices, const vector<Texture> textures);
 	//~Mesh();
 	// Render the mesh
-	void InstancedDraw(GLuint shader, const std::vector<glm::mat4> modelMatrices, const std::vector<glm::vec2> pointIDs, const std::vector<glm::vec2> spotIDs);
-	void Draw(GLuint shader, const glm::mat4 modelMatrices);
+	void InstancedDraw(unsigned int shader, const std::vector<glm::mat4> modelMatrices, const std::vector<glm::vec2> pointIDs, const std::vector<glm::vec2> spotIDs);
+	void Draw(unsigned int shader, const glm::mat4 modelMatrices);
 
-	void bindWall(GLuint shader);
+	void bindWall(unsigned int shader);
 	void unbindWall();
-	void drawWall(GLuint shader, const glm::mat4 modelMatrix);
+	void drawWall(unsigned int shader, const glm::mat4 modelMatrix);
 
 private:
 	/*  Render data  */
-	GLuint VAO, VBO, EBO, vboModel, vboPointIDs, vboSpotIDs;
+	VertexArrayObject * VAO;
+	//unsigned int VAO, VBO, EBO, vboModel, vboPointIDs, vboSpotIDs;
+	unsigned int ID_vboModel, ID_vboPoint, ID_vboSpot;
 	/*  Functions    */
 	// Initializes all the buffer objects/arrays
 	void setupMesh();
@@ -66,6 +70,12 @@ private:
 	#define LOCATION_BITANGENT		4
 	#define LOCATION_BONE_ID		5
 	#define LOCATION_BONE_WEIGHT	6
+	#define LOCATION_MODEL1			7
+	#define LOCATION_MODEL2			8
+	#define LOCATION_MODEL3			9
+	#define LOCATION_MODEL4			10
+	#define LOCATION_POINTID		11
+	#define LOCATION_SPOTID			12
 
 	#define NUM_BONES_PER_VERTEX	4
 };

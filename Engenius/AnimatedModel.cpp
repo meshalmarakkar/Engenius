@@ -10,7 +10,7 @@ AnimatedModel::AnimatedModel(std::string name, const string path) : Model(name, 
 
 void AnimatedModel::loadAnimation() {
 	if (scene->HasAnimations()) {
-		for (GLuint i = 0; i < scene->mAnimations[0]->mNumChannels; i++) {
+		for (unsigned int i = 0; i < scene->mAnimations[0]->mNumChannels; i++) {
 			idle.animationNodes.insert(make_pair(scene->mAnimations[0]->mChannels[i]->mNodeName.data, scene->mAnimations[0]->mChannels[i]));
 		}
 
@@ -33,19 +33,19 @@ void AnimatedModel::setMovementAnims(const std::pair<std::unordered_map<string, 
 	movementCycle.push_back(movement);
 }
 
-GLuint FindPosOrScale(const float AnimationTime, const unsigned int mNumKeys, const aiVectorKey *mKeys)
+unsigned int FindPosOrScale(const float AnimationTime, const unsigned int mNumKeys, const aiVectorKey *mKeys)
 {
-	for (GLuint i = 0; i < mNumKeys - 1; i++)
+	for (unsigned int i = 0; i < mNumKeys - 1; i++)
 		if (AnimationTime < static_cast<float>(mKeys[i + 1].mTime))
 			return i;
 	assert(0);
 	return 0;
 }
 
-GLuint FindRotation(const float AnimationTime, const unsigned int mNumKeys, const aiQuatKey *mKeys)
+unsigned int FindRotation(const float AnimationTime, const unsigned int mNumKeys, const aiQuatKey *mKeys)
 {
 	assert(mNumKeys > 0);
-	for (GLuint i = 0; i < mNumKeys - 1; i++)
+	for (unsigned int i = 0; i < mNumKeys - 1; i++)
 		if (AnimationTime < static_cast<float>(mKeys[i + 1].mTime))
 			return i;
 	assert(0);
@@ -60,8 +60,8 @@ void AnimatedModel::CalcInterpolated_POSorSCALE(aiVector3D& Out, const float Ani
 	}
 
 	//to connect one keyframe to another, have to do it here
-	GLuint PositionIndex = FindPosOrScale(AnimationTime, mNumKeys, mKeys);
-	GLuint NextPositionIndex = (PositionIndex + 1);
+	unsigned int PositionIndex = FindPosOrScale(AnimationTime, mNumKeys, mKeys);
+	unsigned int NextPositionIndex = (PositionIndex + 1);
 	assert(NextPositionIndex < mNumKeys);
 	//time for next keyframe - time for current keyframe time
 	float DeltaTime = (float)(mKeys[NextPositionIndex].mTime - mKeys[PositionIndex].mTime);
@@ -83,8 +83,8 @@ void AnimatedModel::CalcInterpolated_ROT(aiQuaternion& Out, const float Animatio
 		return;
 	}
 
-	GLuint RotationIndex = FindRotation(AnimationTime, mNumKeys, mKeys);
-	GLuint NextRotationIndex = (RotationIndex + 1);
+	unsigned int RotationIndex = FindRotation(AnimationTime, mNumKeys, mKeys);
+	unsigned int NextRotationIndex = (RotationIndex + 1);
 	assert(NextRotationIndex < mNumKeys);
 	float DeltaTime = (float)(mKeys[NextRotationIndex].mTime - mKeys[RotationIndex].mTime);
 	float Factor = (AnimationTime - (float)mKeys[RotationIndex].mTime) / DeltaTime;
@@ -104,8 +104,8 @@ void AnimatedModel::InterpolateAnimations_POS(aiVector3D& Out, const float Anima
 	}
 
 	//to connect one keyframe to another, have to do it here
-	GLuint PositionIndex = FindPosOrScale(AnimationTime, mNumKeys, mKeys);
-	GLuint NextPositionIndex = 0;
+	unsigned int PositionIndex = FindPosOrScale(AnimationTime, mNumKeys, mKeys);
+	unsigned int NextPositionIndex = 0;
 	assert(NextPositionIndex < mNumKeys2);
 	float Factor = blendFactor;
 
@@ -123,8 +123,8 @@ void AnimatedModel::InterpolateAnimations_ROT(aiQuaternion& Out, const float Ani
 		return;
 	}
 
-	GLuint RotationIndex = FindRotation(AnimationTime, mNumKeys, mKeys);
-	GLuint NextRotationIndex = 0;
+	unsigned int RotationIndex = FindRotation(AnimationTime, mNumKeys, mKeys);
+	unsigned int NextRotationIndex = 0;
 	assert(NextRotationIndex < mNumKeys2);
 	float Factor = blendFactor;
 
@@ -169,11 +169,11 @@ void AnimatedModel::ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, 
 	Matrix4f GlobalTransformation = ParentTransform * NodeTransformation;
 
 	if (m_BoneMapping.find(NodeName) != m_BoneMapping.end()) {
-		GLuint BoneIndex = m_BoneMapping[NodeName];
+		unsigned int BoneIndex = m_BoneMapping[NodeName];
 		m_BoneInfo[BoneIndex].FinalTransformation = m_GlobalInverseTransform * GlobalTransformation * m_BoneInfo[BoneIndex].BoneOffset;
 	}
 
-	for (GLuint i = 0; i < pNode->mNumChildren; i++) {
+	for (unsigned int i = 0; i < pNode->mNumChildren; i++) {
 		//now that bone is transformed, do corresponding transforms for children
 		ReadNodeHeirarchy(AnimationTime, pNode->mChildren[i], GlobalTransformation);
 	}
@@ -204,7 +204,7 @@ glm::vec3 getRotation(const glm::mat4 mat) {
 
 std::pair<glm::vec4, glm::vec3> AnimatedModel::getRightHandPos() {
 	Matrix4f matpos;
-	GLuint BoneIndex = m_BoneMapping["mixamorig_RightHandIndex1"];
+	unsigned int BoneIndex = m_BoneMapping["mixamorig_RightHandIndex1"];
 	matpos = m_BoneInfo[BoneIndex].FinalTransformation;
 
 	glm::mat4 pos;
@@ -223,14 +223,14 @@ std::pair<glm::vec4, glm::vec3> AnimatedModel::getRightHandPos() {
 
 void AnimatedModel::coutDetails(const aiNode* pNode) {
 	std::cout << pNode->mName.data << std::endl;
-	GLuint BoneIndex = m_BoneMapping[pNode->mName.data];
+	unsigned int BoneIndex = m_BoneMapping[pNode->mName.data];
 	for (int x = 0; x < 4; x++) {
 		for (int y = 0; y < 4; y++) {
 			std::cout << m_BoneInfo[BoneIndex].FinalTransformation.m[x][y] << ", ";
 		}
 		std::cout << std::endl;
 	}
-	for (GLuint i = 0; i < pNode->mNumChildren; i++) {
+	for (unsigned int i = 0; i < pNode->mNumChildren; i++) {
 		coutDetails(pNode->mChildren[i]);
 	}
 }
@@ -261,7 +261,7 @@ void AnimatedModel::walkBackAnimation() {
 	beginAnimationSwap(movementCycle[3]);
 }
 
-GLuint AnimatedModel::getNumBones() { return m_NumBones; }
+unsigned int AnimatedModel::getNumBones() { return m_NumBones; }
 
 void AnimatedModel::BoneTransform(float TimeInSeconds, vector<Matrix4f>& Transforms)
 {
@@ -290,7 +290,7 @@ void AnimatedModel::BoneTransform(float TimeInSeconds, vector<Matrix4f>& Transfo
 
 	ReadNodeHeirarchy(AnimationTime, scene->mRootNode, Identity);
 
-	for (GLuint i = 0; i < m_NumBones; i++) {
+	for (unsigned int i = 0; i < m_NumBones; i++) {
 		Transforms[i] = m_BoneInfo[i].FinalTransformation;
 	}
 }

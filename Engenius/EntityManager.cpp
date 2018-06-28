@@ -439,9 +439,10 @@ EntityManager::EntityManager(Camera *camera, ParticleManager* particleManager, L
 }
 
 void EntityManager::renderPanels() {
-	GLuint shader = shaderManager->get_mapped_model_program(); 
-	//GLuint shader = shaderManager->get_model_program();
-	glUseProgram(shader);
+	unsigned int shader = shaderManager->get_mapped_model_program(); 
+	//unsigned int shader = shaderManager->get_model_program();
+	shaderManager->gl_UseProgram(shader);
+
 	camera->passViewProjToShader(shader);
 	farPlane_camEye_toShader(shader);
 	lightingManager->lightsToShader(shader);
@@ -470,9 +471,9 @@ void EntityManager::renderPanels() {
 }
 
 void EntityManager::renderPanels_GBuffer() {
-	GLuint shader = shaderManager->get_gBuffer_mapped_program();
-	//GLuint shader = shaderManager->get_gBuffer_program();
-	glUseProgram(shader);
+	unsigned int shader = shaderManager->get_gBuffer_mapped_program();
+	//unsigned int shader = shaderManager->get_gBuffer_program();
+	shaderManager->gl_UseProgram(shader);
 	camera->passViewProjToShader(shader);
 	farPlane_camEye_toShader(shader);
 
@@ -496,9 +497,9 @@ void EntityManager::renderPanels_GBuffer() {
 }
 
 void EntityManager::renderObjects() {
-	GLuint shader = shaderManager->get_mapped_model_program(); 
-	//GLuint shader = shaderManager->get_model_program();
-	glUseProgram(shader);
+	unsigned int shader = shaderManager->get_mapped_model_program(); 
+	//unsigned int shader = shaderManager->get_model_program();
+	shaderManager->gl_UseProgram(shader);
 	camera->passViewProjToShader(shader);
 	farPlane_camEye_toShader(shader);
 	lightingManager->lightsToShader(shader);
@@ -525,9 +526,9 @@ void EntityManager::renderObjects() {
 }
 
 void EntityManager::renderObjects_GBuffer() {
-	GLuint shader = shaderManager->get_gBuffer_mapped_program();
-	//GLuint shader = shaderManager->get_gBuffer_program();
-	glUseProgram(shader);
+	unsigned int shader = shaderManager->get_gBuffer_mapped_program();
+	//unsigned int shader = shaderManager->get_gBuffer_program();
+	shaderManager->gl_UseProgram(shader);
 	camera->passViewProjToShader(shader);
 	farPlane_camEye_toShader(shader);
 	
@@ -550,8 +551,8 @@ void EntityManager::renderObjects_GBuffer() {
 
 void EntityManager::renderCharacters() {
 	//Player
-	GLuint shader = shaderManager->get_animated_model_program();
-	glUseProgram(shader);
+	unsigned int shader = shaderManager->get_animated_model_program();
+	shaderManager->gl_UseProgram(shader);
 	if (lightingManager->getIfShadow() == true)
 		glUniform1i(glGetUniformLocation(shader, "displayShadow"), true);
 	else
@@ -567,8 +568,8 @@ void EntityManager::renderCharacters() {
 
 void EntityManager::renderCharacters_GBuffer() {
 	//Player
-	GLuint shader = shaderManager->get_animated_model_program();
-	glUseProgram(shader);
+	unsigned int shader = shaderManager->get_animated_model_program();
+	shaderManager->gl_UseProgram(shader);
 
 	farPlane_camEye_toShader(shader);
 	camera->passViewProjToShader(shader);
@@ -578,7 +579,7 @@ void EntityManager::renderCharacters_GBuffer() {
 	}
 }
 
-void EntityManager::lightIDsToShader(GLuint shader, int point_id1, int point_id2, int point_id3, int spot_id1, int spot_id2, int spot_id3) {
+void EntityManager::lightIDsToShader(unsigned int shader, int point_id1, int point_id2, int point_id3, int spot_id1, int spot_id2, int spot_id3) {
 	lightingManager->lightIDsToShader(shader, point_id1, point_id2, point_id3, spot_id1, spot_id2, spot_id3);
 	if (lightingManager->getIfShadow() == true) {
 		lightingManager->shadowMapsToShader(shader, point_id1, point_id2, point_id3, spot_id1, spot_id2, spot_id3);
@@ -588,12 +589,12 @@ void EntityManager::lightIDsToShader(GLuint shader, int point_id1, int point_id2
 	}
 }
 
-void EntityManager::farPlane_camEye_toShader(GLuint shader) {
+void EntityManager::farPlane_camEye_toShader(unsigned int shader) {
 	glUniform1f(glGetUniformLocation(shader, "far_plane"), camera->getFarPlane());
 	glUniform3fv(glGetUniformLocation(shader, "viewPos"), 1, glm::value_ptr(camera->getCameraEye()));
 }
 
-void EntityManager::shadow_draw(GLuint shader) {
+void EntityManager::shadow_draw(unsigned int shader) {
 	farPlane_camEye_toShader(shader);
 
 	//TERRAINS

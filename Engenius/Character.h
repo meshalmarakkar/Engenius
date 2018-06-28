@@ -13,7 +13,7 @@ public:
 	Character(AnimatedModel* model, glm::vec3 position, glm::vec3 scale, float yaw, btRigidBody* bounding, btPairCachingGhostObject* ghost);
 	AnimatedModel* getModel();
 	void setAnimated(bool newValue);
-	void draw(GLuint shader);
+	void draw(unsigned int shader);
 	void changeAnimation();
 
 	void MoveForward();
