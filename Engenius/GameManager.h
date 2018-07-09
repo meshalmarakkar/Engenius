@@ -3,8 +3,6 @@
 #ifndef GAMEMANAGER
 #define GAMEMANAGER
 
-#include "Common.h"
-//#include "Skybox.h"
 #include "ShaderManager.h"
 #include "EntityManager.h"
 #include "HUDManager.h"
@@ -18,7 +16,8 @@
 #include "CollisionManager.h"
 #include "WindowManager.h"
 #include "TerrainManager.h"
-#include "Framebuffer.h"
+#include "Renderer.h"
+#include "TextureLoader.h"
 
 #include <iostream>
 #include <math.h>
@@ -30,55 +29,37 @@
 #include <stack>
 #include <string>
 #include <time.h>
-const float quadVertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
-								 // positions   // texCoords
-	-1.0f,  1.0f,  0.0f, 1.0f,
-	-1.0f, -1.0f,  0.0f, 0.0f,
-	1.0f, -1.0f,  1.0f, 0.0f,
 
-	-1.0f,  1.0f,  0.0f, 1.0f,
-	1.0f, -1.0f,  1.0f, 0.0f,
-	1.0f,  1.0f,  1.0f, 1.0f
-};
 class GameManager {
 public:
 	GameManager();
+	~GameManager();
 	void init(WindowManager * windowManager);
 	void update(float _dt_secs);
 	void draw();
 	bool ControlCheck(const float dt_secs);
 
-private:	
-
-	unsigned int quadVAO, quadVBO;
-
-	void initOtherFBOs();
-	void initDeferredRendering();
+private:
 	void renderScene();
 	void renderScene_GBuffer();
 
+private:	
 	unsigned int particle_program;
 	ParticleManager* particleGenerator;
 	LightingManager* lightingManager;
 	Camera* camera;
 	EntityManager * entityManager;
-//	Skybox * skybox;
 	HUDManager * hudManager;
 	InputManager * inputManager;
 	MousePicker * mousePicker;
 	AudioManager * audioManager;
 	EditModeManager * editModeManager;
 	ShaderManager * shaderManager;
-	//CollisionManager * colManager;
 	WindowManager * windowManager;
+	CollisionManager * colManager;
+	TerrainManager * terrainManager;
 
-	Framebuffer* FBO_postProcess;
-	
-	//Bloom - "ping pong" buffers to do horizontal and vertical blurring separately to save performance
-	Framebuffer* FBO_pingpong[2];
-
-	//Deferred Rendering
-	Framebuffer* FBO_gBuffer;
+	Renderer* renderer;
 
 	unsigned int tex_pause;
 	unsigned int tex_end;

@@ -1,4 +1,5 @@
 #include "ParticleManager.h"
+#include "TextureLoader.h"
 #include <iostream>
 ParticleManager::~ParticleManager()
 {
@@ -24,25 +25,25 @@ ParticleManager::ParticleManager(unsigned int shader) : shader(shader) {
 
 	particleTextures = new ParticleTexture[4]; //the wrong heap size thing!!!
 
-	particleTextures[FIRE].texture = Common::loadTexture("firetorch2.png", "../Engenius/Textures/");
+	particleTextures[FIRE].texture = TextureLoader::loadTexture("firetorch2.png", "../Engenius/Textures/");
 	particleTextures[FIRE].num_of_rows = 8;
 	particleTextures[FIRE].optimumSize = 1.5f;
 	particleTextures[FIRE].optimumLifeLength = 3.0f;
 	particleTextures[FIRE].additive = false;
 
-	particleTextures[EXPLOSION].texture = Common::loadTexture("Explosion.png", "../Engenius/Textures/");
+	particleTextures[EXPLOSION].texture = TextureLoader::loadTexture("Explosion.png", "../Engenius/Textures/");
 	particleTextures[EXPLOSION].num_of_rows = 8;
 	particleTextures[EXPLOSION].optimumSize = 2.5f;
 	particleTextures[EXPLOSION].optimumLifeLength = 2.0f;
 	particleTextures[EXPLOSION].additive = false;
 
-	particleTextures[EXPLOSION2].texture = Common::loadTexture("fire.png", "../Engenius/Textures/");
+	particleTextures[EXPLOSION2].texture = TextureLoader::loadTexture("fire.png", "../Engenius/Textures/");
 	particleTextures[EXPLOSION2].num_of_rows = 8;
 	particleTextures[EXPLOSION2].optimumSize = 2.5f;
 	particleTextures[EXPLOSION2].optimumLifeLength = 3.0f;
 	particleTextures[EXPLOSION2].additive = false;
 
-	particleTextures[SMOKE].texture = Common::loadTexture("smoke.png", "../Engenius/Textures/");
+	particleTextures[SMOKE].texture = TextureLoader::loadTexture("smoke.png", "../Engenius/Textures/");
 	particleTextures[SMOKE].num_of_rows = 8;
 	particleTextures[SMOKE].optimumSize = 2.5f;
 	particleTextures[SMOKE].optimumLifeLength = 3.0f;
@@ -276,7 +277,8 @@ void ParticleManager::renderParticles(glm::mat4 view, glm::mat4 projection) {
 		glDisable(GL_BLEND);
 		Common::disableVertexAttribArray(0, 3);
 		glBindVertexArray(0);
-		Common::unbindTextures(0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	//	Common::unbindTextures(0);
 	}
 }
 

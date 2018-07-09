@@ -1,7 +1,8 @@
 #include "Skybox.h"
+#include "TextureLoader.h"
 
 Skybox::Skybox(unsigned int _skyboxProgram, Model* modelForSkybox) : skyboxProgram(_skyboxProgram), skyboxModel(modelForSkybox) {
-	skyboxTexture = Common::loadCubeMap(nightSkyTexFiles);
+	skyboxTexture = TextureLoader::loadCubeMap(nightSkyTexFiles);
 	modelMatrix = glm::scale(modelMatrix, glm::vec3(1.5f, 1.5f, 1.5f));
 }
 

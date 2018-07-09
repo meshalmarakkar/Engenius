@@ -70,6 +70,7 @@ public:
 #define MODEL
 
 #include "Mesh.h"
+#include "Renderer.h"
 
 // Std. Includes
 #include <string>
@@ -87,7 +88,6 @@ using namespace std;
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 
-#include "Common.h"
 
 class Model
 {
@@ -103,6 +103,8 @@ public:
 
 	bool getIfMapped();
 
+	std::vector<Mesh>* getMeshes() { return &meshes; }
+
 	bool getToInstance();
 	void setToInstance(const bool newValue);
 
@@ -114,11 +116,12 @@ public:
 	
 	// Draws the model, and thus all its meshes
 	void InstancedDraw(unsigned int shader, const std::vector<glm::mat4> modelMatrices, const std::vector<glm::vec2> pointIDs, const std::vector<glm::vec2> spotIDs);
+	void Draw(unsigned int shader, const glm::mat4 modelMatrices, Renderer* renderer);
 	void Draw(unsigned int shader, const glm::mat4 modelMatrices);
 
 	void bindWall(unsigned int shader);
 	void unbindWall();
-	void drawWall(unsigned int shader, const glm::mat4 modelMatrix);
+	void drawWall(unsigned int shader, const glm::mat4 modelMatrix, Renderer* renderer);
 
 protected:
 	const aiScene* scene;

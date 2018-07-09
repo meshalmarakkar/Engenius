@@ -4,7 +4,6 @@
 #include <GL/glew.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include "SOIL.h"
 #include <string>
 #include <iostream>
 
@@ -16,9 +15,6 @@
 #define PI 3.14159265359f
 
 namespace Common {
-	int loadTexture(const std::string type, const std::string path);
-	int loadTextureNonTransparent(const std::string type, const std::string path);
-	unsigned int loadCubeMap(const char *fname[6]);
 	glm::vec3 moveForwardOrBack(const glm::vec3 pos, const GLfloat angle, const GLfloat d);
 	glm::vec3 moveLateral(const glm::vec3 pos, const GLfloat angle, const GLfloat d);
 	void createModelMatrix(glm::mat4 &model, glm::vec3 position);
@@ -31,10 +27,7 @@ namespace Common {
 	void disableVertexAttribArray(unsigned int first, unsigned int last);
 	void enableVertexAttribArray(unsigned int num);
 	void disableVertexAttribArray(unsigned int num);
-	void bindTexture(const unsigned int shader, const unsigned int texture, const GLchar* name);
-	void bindCubeMapTexture(const unsigned int shader, const unsigned int texture, const GLchar* name);
-	void unbindTextures(unsigned int num);
-	void unbindTextures(unsigned int first, unsigned int last);
+
 
 	void coutVector(std::string name, const glm::vec3 i);
 	void coutVector(std::string name, const glm::vec4 i);

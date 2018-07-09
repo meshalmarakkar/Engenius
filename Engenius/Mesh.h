@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 
 #include "Common.h"
+#include "TextureLoader.h"
 
 #pragma comment(lib, "assimp.lib")
 #include <assimp/Importer.hpp>
@@ -54,10 +55,14 @@ public:
 	void unbindWall();
 	void drawWall(unsigned int shader, const glm::mat4 modelMatrix);
 
+	VertexArrayObject* getVAO();
+	void sendTex(GLuint shader);
+	//void unbind();
+
 private:
+
 	/*  Render data  */
 	VertexArrayObject * VAO;
-	//unsigned int VAO, VBO, EBO, vboModel, vboPointIDs, vboSpotIDs;
 	unsigned int ID_vboModel, ID_vboPoint, ID_vboSpot;
 	/*  Functions    */
 	// Initializes all the buffer objects/arrays

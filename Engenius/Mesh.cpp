@@ -39,7 +39,8 @@ void Mesh::bindWall(unsigned int shader) {
 }
 
 void Mesh::unbindWall() {
-	Common::unbindTextures(0, textures.size() - 1);
+	//TODO : this
+	//textureManager->unbindTextures(0, textures.size() - 1);
 }
 
 void Mesh::drawWall(unsigned int shader, const glm::mat4 modelMatrix) {
@@ -82,7 +83,38 @@ void Mesh::Draw(unsigned int shader, const glm::mat4 modelMatrices)
 	glUniformMatrix4fv(glGetUniformLocation(shader, "uniform_model"), 1, GL_FALSE, glm::value_ptr(modelMatrices));
 	glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
 	
-	Common::unbindTextures(0, textures.size() - 1);
+	//TODO : this
+	//textureManager->unbindTextures(0, textures.size() - 1);
+}
+
+VertexArrayObject* Mesh::getVAO() {
+	return VAO;
+}
+
+void Mesh::sendTex(GLuint shader) {
+	// bind appropriate textures
+	unsigned int diffuseNr = 1;
+	unsigned int specularNr = 1;
+	unsigned int normalNr = 1;
+	unsigned int heightNr = 1;
+	for (unsigned int i = 0; i < this->textures.size(); i++)
+	{
+		glActiveTexture(GL_TEXTURE0 + i);
+
+		std::string name = this->textures[i].type;
+		std::string number;
+		if (name == "texture_diffuse")
+			number = std::to_string(diffuseNr++);
+		else if (name == "texture_specular")
+			number = std::to_string(specularNr++);
+		else if (name == "texture_normal")
+			number = std::to_string(normalNr++);
+		else if (name == "texture_height")
+			number = std::to_string(heightNr++);
+
+		glUniform1i(glGetUniformLocation(shader, (name + number).c_str()), i);
+		glBindTexture(GL_TEXTURE_2D, this->textures[i].id);
+	}
 }
 
 void Mesh::InstancedDraw(unsigned int shader, const std::vector<glm::mat4> modelMatrices, const std::vector<glm::vec2> pointIDs, const std::vector<glm::vec2> spotIDs)
@@ -176,15 +208,16 @@ void Mesh::InstancedDraw(unsigned int shader, const std::vector<glm::mat4> model
 
 	//Common::disableVertexAttribArray(7, 10);
 	//Common::disableVertexAttribArray(11);
-   
-	Common::unbindTextures(0, textures.size()-1);
+  
+	//TODO : this
+//	textureManager->unbindTextures(0, textures.size()-1);
 	//Common::disableVertexAttribArray(0, 6);
 	glBindVertexArray(0);
 }
 
 void Mesh::setupMesh()
 {
-	VAO = new VertexArrayObject();
+	VAO = new VertexArrayObject(indices.size());
 	VAO->genBuffer_andAddData(Buffer_Options::gl_array_buffer, this->vertices.size() * sizeof(Vertex), &this->vertices.at(0), Buffer_Options::gl_static_draw);
 	VAO->genBuffer_andAddData(Buffer_Options::gl_element_array_buffer, this->indices.size() * sizeof(unsigned int), &this->indices[0], Buffer_Options::gl_static_draw);
 	ID_vboModel = VAO->genBuffer();

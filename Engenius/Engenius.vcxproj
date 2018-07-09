@@ -164,6 +164,7 @@
     <ClInclude Include="HUDItem.h" />
     <ClInclude Include="HUDManager.h" />
     <ClInclude Include="LightingManager.h" />
+    <ClInclude Include="Material.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="EntityManager.h" />
@@ -171,10 +172,12 @@
     <ClInclude Include="MousePicker.h" />
     <ClInclude Include="ParticleManager.h" />
     <ClInclude Include="GameManager.h" />
+    <ClInclude Include="Renderer.h" />
     <ClInclude Include="ShaderManager.h" />
     <ClInclude Include="Skybox.h" />
     <ClInclude Include="Terrain.h" />
     <ClInclude Include="TerrainManager.h" />
+    <ClInclude Include="TextureLoader.h" />
     <ClInclude Include="VertexArrayObject.h" />
     <ClInclude Include="WindowManager.h" />
   </ItemGroup>
@@ -194,16 +197,19 @@
     <ClCompile Include="HUDManager.cpp" />
     <ClCompile Include="LightingManager.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Material.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="EntityManager.cpp" />
     <ClCompile Include="MousePicker.cpp" />
     <ClCompile Include="ParticleManager.cpp" />
     <ClCompile Include="GameManager.cpp" />
+    <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="ShaderManager.cpp" />
     <ClCompile Include="Skybox.cpp" />
     <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="TerrainManager.cpp" />
+    <ClCompile Include="TextureLoader.cpp" />
     <ClCompile Include="VertexArrayObject.cpp" />
     <ClCompile Include="WindowManager.cpp" />
   </ItemGroup>

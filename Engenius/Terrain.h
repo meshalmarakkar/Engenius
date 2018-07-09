@@ -6,17 +6,22 @@
 #include <vector>
 #include <glm/gtc/matrix_transform.hpp>
 #include "Common.h"
+#include "VertexArrayObject.h"
+#include "Material.h"
+
+#define VERTEX_COUNT 10
+#define LAST_VERTEX (VERTEX_COUNT - 1)
+#define COUNT (VERTEX_COUNT * VERTEX_COUNT)
 
 class Terrain {
-public:
-	Terrain(glm::vec3 position, float size, unsigned int texture, float tiling, const float vertHeights[], unsigned int specularMap = 0);
-	Terrain(glm::vec3 position, float size, unsigned int texture, unsigned int normalMap, float tiling, const float vertHeights[], unsigned int specularMap = 0);
+public:	
+	Terrain(const std::vector<glm::vec3> verts, const std::vector<glm::vec3> normals, const std::vector<glm::vec2> texCoords, std::vector<unsigned int> indices, glm::vec3 pos, const float size, GLuint tex_dif, GLuint tex_spec, const float heights[VERTEX_COUNT][VERTEX_COUNT], float tiling);
+	Terrain(const std::vector<glm::vec3> verts, const std::vector<glm::vec3> normals, const std::vector<glm::vec2> texCoords, const std::vector<glm::vec3> tangents, const std::vector<glm::vec3> bitangents, std::vector<unsigned int> indices, glm::vec3 pos, const float size, GLuint tex_dif, GLuint tex_spec, GLuint tex_norm, const float heights[VERTEX_COUNT][VERTEX_COUNT], float tiling);
+	
 	float getTerrainHeight(float const worldX, const float worldZ);
 	glm::vec3 getCentre();
 	bool get_ifMapped();
-	void Draw(unsigned int shader);
-	void DrawMapped(unsigned int shader);
-	void renderGrass(unsigned int shader, float dt_secs);
+	
 	bool ifInTerrain(const float x, const float y);
 	
 	void setPointLightIDs(int id1, int id2, int id3);
@@ -25,48 +30,40 @@ public:
 	void setSpotLightIDs(int id1, int id2, int id3);
 	int getSpotLightID(unsigned int i);
 
+	VertexArrayObject * getVAO();
+	Material* getMaterial();
+	float getTiling();
+
+	VertexArrayObject * getVAO_Grass();
+	glm::mat4 * getModelMatrix_Grass();
+
 private:
-	glm::vec3 calculateNormal(int x, int z);
-	void init(const float vertHeights[]);
-	glm::mat4 model;
-	unsigned int indicesCount;
+	void init(bool ifMapped);
+	void initGrass();
+
+	float barryCentric(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3, glm::vec2 pos);
+
+private:
+	VertexArrayObject * VAO;
+	Material* material;
+
 	glm::vec3 position;
 	glm::vec3 terrain_centre;
 	float terrain_left;
 	float terrain_right;
 	float terrain_up;
 	float terrain_down;
-	unsigned int texture;
-	unsigned int normalMap;
-	unsigned int specularMap;
-	bool hasSpecular;
+
 	bool mapped;
 	float tiling;
 	const float TERRAIN_SIZE;
 	unsigned int pointLightIDs[3]; //lights that effect object
 	unsigned int spotLightIDs[3]; //lights that effect object
 
-	int LAST_VERTEX;
-	#define VERTEX_COUNT 10
-	const int count = VERTEX_COUNT * VERTEX_COUNT;
 	float heights[VERTEX_COUNT][VERTEX_COUNT];
 
-	int numGrassTriangles;
-	std::vector<glm::vec3> patchPositions;
-	float timePassed;
+	VertexArrayObject * VAOGrass;
 	glm::mat4 grassModelMat;
-	
-	unsigned int VBOTexCoords;
-	unsigned int VBONormals; 
-	unsigned int VBOVertices; 
-	unsigned int VBOIndices;
-	unsigned int VBOTangents;
-	unsigned int VBOBitangents;
-	unsigned int VAOHeightmap; // One VAO for heightmap
-	
-	
-	unsigned int VBOGrassData;
-	unsigned int VAOGrass;
 };
 
 #endif

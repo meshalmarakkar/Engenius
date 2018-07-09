@@ -16,6 +16,10 @@ struct Buffer_Options {
 	static const GLenum gl_byte = GL_BYTE;
 	static const GLenum gl_false = GL_FALSE;
 	static const GLenum gl_true = GL_TRUE;
+	
+	static const GLenum gl_triangles = GL_TRIANGLES;
+	static const GLenum gl_triangle_strip = GL_TRIANGLE_STRIP;
+	static const GLenum gl_points = GL_POINTS;
 
 	static const GLenum none = 0;
 };
@@ -23,7 +27,7 @@ struct Buffer_Options {
 class VertexArrayObject
 {
 public:
-	VertexArrayObject();
+	VertexArrayObject(unsigned int indicesCount, GLenum drawMode = GL_TRIANGLES);
 	~VertexArrayObject();
 
 	void bind();
@@ -39,9 +43,22 @@ public:
 	void setDivisor(unsigned int bufferID, unsigned int divisor);
 	void setDivisor_multi(unsigned int bufferID_first, unsigned int bufferID_last, unsigned int divisor);
 
+	void setIndicesCount(unsigned int num);
+	unsigned int getIndicesCount();
+
+	void setRestartIndex(unsigned int num);
+	unsigned int getRestartIndex();
+
+	GLenum getDrawMode();
+
 private:
 	GLuint VAO;
 	std::vector<GLuint> VBOs;
+
+	unsigned int indicesCount;
+	unsigned int restartIndex;
+
+	GLenum drawMode;
 };
 
 #endif

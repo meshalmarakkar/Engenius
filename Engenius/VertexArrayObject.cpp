@@ -23,7 +23,7 @@ static bool gl_PrintError(const char* functionName, const char* fileName, unsign
 	return true;
 }
 
-VertexArrayObject::VertexArrayObject() {
+VertexArrayObject::VertexArrayObject(unsigned int indicesCount, GLenum drawMode) : indicesCount(indicesCount), drawMode(drawMode) {
 	GL_ERROR_CHECK(glGenVertexArrays(1, &VAO));
 	GL_ERROR_CHECK(glBindVertexArray(VAO));
 }
@@ -80,4 +80,24 @@ void VertexArrayObject::setDivisor_multi(unsigned int bufferID_first, unsigned i
 	for (unsigned int i = bufferID_first; i < bufferID_last + 1; i++) {
 		GL_ERROR_CHECK(glVertexAttribDivisor(i, divisor));
 	}
+}
+
+void VertexArrayObject::setIndicesCount(unsigned int num) {
+	indicesCount = num;
+}
+
+unsigned int VertexArrayObject::getIndicesCount() {
+	return indicesCount;
+}
+
+void VertexArrayObject::setRestartIndex(unsigned int num) {
+	restartIndex = num;
+}
+
+unsigned int VertexArrayObject::getRestartIndex() {
+	return restartIndex;
+}
+
+GLenum VertexArrayObject::getDrawMode() {
+	return drawMode;
 }

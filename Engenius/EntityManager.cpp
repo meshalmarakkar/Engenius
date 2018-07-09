@@ -401,7 +401,8 @@ EntityManager::EntityManager(Camera *camera, ParticleManager* particleManager, L
 
 	initObjectsToWorld();
 //CHECK FOR THE OBJECTS AFFECTED BY LIGHT HERE!!!!
-	
+
+
 	test = false;
 
 	pause = true;
@@ -461,7 +462,7 @@ void EntityManager::renderPanels() {
 					const glm::mat4 objMatrix = panels.at(iter)->getModelMatrix();
 					lightIDsToShader(shader, panels[iter]->getPointLightID(0), panels[iter]->getPointLightID(1), panels[iter]->getPointLightID(2), panels[iter]->getSpotLightID(0), panels[iter]->getSpotLightID(1), panels[iter]->getSpotLightID(2));
 					glUniform1f(glGetUniformLocation(shader, "tiling"), panels.at(iter)->getTiling());
-					objModel->drawWall(shader, objMatrix);
+					objModel->drawWall(shader, objMatrix, renderer);
 					rendered = true;
 				}
 			}
@@ -487,7 +488,7 @@ void EntityManager::renderPanels_GBuffer() {
 					const glm::mat4 objMatrix = panels.at(iter)->getModelMatrix();
 					lightIDsToShader(shader, panels[iter]->getPointLightID(0), panels[iter]->getPointLightID(1), panels[iter]->getPointLightID(2), panels[iter]->getSpotLightID(0), panels[iter]->getSpotLightID(1), panels[iter]->getSpotLightID(2));
 					glUniform1f(glGetUniformLocation(shader, "tiling"), panels.at(iter)->getTiling());
-					objModel->drawWall(shader, objMatrix);
+					objModel->drawWall(shader, objMatrix, renderer);
 					rendered = true;
 				}
 			}
@@ -517,7 +518,7 @@ void EntityManager::renderObjects() {
 					const glm::mat4 objMatrix = objects.at(iter)->getModelMatrix();
 					lightIDsToShader(shader, objects[iter]->getPointLightID(0), objects[iter]->getPointLightID(1), objects[iter]->getPointLightID(2), objects[iter]->getSpotLightID(0), objects[iter]->getSpotLightID(1), objects[iter]->getSpotLightID(2));
 					glUniform1f(glGetUniformLocation(shader, "tiling"), objects.at(iter)->getTiling());
-					objModel->Draw(shader, objMatrix);
+					objModel->Draw(shader, objMatrix, renderer);
 					rendered = true;
 				}
 			}
@@ -541,7 +542,7 @@ void EntityManager::renderObjects_GBuffer() {
 					const glm::mat4 objMatrix = objects.at(iter)->getModelMatrix();
 					lightIDsToShader(shader, objects[iter]->getPointLightID(0), objects[iter]->getPointLightID(1), objects[iter]->getPointLightID(2), objects[iter]->getSpotLightID(0), objects[iter]->getSpotLightID(1), objects[iter]->getSpotLightID(2));
 					glUniform1f(glGetUniformLocation(shader, "tiling"), objects.at(iter)->getTiling());
-					objModel->Draw(shader, objMatrix);
+					objModel->Draw(shader, objMatrix, renderer);
 					rendered = true;
 				}
 			}
@@ -598,7 +599,7 @@ void EntityManager::shadow_draw(unsigned int shader) {
 	farPlane_camEye_toShader(shader);
 
 	//TERRAINS
-//	terrainManager->shadowDraw(shader);
+//	terrainManager->shadowDraw(shader, renderer);
 
 	//OBJECTS
 	glDisable(GL_CULL_FACE);
@@ -613,7 +614,7 @@ void EntityManager::shadow_draw(unsigned int shader) {
 				
 				//	lightIDsToShader(shader, objects[iter]->getPointLightID(0), objects[iter]->getPointLightID(1), objects[iter]->getSpotLightID(0), objects[iter]->getSpotLightID(1));
 				//	glUniform1f(glGetUniformLocation(shader, "tiling"), objects.at(iter)->getTiling());
-					objModel->Draw(shader, objMatrix);
+					objModel->Draw(shader, objMatrix, renderer);
 					rendered = true;
 				}
 			}
@@ -626,7 +627,7 @@ void EntityManager::shadow_draw(unsigned int shader) {
 }
 
 void EntityManager::draw(float dt_secs) {
-	terrainManager->render(test, player->getPos(), dt_secs);
+	terrainManager->render(renderer, test, player->getPos(), dt_secs);
 	renderObjects();
 	renderPanels();
 //	renderCharacters();	

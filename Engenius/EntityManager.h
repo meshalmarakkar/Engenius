@@ -3,6 +3,7 @@
 
 #include "Model.h"
 #include "AnimatedModel.h"
+#include "Renderer.h"
 #include "Entity.h"
 #include "Terrain.h"
 #include "Character.h"
@@ -140,6 +141,8 @@ private:
 
 	ParticleManager *particleManager;
 	bool test;
+
+	Renderer* renderer;
 };
 
 #endif

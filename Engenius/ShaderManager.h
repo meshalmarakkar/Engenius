@@ -2,7 +2,7 @@
 #define SHADERMANAGER
 
 #include <GL/glew.h>
-#include "SOIL.h"
+
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
@@ -16,25 +16,10 @@ public:
 	void gl_ClearError();
 	void gl_CheckError();
 
-	unsigned int loadTexture(const std::string type, const std::string path);
-	unsigned int loadTextureNonTransparent(const std::string type, const std::string path);
-	unsigned int loadCubeMap(const char *fname[6]);
-
-	void createModelMatrix(glm::mat4 &model, glm::vec3 position);
-	void createModelMatrix(glm::mat4 &model, glm::vec3 position, float yaw);
-	void createModelMatrix(glm::mat4 &model, glm::vec3 position, glm::vec3 scale);
-	void createModelMatrix(glm::mat4 &model, glm::vec3 position, float yaw, glm::vec3 scale);
-	void createModelMatrix(glm::mat4 &model, glm::vec3 position, float pitch, float yaw, glm::vec3 scale);
-	void createModelMatrix(glm::mat4 &model, glm::vec3 position, glm::vec3 scale, glm::vec3 rotation);
-
 	void enableVertexAttribArray(unsigned int first, unsigned int last);
 	void disableVertexAttribArray(unsigned int first, unsigned int last);
 	void enableVertexAttribArray(unsigned int num);
 	void disableVertexAttribArray(unsigned int num);
-	void bindTexture(const unsigned int shader, const unsigned int texture, const GLchar* name);
-	void bindCubeMapTexture(const unsigned int shader, const unsigned int texture, const GLchar* name);
-	void unbindTextures(unsigned int num);
-	void unbindTextures(unsigned int first, unsigned int last);
 
 	unsigned int get_postProcessing_program();
 	unsigned int get_simple_program();
@@ -63,6 +48,8 @@ private:
 	unsigned int initShaders(const char *vertFile, const char *fragFile);
 	unsigned int initShaders(const char *vertFile, const char *fragFile, const char *geomFile);
 
+private:
+	unsigned int num_nextAvailableTex = 0;
 	const float DEGREE_TO_RADIAN = 0.017453293f;
 	const float PIE = 3.14159265359f;
 

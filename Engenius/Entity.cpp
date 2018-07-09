@@ -4,6 +4,7 @@ Entity::Entity(Model* model, glm::vec3 position, glm::vec3 scale, glm::vec3 rota
 	Common::createModelMatrix(this->modelMatrix, this->position, this->scale, this->rotation);
 	shininess = 32.0f;
 	tiling = 1.0f;
+
 }
 
 const glm::vec3 Entity::getPos() { return this->position; }

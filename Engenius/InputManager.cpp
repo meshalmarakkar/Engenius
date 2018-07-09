@@ -322,6 +322,7 @@ bool InputManager::KeyboardControls(SDL_Window * window, const float dt_secs) {
 				if (keys[SDL_SCANCODE_H]) {
 					entityManager->increNum();
 				}
+
 			}
 			else {
 				if (keys[SDL_SCANCODE_1]) {

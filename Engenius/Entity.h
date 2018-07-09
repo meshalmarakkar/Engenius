@@ -4,6 +4,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include "Model.h"
 #include "Common.h"
+#include <map>
 
 class Entity {
 public:

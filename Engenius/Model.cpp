@@ -1,4 +1,5 @@
 #include "Model.h"
+#include "TextureLoader.h"
 
 //just for animation loading
 Model::Model(const std::string path, const bool justAnimation) : path(path) {
@@ -69,27 +70,47 @@ void Model::setToInstance(const bool newValue) {
 }
 
 void Model::bindWall(unsigned int shader) {
-	this->meshes.at(0).bindWall(shader);
+	glUniform1f(glGetUniformLocation(shader, "hasSpecularMap"), hasSpecularMap);
+	glUniform1i(glGetUniformLocation(shader, "instanced"), false);
+	this->meshes.at(0).sendTex(shader);
+	//this->meshes.at(0).bindWall(shader);
 }
 void Model::unbindWall() {
 	this->meshes.at(0).unbindWall();
 }
-void Model::drawWall(unsigned int shader, const glm::mat4 modelMatrix) {
-	glUniform1f(glGetUniformLocation(shader, "hasSpecularMap"), hasSpecularMap);
-	this->meshes.at(0).drawWall(shader, modelMatrix);
+void Model::drawWall(unsigned int shader, const glm::mat4 modelMatrix, Renderer* renderer) {
+	//glUniform1f(glGetUniformLocation(shader, "hasSpecularMap"), hasSpecularMap);
+	//glUniform1i(glGetUniformLocation(shader, "instanced"), false);
+	glUniformMatrix4fv(glGetUniformLocation(shader, "uniform_model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+
+	renderer->drawElements(this->meshes.at(0).getVAO());
+	//this->meshes.at(0).drawWall(shader, modelMatrix);
 }
 
 void Model::InstancedDraw(unsigned int shader, const std::vector<glm::mat4> modelMatrices, const std::vector<glm::vec2> pointIDs, const std::vector<glm::vec2> spotIDs) {
 	glUniform1f(glGetUniformLocation(shader, "hasSpecularMap"), hasSpecularMap);
+	glUniform1i(glGetUniformLocation(shader, "instanced"), true);
 	for (unsigned int i = 0; i < this->meshes.size(); i++)
 		this->meshes.at(i).InstancedDraw(shader, modelMatrices, pointIDs, spotIDs);
 }
+void Model::Draw(unsigned int shader, const glm::mat4 modelMatrix, Renderer* renderer) {
+	glUniform1f(glGetUniformLocation(shader, "hasSpecularMap"), hasSpecularMap);
+	glUniform1i(glGetUniformLocation(shader, "instanced"), false);
+	glUniformMatrix4fv(glGetUniformLocation(shader, "uniform_model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+	for (unsigned int i = 0; i < this->meshes.size(); i++) {
+		Mesh* m = &(this->meshes.at(i));
+		m->sendTex(shader);
+		renderer->drawElements(m->getVAO());
+	}
+}
 void Model::Draw(unsigned int shader, const glm::mat4 modelMatrix) {
 	glUniform1f(glGetUniformLocation(shader, "hasSpecularMap"), hasSpecularMap);
-	for (unsigned int i = 0; i < this->meshes.size(); i++)
+	glUniform1i(glGetUniformLocation(shader, "instanced"), false);
+	//glUniformMatrix4fv(glGetUniformLocation(shader, "uniform_model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+	for (unsigned int i = 0; i < this->meshes.size(); i++) {
 		this->meshes.at(i).Draw(shader, modelMatrix);
+	}
 }
-
 void Model::loadModel(bool onlyAnimation)
 {
 	// Read file via ASSIMP
@@ -235,15 +256,13 @@ Mesh Model::processMesh(aiMesh* mesh)
 
 	vector<Texture> textures;
 	if (customTextures.diffuse != NULL) {
-		vector<Texture> getTextures;
-		loadTextures(getTextures, customTextures.diffuse, "texture_diffuse");
-		std::vector<Texture> diffuseMaps = getTextures;
+		vector<Texture> diffuseMaps;
+		loadTextures(diffuseMaps, customTextures.diffuse, "texture_diffuse");
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 	}
 	if (customTextures.specular != NULL) {
-		vector<Texture> getTextures;
-		loadTextures(getTextures, customTextures.specular, "texture_specular");
-		std::vector<Texture> specularMaps = getTextures;
+		vector<Texture> specularMaps;
+		loadTextures(specularMaps, customTextures.specular, "texture_specular");
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 		hasSpecularMap = true;
 	}
@@ -251,9 +270,8 @@ Mesh Model::processMesh(aiMesh* mesh)
 		hasSpecularMap = false;
 	}
 	if (customTextures.normal != NULL) {
-		vector<Texture> getTextures;
-		loadTextures(getTextures, customTextures.normal, "texture_normal");
-		std::vector<Texture> normalMaps = getTextures;
+		vector<Texture> normalMaps;
+		loadTextures(normalMaps, customTextures.normal, "texture_normal");
 		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 		mapped = true;
 	}
@@ -261,9 +279,8 @@ Mesh Model::processMesh(aiMesh* mesh)
 		mapped = false;
 	}
 	if (customTextures.height != NULL) {
-		vector<Texture> getTextures;
-		loadTextures(getTextures, customTextures.height, "texture_height");
-		std::vector<Texture> heightMaps = getTextures;
+		vector<Texture> heightMaps;
+		loadTextures(heightMaps, customTextures.height, "texture_height");
 		textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 	}
 
@@ -304,10 +321,11 @@ void Model::loadTextures(vector<Texture> &textures, const char* str, string type
 			break;
 		}
 	}
+
 	if (!skip)
 	{   // if texture hasn't been loaded already, load it
 		Texture texture;
-		texture.id = Common::loadTexture(str, this->path);
+		texture.id = TextureLoader::loadTexture(str, this->path);
 		texture.type = typeName;
 		if (typeName == "texture_specular")
 			hasSpecularMap = true;
