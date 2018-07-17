@@ -9,8 +9,8 @@ class Plane {
 public:
 	Plane::Plane() { ; }
 	Plane::~Plane() { ; }
-	void set3Points(const glm::vec3 v1, const glm::vec3 v2, const glm::vec3 v3);
-	void setNormalAndPoint(const glm::vec3 normal, const glm::vec3 point);
+	void set3Points(const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3);
+	void setNormalAndPoint(const glm::vec3& normal, const glm::vec3& point);
 
 private:
 	glm::vec3 normal;
@@ -23,10 +23,10 @@ class FrustumCulling {
 public:
 	FrustumCulling() { pl = new Plane[NUMPLANES]; }
 	FrustumCulling::~FrustumCulling() {}
-	void setCamInternals(float angle, float ratio, float nearD, float farD);
-	void setCamDef(const glm::vec3 cameraEye, const glm::vec3 cameraAt, const glm::vec3 cameraUp);
-	int pointInFrustum(const glm::vec3 p);
-	int sphereInFrustum(const glm::vec3 p, const float rad);
+	void setCamInternals(const float& angle, const float& ratio, const float& nearD, const float& farD);
+	void setCamDef(const glm::vec3& cameraEye, const glm::vec3& cameraAt, const glm::vec3& cameraUp);
+	int pointInFrustum(const glm::vec3& p);
+	int sphereInFrustum(const glm::vec3& p, const float& rad);
 
 private:
 	const float HALF_ANG2RAD = 3.14159265358979323846f/360.0f;

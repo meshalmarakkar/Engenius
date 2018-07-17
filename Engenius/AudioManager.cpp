@@ -23,7 +23,7 @@ bool AudioManager::isBigEndian()
 	return !((char*)&a)[0];
 }
 
-int AudioManager::convertToInt(char* buffer, int len)
+int AudioManager::convertToInt(const char* buffer, const int& len)
 {
 	int a = 0;
 	if (!isBigEndian())
@@ -106,7 +106,7 @@ AudioManager::AudioManager(){
 	alListener3f(AL_VELOCITY, 0.0f, 0.0f, 0.0f);
 }
 
-void AudioManager::LoadAudioFiles(std::string name, char * filepath) {
+void AudioManager::LoadAudioFiles(const std::string& name, const char * filepath) {
 	int channel, sampleRate, bps, size;
 	char* data = loadWAV(filepath, channel, sampleRate, bps, size);
 
@@ -132,7 +132,7 @@ void AudioManager::LoadAudioFiles(std::string name, char * filepath) {
 	alBufferData(buffer, format, data, size, sampleRate);
 }
 
-void AudioManager::InsertSource(const std::string name, glm::vec3 pos, const glm::vec3 vel, const float volume, const float pitch, const float referenceDist, const bool loop, const bool ambient) {
+void AudioManager::InsertSource(const std::string& name, const glm::vec3& pos, const glm::vec3& vel, const float& volume, const float& pitch, const float& referenceDist, const bool& loop, const bool& ambient) {
 	ALuint sourceID;
 	alGenSources(1, &sourceID);
 	sourceIDs.insert(std::pair<std::string, ALuint>(name, sourceID));
@@ -160,34 +160,34 @@ void AudioManager::StopAll() {
 	}
 }
 
-void AudioManager::SetVolume(const std::string name, const float volume) {
+void AudioManager::SetVolume(const std::string& name, const float& volume) {
 	alSourcef(sourceIDs.at(name), AL_GAIN, volume);
 }
-void AudioManager::SetPitch(const std::string name, const float pitch) {
+void AudioManager::SetPitch(const std::string& name, const float& pitch) {
 	alSourcef(sourceIDs.at(name), AL_PITCH, pitch);
 }
-void AudioManager::SetPosition(const std::string name, const glm::vec3 pos) {
+void AudioManager::SetPosition(const std::string& name, const glm::vec3& pos) {
 	alSource3f(sourceIDs.at(name), AL_POSITION, pos.x, pos.y, pos.z);
 }
-void AudioManager::SetVelocity(const std::string name, const glm::vec3 vel) {
+void AudioManager::SetVelocity(const std::string& name, const glm::vec3& vel) {
 	alSource3f(sourceIDs.at(name), AL_VELOCITY, vel.x, vel.y, vel.z);
 }
-void AudioManager::SetLooping(const std::string name, const bool loop) {
+void AudioManager::SetLooping(const std::string& name, const bool& loop) {
 	alSourcei(sourceIDs.at(name), AL_LOOPING, loop ? AL_TRUE : AL_FALSE);
 }
-bool AudioManager::IfPlaying(const std::string name) {
+bool AudioManager::IfPlaying(const std::string& name) {
 	ALint playing;
 	alGetSourcei(sourceIDs.at(name), AL_SOURCE_STATE, &playing);
 	return playing;
 }
 
-void AudioManager::PlayAudio(const std::string name, const std::string soundname, const glm::vec3 listenerPos) {
+void AudioManager::PlayAudio(const std::string& name, const std::string& soundname, const glm::vec3& listenerPos) {
 	updateListenerPosition(listenerPos);
 	alListener3f(AL_POSITION, listenerPos.x, listenerPos.y, listenerPos.z);
 	alSourcei(sourceIDs.at(name), AL_BUFFER, buffers.at(soundname));
 	alSourcePlay(sourceIDs.at(name));
 }
-void AudioManager::playMenu(const glm::vec3 listenerPos) {
+void AudioManager::playMenu(const glm::vec3& listenerPos) {
 	std::unordered_map<std::string, ALuint>::iterator it;
 	for (it = sourceIDs.begin(); it != sourceIDs.end(); it++) {
 		Stop((*it).first);
@@ -195,7 +195,7 @@ void AudioManager::playMenu(const glm::vec3 listenerPos) {
 	PlayAudio("menu_background", "menu_background", listenerPos);
 }
 
-void AudioManager::startGame(const glm::vec3 listenerPos) {
+void AudioManager::startGame(const glm::vec3& listenerPos) {
 	Stop("menu_background");
 	PlayAudio("machine", "machine", listenerPos);
 	SetVolume("machine", 0.1f);
@@ -207,7 +207,7 @@ void AudioManager::startGame(const glm::vec3 listenerPos) {
 	StopAll();
 }
 
-void AudioManager::playAlarm(const glm::vec3 listenerPos) {
+void AudioManager::playAlarm(const glm::vec3& listenerPos) {
 	PlayAudio("alarm", "alarm", listenerPos);
 }
 
@@ -217,31 +217,31 @@ void AudioManager::stopTense() {
 	SetVolume("machine2", 0.4f);
 }
 
-void AudioManager::playSFX_correct(const glm::vec3 listenerPos) {
+void AudioManager::playSFX_correct(const glm::vec3& listenerPos) {
 	PlayAudio("correct", "correct", listenerPos);
 }
 
-void AudioManager::playSFX_wrong(const glm::vec3 listenerPos) {
+void AudioManager::playSFX_wrong(const glm::vec3& listenerPos) {
 	PlayAudio("wrong", "wrong", listenerPos);
 }
 
-void AudioManager::playSFX_gearSpinning(const glm::vec3 listenerPos) {
+void AudioManager::playSFX_gearSpinning(const glm::vec3& listenerPos) {
 	Stop("machine");
 	Stop("machine2");
 	Stop("tense");
 	PlayAudio("gear_spinning", "gear_spinning", listenerPos);
 }
 
-void AudioManager::Pause(const std::string name) {
+void AudioManager::Pause(const std::string& name) {
 	alSourcePause(sourceIDs.at(name));
 }
-void AudioManager::Continue(const std::string name) {
+void AudioManager::Continue(const std::string& name) {
 	alSourcePlay(sourceIDs.at(name));
 }
-void AudioManager::Stop(const std::string name) {
+void AudioManager::Stop(const std::string& name) {
 	alSourceStop(sourceIDs.at(name));
 }
 
-void AudioManager::updateListenerPosition(const glm::vec3 pos) {
+void AudioManager::updateListenerPosition(const glm::vec3& pos) {
 	alListener3f(AL_POSITION, pos.x, pos.y, pos.z);
 }

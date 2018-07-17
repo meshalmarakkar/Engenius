@@ -1,10 +1,10 @@
 #include "HUDItem.h"
 
-HUDItem::HUDItem(int screenWidth, int screenHeight, int x, int y, int sizeX, int sizeY, unsigned int texture, bool allowLowTransparency, float transparency) {
+HUDItem::HUDItem(const int& screenWidth, const int& screenHeight, const int& x, const int& y, const int& sizeX, const int& sizeY, const unsigned int& texture, const bool& allowLowTransparency, const float& transparency) {
 	init(screenWidth, screenHeight, x, y, sizeX, sizeY, texture, allowLowTransparency, transparency);
 }
 
-void HUDItem::init(int screenWidth, int screenHeight, int x, int y, int sizeX, int sizeY, unsigned int texture, bool allowLowTransparency, float transparency) {
+void HUDItem::init(const int& screenWidth, const int& screenHeight, const int& x, const int& y, const int& sizeX, const int& sizeY, const unsigned int& texture, const bool& allowLowTransparency, const float& transparency) {
 	this->xy.x = static_cast<float>(x);
 	this->xy.y = static_cast<float>(y);
 	this->size.x = static_cast<float>(sizeX);
@@ -32,7 +32,7 @@ void HUDItem::init(int screenWidth, int screenHeight, int x, int y, int sizeX, i
 	this->allowLowTransparency = allowLowTransparency;
 }
 
-void HUDItem::convert_ClipSpace_to_HomogeneousSpace(int screenWidth, int screenHeight) {
+void HUDItem::convert_ClipSpace_to_HomogeneousSpace(const int& screenWidth, const int& screenHeight) {
 	for (unsigned int i = 0; i < verts.size(); i++) {
 		// Output position of the vertex, in clip space
 		// map [0..screenWidth][0..screenHeight] to [-1..1][-1..1]

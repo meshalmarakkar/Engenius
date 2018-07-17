@@ -2,44 +2,34 @@
 #include "TextureLoader.h"
 
 //just for animation loading
-Model::Model(const std::string path, const bool justAnimation) : path(path) {
+Model::Model(const std::string& path, const bool& justAnimation) : path(path) {
 	this->loadModel(justAnimation);
 }
 
 //auto texture loading
-Model::Model(const std::string name, const std::string path) : name(name), path(path) {
+Model::Model(const std::string& name, const std::string& path) : name(name), path(path) {
 	customTextures.diffuse = NULL;
 	customTextures.specular = NULL;
 	customTextures.normal = NULL;
 	customTextures.height = NULL;
 	this->loadModel();
 }
-
-Model::Model(const std::string name, const string path, const char* diffuse, const char* specular) : name(name), path(path) {
+Model::Model(const std::string& name, const std::string& path, const char* diffuse, const char* specular) : name(name), path(path) {
 	customTextures.diffuse = diffuse;
 	customTextures.specular = specular;
 	customTextures.normal = NULL;
 	customTextures.height = NULL;
 	this->loadModel();
 }
-Model::Model(const std::string name, const string path, const char* diffuse, const char* specular, const char* normal) : name(name), path(path) {
+Model::Model(const std::string& name, const std::string& path, const char* diffuse, const char* specular, const char* normal) : name(name), path(path) {
 	customTextures.diffuse = diffuse;
 	customTextures.specular = specular;
 	customTextures.normal = normal;
 	customTextures.height = NULL;
 	this->loadModel();
 }
-Model::Model(const std::string name, const string path, const char* diffuse, const char* specular, const char* normal, const char* height, const float heightScale) : name(name), path(path) {
-	customTextures.diffuse = diffuse;
-	customTextures.specular = specular;
-	customTextures.normal = normal;
-	customTextures.height = height;
-	this->parallaxed = true;
-	this->heightScale = heightScale;
-	this->loadModel();
-}
 
-void Model::setIfDisableCullFace(bool newVal) {
+void Model::setIfDisableCullFace(const bool& newVal) {
 	disableCullFace = newVal;
 }
 bool Model::getIfDisableCullFace() {
@@ -61,15 +51,11 @@ bool Model::getToInstance() {
 	return toInstance;
 }
 
-void Model::setParallaxed(const bool newVal) {
-	parallaxed = newVal;
- }
-
-void Model::setToInstance(const bool newValue) {
+void Model::setToInstance(const bool& newValue) {
 	toInstance = newValue;
 }
 
-void Model::bindWall(unsigned int shader) {
+void Model::bindWall(const unsigned int& shader) {
 	glUniform1f(glGetUniformLocation(shader, "hasSpecularMap"), hasSpecularMap);
 	glUniform1i(glGetUniformLocation(shader, "instanced"), false);
 	this->meshes.at(0).sendTex(shader);
@@ -78,22 +64,21 @@ void Model::bindWall(unsigned int shader) {
 void Model::unbindWall() {
 	this->meshes.at(0).unbindWall();
 }
-void Model::drawWall(unsigned int shader, const glm::mat4 modelMatrix, Renderer* renderer) {
+void Model::drawWall(const unsigned int& shader, const glm::mat4& modelMatrix, Renderer* renderer) {
 	//glUniform1f(glGetUniformLocation(shader, "hasSpecularMap"), hasSpecularMap);
 	//glUniform1i(glGetUniformLocation(shader, "instanced"), false);
 	glUniformMatrix4fv(glGetUniformLocation(shader, "uniform_model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
 	renderer->drawElements(this->meshes.at(0).getVAO());
-	//this->meshes.at(0).drawWall(shader, modelMatrix);
 }
 
-void Model::InstancedDraw(unsigned int shader, const std::vector<glm::mat4> modelMatrices, const std::vector<glm::vec2> pointIDs, const std::vector<glm::vec2> spotIDs) {
+void Model::InstancedDraw(const unsigned int& shader, const std::vector<glm::mat4>& modelMatrices, const std::vector<glm::vec2>& pointIDs, const std::vector<glm::vec2>& spotIDs) {
 	glUniform1f(glGetUniformLocation(shader, "hasSpecularMap"), hasSpecularMap);
 	glUniform1i(glGetUniformLocation(shader, "instanced"), true);
 	for (unsigned int i = 0; i < this->meshes.size(); i++)
 		this->meshes.at(i).InstancedDraw(shader, modelMatrices, pointIDs, spotIDs);
 }
-void Model::Draw(unsigned int shader, const glm::mat4 modelMatrix, Renderer* renderer) {
+void Model::Draw(const unsigned int& shader, const glm::mat4& modelMatrix, Renderer* renderer) {
 	glUniform1f(glGetUniformLocation(shader, "hasSpecularMap"), hasSpecularMap);
 	glUniform1i(glGetUniformLocation(shader, "instanced"), false);
 	glUniformMatrix4fv(glGetUniformLocation(shader, "uniform_model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
@@ -103,7 +88,7 @@ void Model::Draw(unsigned int shader, const glm::mat4 modelMatrix, Renderer* ren
 		renderer->drawElements(m->getVAO());
 	}
 }
-void Model::Draw(unsigned int shader, const glm::mat4 modelMatrix) {
+void Model::Draw(const unsigned int& shader, const glm::mat4& modelMatrix) {
 	glUniform1f(glGetUniformLocation(shader, "hasSpecularMap"), hasSpecularMap);
 	glUniform1i(glGetUniformLocation(shader, "instanced"), false);
 	//glUniformMatrix4fv(glGetUniformLocation(shader, "uniform_model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
@@ -111,7 +96,7 @@ void Model::Draw(unsigned int shader, const glm::mat4 modelMatrix) {
 		this->meshes.at(i).Draw(shader, modelMatrix);
 	}
 }
-void Model::loadModel(bool onlyAnimation)
+void Model::loadModel(const bool& onlyAnimation)
 {
 	// Read file via ASSIMP
 	scene = importer.ReadFile(path, aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs | aiProcess_CalcTangentSpace);
@@ -124,11 +109,10 @@ void Model::loadModel(bool onlyAnimation)
 		}
 		return;
 	}
-	// Retrieve the directory path of the filepath
+	
 	m_NumBones = 0;
 
 	if (!onlyAnimation) {
-		setParallaxed(false);
 		toInstance = false;
 
 		// Process all of the meshes
@@ -308,7 +292,7 @@ Mesh Model::processMesh(aiMesh* mesh)
 }
 
 // checks all material textures of a given type and loads the textures if they're not loaded yet.
-void Model::loadTextures(vector<Texture> &textures, const char* str, string typeName) {
+void Model::loadTextures(vector<Texture> &textures, const char* str, const std::string& typeName) {
 
 	// check if texture was loaded before and if so, continue to next iteration: skip loading a new texture
 	bool skip = false;
@@ -336,7 +320,7 @@ void Model::loadTextures(vector<Texture> &textures, const char* str, string type
 		textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.
 	}
 }
-vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type, string typeName)
+vector<Texture> Model::loadMaterialTextures(aiMaterial *mat, aiTextureType type, const std::string& typeName)
 {
 	vector<Texture> textures;
 	for (unsigned int i = 0; i < mat->GetTextureCount(type); i++)

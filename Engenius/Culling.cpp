@@ -1,6 +1,6 @@
 #include "Culling.h"
 
-void Plane::set3Points(const glm::vec3 v1, const glm::vec3 v2, const glm::vec3 v3) {
+void Plane::set3Points(const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3) {
 	
 	glm::vec3 aux1, aux2;
 
@@ -14,14 +14,14 @@ void Plane::set3Points(const glm::vec3 v1, const glm::vec3 v2, const glm::vec3 v
 	d = -(normal.x * point.x + normal.y * point.y + normal.z * point.z);
 }
 
-void Plane::setNormalAndPoint(const glm::vec3 normal, const glm::vec3 point) {
+void Plane::setNormalAndPoint(const glm::vec3& normal, const glm::vec3& point) {
 
 	this->normal = normal;
 	this->normal = glm::normalize(this->normal);
 	d = -(normal.x * point.x + normal.y * point.y + normal.z * point.z);
 }
 
-void FrustumCulling::setCamInternals(float angle, float ratio, float nearD, float farD) {
+void FrustumCulling::setCamInternals(const float& angle, const float& ratio, const float& nearD, const float& farD) {
 
 	// store the information
 	this->ratio = ratio;
@@ -44,7 +44,7 @@ void FrustumCulling::setCamInternals(float angle, float ratio, float nearD, floa
 
 }
 
-void FrustumCulling::setCamDef(const glm::vec3 cameraEye, const glm::vec3 cameraAt, const glm::vec3 cameraUp) {
+void FrustumCulling::setCamDef(const glm::vec3& cameraEye, const glm::vec3& cameraAt, const glm::vec3& cameraUp) {
 
 	glm::vec3 dir, nc, fc;
 
@@ -106,7 +106,7 @@ void FrustumCulling::setCamDef(const glm::vec3 cameraEye, const glm::vec3 camera
 	pl[RIGHT].setNormalAndPoint(normal, nc + X*nw);
 }
 
-int FrustumCulling::pointInFrustum(const glm::vec3 p) {
+int FrustumCulling::pointInFrustum(const glm::vec3& p) {
 
 	float pcz, pcx, pcy, aux;
 
@@ -133,7 +133,7 @@ int FrustumCulling::pointInFrustum(const glm::vec3 p) {
 	return(INSIDE);
 }
 
-int FrustumCulling::sphereInFrustum(const glm::vec3 p, const float radius) {
+int FrustumCulling::sphereInFrustum(const glm::vec3& p, const float& radius) {
 	float d1, d2;
 	float az, ax, ay, zz1, zz2;
 	int result = INSIDE;

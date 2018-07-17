@@ -5,24 +5,27 @@
 #include <vector>
 #include "AnimatedModel.h"
 #include "Entity.h"
+#include "Renderer.h"
 #include "Common.h"
 #include <btBulletDynamicsCommon.h>
 
 class Character : public Entity {
 public:
-	Character(AnimatedModel* model, glm::vec3 position, glm::vec3 scale, float yaw, btRigidBody* bounding, btPairCachingGhostObject* ghost);
+	Character(AnimatedModel* model, const glm::vec3& position, const glm::vec3& scale, const float& yaw);
+
 	AnimatedModel* getModel();
-	void setAnimated(bool newValue);
-	void draw(unsigned int shader);
+	void setAnimated(const bool& newValue);
+	void draw(const unsigned int& shader, Renderer* renderer);
 	void changeAnimation();
 
 	void MoveForward();
 	void MoveBackward();
 	void MoveLeft();
 	void MoveRight();
-	void Update(const float yaw, glm::vec3 cameraAt, glm::vec3 cameraUp, const float terrainHeight, const float dt_secs);
+	void Update(const float& yaw, const glm::vec3& cameraAt, const glm::vec3& cameraUp, const float& terrainHeight, const float& dt_secs);
 
 	btRigidBody* getBounding();
+	void addCollider(btRigidBody* bounding, btPairCachingGhostObject* ghost);
 
 private:
 	AnimatedModel* model;

@@ -15,9 +15,11 @@
 //#include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+class GameManager;
+
 class InputManager {
 public:
-	InputManager(WindowManager*  windowManager, Camera* camera, EntityManager* entityManager, MousePicker* mousePicker, LightingManager* lightingManager, HUDManager* hudManager, AudioManager* audioManager, EditModeManager *editModeManager, CollisionManager* colManager, TerrainManager* terrainManager);
+	InputManager(GameManager* gameManager, WindowManager*  windowManager, Camera* camera, EntityManager* entityManager, MousePicker* mousePicker, LightingManager* lightingManager, HUDManager* hudManager, AudioManager* audioManager, EditModeManager *editModeManager, CollisionManager* colManager, TerrainManager* terrainManager);
 	void WarpMouse();
 	bool get_ifWarpMouse();
 	bool KeyboardControls(SDL_Window * window, const float dt_secs);
@@ -45,6 +47,8 @@ private:
 	Camera* camera;
 	EditModeManager* editModeManager;
 	TerrainManager* terrainManager;
+	
+	GameManager* gameManager;
 };
 
 #endif

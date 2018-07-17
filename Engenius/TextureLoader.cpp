@@ -5,7 +5,7 @@
 
 namespace TextureLoader{
 
-	int loadTexture(const std::string type, const std::string path)
+	int loadTexture(const std::string& type, const std::string& path)
 	{
 		std::string directory = path.substr(0, path.find_last_of('/'));
 		directory = directory + "/" + type;
@@ -39,7 +39,7 @@ namespace TextureLoader{
 		return texID;	// return value of texture ID
 	}
 
-	int loadTextureNonTransparent(const std::string type, const std::string path)
+	int loadTextureNonTransparent(const std::string& type, const std::string& path)
 	{
 		std::string directory = path.substr(0, path.find_last_of('/'));
 		directory = directory + "/" + type;

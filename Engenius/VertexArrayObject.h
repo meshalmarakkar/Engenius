@@ -27,7 +27,7 @@ struct Buffer_Options {
 class VertexArrayObject
 {
 public:
-	VertexArrayObject(unsigned int indicesCount, GLenum drawMode = GL_TRIANGLES);
+	VertexArrayObject(const unsigned int& indicesCount, GLenum drawMode = GL_TRIANGLES);
 	~VertexArrayObject();
 
 	void bind();
@@ -35,18 +35,18 @@ public:
 
 	unsigned int genBuffer();
 	unsigned int genBuffer_andAddData(GLenum target, GLsizeiptr size, const void* data, GLenum usage);
-	void addData(unsigned int bufferID, GLenum target, GLsizeiptr size, const void* data, GLenum usage);
+	void addData(const unsigned int& bufferID, GLenum target, GLsizeiptr size, const void* data, GLenum usage);
 
-	void enableVertexAttribArray(unsigned int attribID, int size, GLenum type, GLboolean normalised, GLsizei stride, size_t pointer);
-	void enableVertexAttribArray_I(unsigned int attribID, int size, GLenum type, GLsizei stride, size_t pointer);
+	void enableVertexAttribArray(const unsigned int& attribID, const int& size, GLenum type, GLboolean normalised, GLsizei stride, size_t pointer);
+	void enableVertexAttribArray_I(const unsigned int& attribID, const int& size, GLenum type, GLsizei stride, size_t pointer);
 
-	void setDivisor(unsigned int bufferID, unsigned int divisor);
-	void setDivisor_multi(unsigned int bufferID_first, unsigned int bufferID_last, unsigned int divisor);
+	void setDivisor(const unsigned int& bufferID, const unsigned int& divisor);
+	void setDivisor_multi(const unsigned int& bufferID_first, const unsigned int& bufferID_last, const unsigned int& divisor);
 
-	void setIndicesCount(unsigned int num);
+	void setIndicesCount(const unsigned int& num);
 	unsigned int getIndicesCount();
 
-	void setRestartIndex(unsigned int num);
+	void setRestartIndex(const unsigned int& num);
 	unsigned int getRestartIndex();
 
 	GLenum getDrawMode();

@@ -8,6 +8,7 @@
 #include <vector>
 #include "Model.h"
 #include "Common.h"
+#include "Character.h"
 #include <map>
 #include <fstream>
 
@@ -40,7 +41,7 @@ struct HeirarchicalGrid {
 	float left, right, top, bottom;
 
 	HeirarchicalGrid() { ; }
-	HeirarchicalGrid(glm::vec2 pos, glm::vec2 scale) : position(pos), scale(scale) { ; }
+	HeirarchicalGrid(const glm::vec2& pos, const glm::vec2& scale) : position(pos), scale(scale) { ; }
 };
 
 class CollisionManager {
@@ -48,13 +49,13 @@ public:
 	CollisionManager();
 	void addCollisionModel(Model* cube);
 
-	void addHeirarchicalGrid(glm::vec2 pos, glm::vec2 scale);
-	unsigned int getRelevantGrid(const glm::vec3 pos, const glm::vec3 scale);
+	void addHeirarchicalGrid(const glm::vec2& pos, const glm::vec2& scale);
+	unsigned int getRelevantGrid(const glm::vec3& pos, const glm::vec3& scale);
 
 	bool readBoundFile();
 	bool writeBoundFile();
 
-	void renderBoundingBoxes(unsigned int shader, bool addMode, bool rigidBodyMode, glm::mat4 edit_modelMatrix);
+	void renderBoundingBoxes(const unsigned int& shader, const bool& addMode, const bool& rigidBodyMode, const glm::mat4& edit_modelMatrix);
 
 	float getHeirarchicalGridScale();
 
@@ -67,26 +68,28 @@ public:
 	void update();
 	void displayGridDetails();
 
-	btRigidBody* addBox(float width, float height, float depth, float x, float y, float z, float mass);
-	btRigidBody* addBox(float width, float height, float depth, float x, float y, float z, float mass, collisiontype group, collisiontype mask);
-	btRigidBody* addCapsule(float rad, float height, float x, float y, float z, float mass);
+	btRigidBody* addBox(const float& width, const float& height, const float& depth, const float& x, const float& y, const float& z, const float& mass);
+	btRigidBody* addBox(const float& width, const float& height, const float& depth, const float& x, const float& y, const float& z, const float& mass, collisiontype& group, collisiontype& mask);
+	btRigidBody* addCapsule(const float& rad, const float& height, const float& x, const float& y, const float& z, const float& mass);
 
-	void renderBox(btRigidBody* box, unsigned int shader);
-	void renderCapsule(btRigidBody* capsule, Model *modelData, unsigned int shader, unsigned int texture);
+	void renderBox(btRigidBody* box, const unsigned int& shader);
+	void renderCapsule(btRigidBody* capsule, Model *modelData, const unsigned int& shader, const unsigned int& texture);
 	void addToWorld(btRigidBody* body);
-	void addToWorld(btRigidBody* body, collisiontype COLL_TYPE, int collidesWith);
+	void addToWorld(btRigidBody* body, collisiontype COLL_TYPE, const int& collidesWith);
 	void addGhostToWorld(btPairCachingGhostObject* ghost);
-	void addGhostToWorld(btPairCachingGhostObject* ghost, collisiontype COLL_TYPE, int collidesWith);
+	void addGhostToWorld(btPairCachingGhostObject* ghost, collisiontype COLL_TYPE, const int& collidesWith);
 	btBroadphasePair* findWorldPair(const btBroadphasePair &pair);
 	void removeObject(btRigidBody* body);
 	void removeObject(btPairCachingGhostObject* ghost);
+
+	void attachPlayerCollider(Character* player, const glm::vec3& pos, const float& rad, const float& height, const float& mass);
 
 private:
 	bool heirDisplay;
 
 	void initGrids();
 	
-	bool twoDcollisionCheck(const glm::vec2 position_A, const glm::vec2 scale_A, const float left, float right, const float top, const float bottom);
+	bool twoDcollisionCheck(const glm::vec2& position_A, const glm::vec2& scale_A, const float& left, const float& right, const float& top, const float& bottom);
 
 	Model* cube;
 	const glm::vec4 red = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);

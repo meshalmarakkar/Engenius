@@ -10,7 +10,8 @@
 //#include "Entity.h"
 #include "ShaderManager.h"
 //#include "TextureLoader.h"
-#include "Material.h"
+#include "RenderProperties.h"
+#include "Shader.h"
 
 class Renderer {
 public:
@@ -28,18 +29,22 @@ public:
 	void SS_GodRays();
 
 	void drawArrays(VertexArrayObject* VAO);
+	void drawArrays(Shader* shader, VertexArrayObject* VAO, RenderProperties* rp);
 	void drawElements(VertexArrayObject* VAO);
-	void drawElements_w_primitiveRestart(GLuint shader, VertexArrayObject* VAO, Material* mat);
+	void drawElements_w_primitiveRestart(Shader* shader, VertexArrayObject* VAO, RenderProperties* rp);
 	void draw(VertexArrayObject* VAO);
 	void draw_screenQuad();
-	void draw_finalDisplay(const float exposure, const int ifBloom, const int effectNo, bool ifPause, GLuint tex_pause, bool ifEndGame, GLuint tex_end);
+	void draw_finalDisplay(const float& exposure, const int& ifBloom, const int& effectNo, const bool& ifPause, const GLuint& tex_pause, const bool& ifEndGame, const GLuint& tex_end);
 
 
-	void bindTexture(const unsigned int shader, const unsigned int texture, const char* name);
-	void bindCubeMapTexture(const unsigned int shader, const unsigned int texture, const char* name);
-	void unbindTextures(unsigned int num);
-	void unbindTextures(unsigned int first, unsigned int last);
+	void bindTexture(const unsigned int& shader, const unsigned int& texture, const char* name);
+	void bindCubeMapTexture(const unsigned int& shader, const unsigned int& texture, const char* name);
+	void unbindTextures(const unsigned int& num);
+	void unbindTextures(const unsigned int& first, const unsigned int& last);
 	void unbindAllTextures();
+
+	void enableCullFace();
+	void disableCullFace();
 
 private:
 	void initFBOs();

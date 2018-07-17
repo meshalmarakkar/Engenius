@@ -1,10 +1,10 @@
 #include "AnimatedModel.h" 
 
-AnimatedModel::AnimatedModel(const string path, const bool justAnimation) : Model(path, justAnimation) {
+AnimatedModel::AnimatedModel(const string& path, const bool& justAnimation) : Model(path, justAnimation) {
 	this->loadAnimation();
 }
 
-AnimatedModel::AnimatedModel(std::string name, const string path) : Model(name, path) {
+AnimatedModel::AnimatedModel(const std::string& name, const string& path) : Model(name, path) {
 	this->loadAnimation();
 }
 
@@ -26,14 +26,14 @@ void AnimatedModel::loadAnimation() {
 
 std::pair<std::unordered_map<string, aiNodeAnim*>, std::pair<float, float>> AnimatedModel::getAnims() { return std::make_pair(idle.animationNodes, idle.timeDetails); }
 
-void AnimatedModel::setMovementAnims(const std::pair<std::unordered_map<string, aiNodeAnim*>, std::pair<float, float>> animationDetails) {
+void AnimatedModel::setMovementAnims(const std::pair<std::unordered_map<string, aiNodeAnim*>, std::pair<float, float>>& animationDetails) {
 	Animation movement;
 	movement.animationNodes = animationDetails.first;
 	movement.timeDetails = animationDetails.second;
 	movementCycle.push_back(movement);
 }
 
-unsigned int FindPosOrScale(const float AnimationTime, const unsigned int mNumKeys, const aiVectorKey *mKeys)
+unsigned int FindPosOrScale(const float& AnimationTime, const unsigned int& mNumKeys, const aiVectorKey *mKeys)
 {
 	for (unsigned int i = 0; i < mNumKeys - 1; i++)
 		if (AnimationTime < static_cast<float>(mKeys[i + 1].mTime))
@@ -42,7 +42,7 @@ unsigned int FindPosOrScale(const float AnimationTime, const unsigned int mNumKe
 	return 0;
 }
 
-unsigned int FindRotation(const float AnimationTime, const unsigned int mNumKeys, const aiQuatKey *mKeys)
+unsigned int FindRotation(const float& AnimationTime, const unsigned int& mNumKeys, const aiQuatKey *mKeys)
 {
 	assert(mNumKeys > 0);
 	for (unsigned int i = 0; i < mNumKeys - 1; i++)
@@ -52,7 +52,7 @@ unsigned int FindRotation(const float AnimationTime, const unsigned int mNumKeys
 	return 0;
 }
 
-void AnimatedModel::CalcInterpolated_POSorSCALE(aiVector3D& Out, const float AnimationTime, const unsigned int mNumKeys, const aiVectorKey *mKeys)
+void AnimatedModel::CalcInterpolated_POSorSCALE(aiVector3D& Out, const float& AnimationTime, const unsigned int& mNumKeys, const aiVectorKey *mKeys)
 {
 	if (mNumKeys == 1) {
 		Out = mKeys[0].mValue;
@@ -75,7 +75,7 @@ void AnimatedModel::CalcInterpolated_POSorSCALE(aiVector3D& Out, const float Ani
 	Out = Start + Factor * Delta;
 }
 
-void AnimatedModel::CalcInterpolated_ROT(aiQuaternion& Out, const float AnimationTime, const unsigned int mNumKeys, const aiQuatKey *mKeys)
+void AnimatedModel::CalcInterpolated_ROT(aiQuaternion& Out, const float& AnimationTime, const unsigned int& mNumKeys, const aiQuatKey *mKeys)
 {
 	// we need at least two values to interpolate...
 	if (mNumKeys == 1) {
@@ -96,7 +96,7 @@ void AnimatedModel::CalcInterpolated_ROT(aiQuaternion& Out, const float Animatio
 	Out = Out.Normalize();
 }
 
-void AnimatedModel::InterpolateAnimations_POS(aiVector3D& Out, const float AnimationTime, const unsigned int mNumKeys, const aiVectorKey *mKeys, const unsigned int mNumKeys2, const aiVectorKey *mKeys2)
+void AnimatedModel::InterpolateAnimations_POS(aiVector3D& Out, const float& AnimationTime, const unsigned int& mNumKeys, const aiVectorKey *mKeys, const unsigned int& mNumKeys2, const aiVectorKey *mKeys2)
 {
 	if (mNumKeys == 1) {
 		Out = mKeys[0].mValue;
@@ -115,7 +115,7 @@ void AnimatedModel::InterpolateAnimations_POS(aiVector3D& Out, const float Anima
 	Out = Start + Factor * Delta;
 }
 
-void AnimatedModel::InterpolateAnimations_ROT(aiQuaternion& Out, const float AnimationTime, const unsigned int mNumKeys, const aiQuatKey *mKeys, const unsigned int mNumKeys2, const aiQuatKey *mKeys2)
+void AnimatedModel::InterpolateAnimations_ROT(aiQuaternion& Out, const float& AnimationTime, const unsigned int& mNumKeys, const aiQuatKey *mKeys, const unsigned int& mNumKeys2, const aiQuatKey *mKeys2)
 {
 	// we need at least two values to interpolate...
 	if (mNumKeys == 1) {
@@ -134,7 +134,7 @@ void AnimatedModel::InterpolateAnimations_ROT(aiQuaternion& Out, const float Ani
 	Out = Out.Normalize();
 }
 
-void AnimatedModel::ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, const Matrix4f& ParentTransform)
+void AnimatedModel::ReadNodeHeirarchy(const float& AnimationTime, const aiNode* pNode, const Matrix4f& ParentTransform)
 {
 	string NodeName(pNode->mName.data);
 	Matrix4f NodeTransformation(pNode->mTransformation);
@@ -179,14 +179,14 @@ void AnimatedModel::ReadNodeHeirarchy(float AnimationTime, const aiNode* pNode, 
 	}
 }
 
-void Matrix4f_to_GLMmat4(glm::mat4 &pos, const Matrix4f matpos) {
+void Matrix4f_to_GLMmat4(glm::mat4 &pos, const Matrix4f& matpos) {
 	pos[0][0] = matpos.m[0][0]; pos[1][0] = matpos.m[0][1]; pos[2][0] = matpos.m[0][2]; pos[3][0] = matpos.m[0][3];
 	pos[0][1] = matpos.m[1][0]; pos[1][1] = matpos.m[1][1]; pos[2][1] = matpos.m[1][2]; pos[3][1] = matpos.m[1][3];
 	pos[0][2] = matpos.m[2][0]; pos[1][2] = matpos.m[2][1]; pos[2][2] = matpos.m[2][2]; pos[3][2] = matpos.m[2][3];
 	pos[0][3] = matpos.m[3][0]; pos[1][3] = matpos.m[3][1]; pos[2][3] = matpos.m[3][2]; pos[3][3] = matpos.m[3][3];
 }
 
-glm::vec3 getRotation(const glm::mat4 mat) {
+glm::vec3 getRotation(const glm::mat4& mat) {
 	glm::length_t sy = glm::vec3(mat[1][0], mat[1][1], mat[1][2]).length();
 	glm::length_t sz = glm::vec3(mat[2][0], mat[2][1], mat[2][2]).length();
 	float j = mat[1][2] / sy;
@@ -263,7 +263,7 @@ void AnimatedModel::walkBackAnimation() {
 
 unsigned int AnimatedModel::getNumBones() { return m_NumBones; }
 
-void AnimatedModel::BoneTransform(float TimeInSeconds, vector<Matrix4f>& Transforms)
+void AnimatedModel::BoneTransform(const float& TimeInSeconds, vector<Matrix4f>& Transforms)
 {
 	Matrix4f Identity;
 	Identity.InitIdentity();

@@ -1,10 +1,17 @@
 #include "ShaderManager.h"
+#include "Uniforms.h"
 
-/*
-Based on rt3d.cpp from Real Time 3d graphics module
-*/ 
-ShaderManager::ShaderManager() {
+#include <iostream>
+#include <fstream>
+
+ShaderManager::ShaderManager(Camera* camera, LightingManager* lightingManager) : camera(camera), lightingManager(lightingManager) {
 	init(); 
+}
+
+ShaderManager::~ShaderManager() {
+	for (std::unordered_map<const char*, Shader*>::iterator it = shaders.begin(); it != shaders.end(); it++) {
+		delete &it;
+	}
 }
 
 // loadFile - loads text file from file fname as a char* 
@@ -62,8 +69,8 @@ void printShaderError(const int shader) {
 	// should additionally check for OpenGL errors here
 }
 
-unsigned int ShaderManager::initShaders(const char *vertFile, const char *fragFile) {
-	unsigned int p, f, v;
+GLuint ShaderManager::initShaders(const char *vertFile, const char *fragFile) {
+	GLuint p, f, v;
 
 	char *vs,*fs;
 
@@ -117,8 +124,8 @@ unsigned int ShaderManager::initShaders(const char *vertFile, const char *fragFi
 	return p;
 }
 
-unsigned int ShaderManager::initShaders(const char *vertFile, const char *fragFile, const char *geomFile) {
-	unsigned int p, f, v, g;
+GLuint ShaderManager::initShaders(const char *vertFile, const char *fragFile, const char *geomFile) {
+	GLuint p, f, v, g;
 
 	char *vs, *fs, *gs;
 
@@ -186,7 +193,7 @@ unsigned int ShaderManager::initShaders(const char *vertFile, const char *fragFi
 	return p;
 }
 
-void ShaderManager::gl_UseProgram(unsigned int shader) {
+void ShaderManager::gl_UseProgram(GLuint shader) {
 	glUseProgram(shader);
 	currentShader = shader;
 }
@@ -199,22 +206,6 @@ void ShaderManager::gl_CheckError() {
 	while (GLenum error = glGetError()) {
 		std::cout << "[OpenGL ERROR] : " << error << std::endl; //convert to hexadecimal before checking glew
 	}
-}
-
-void ShaderManager::enableVertexAttribArray(unsigned int first, unsigned int last) {
-	for (unsigned int i = first; i < last + 1; i++)
-		glEnableVertexAttribArray(i);
-}
-void ShaderManager::enableVertexAttribArray(unsigned int num) {
-	glEnableVertexAttribArray(num);
-}
-
-void ShaderManager::disableVertexAttribArray(unsigned int first, unsigned int last) {
-	for (unsigned int i = first; i < last + 1; i++)
-		glDisableVertexAttribArray(i);
-}
-void ShaderManager::disableVertexAttribArray(unsigned int num) {
-	glDisableVertexAttribArray(num);
 }
 
 void ShaderManager::init() {
@@ -238,80 +229,158 @@ void ShaderManager::init() {
 	gBuffer_program = initShaders("../Engenius/Shaders/modelGBuffer.vert", "../Engenius/Shaders/modelGBuffer.frag");
 	deferredShading_program = initShaders("../Engenius/Shaders/screenSpace.vert", "../Engenius/Shaders/modelDeferredShading.frag");
 	grass_program = initShaders("../Engenius/Shaders/grass.vert", "../Engenius/Shaders/grass.frag", "../Engenius/Shaders/grass.gs");
+
+	typedef std::pair<const char*, Shader*> pair;
+
+	//MODEL LOADING
+	shaders.insert(pair(Programs::simple, new Shader(simple_program)));
+	shaders.insert(pair(Programs::skybox, new Shader(skybox_program)));
+	shaders.insert(pair(Programs::model, new Shader(model_program)));
+	shaders.insert(pair(Programs::model_mapped, new Shader(mapped_model_program)));
+	shaders.insert(pair(Programs::model_animated, new Shader(animated_model_program)));
+	shaders.insert(pair(Programs::terrain, new Shader(terrain_program)));
+	shaders.insert(pair(Programs::terrain_mapped, new Shader(terrain_mapped_program)));
+	shaders.insert(pair(Programs::grass, new Shader(grass_program)));
+	shaders.insert(pair(Programs::hud, new Shader(hud_program)));
+	shaders.insert(pair(Programs::particle, new Shader(particle_program)));
+
+	//DEFERRED RENDERING
+	shaders.insert(pair(Programs::deferred_gBuffer, new Shader(gBuffer_program)));
+	shaders.insert(pair(Programs::deferred_gBuffer_mapped, new Shader(gBuffer_mapped_program)));
+	shaders.insert(pair(Programs::deferred_shading, new Shader(deferredShading_program)));
+	shaders.insert(pair(Programs::deferred_shading_mapped, new Shader(deferredShading_mapped_program)));
+
+	//PASSES
+	shaders.insert(pair(Programs::gaussian_blur, new Shader(gaussianBlur_program)));
+	shaders.insert(pair(Programs::godray_firstPass, new Shader(firstPass_program)));
+	shaders.insert(pair(Programs::shadow_depthShader, new Shader(depthShader_program)));
+	shaders.insert(pair(Programs::post_processing, new Shader(postProcessing_program)));
+
+	//DEBUG
+	shaders.insert(pair(Programs::display_normal, new Shader(displayNormals_program)));
+	shaders.insert(pair(Programs::display_depthMap, new Shader(depthMapRender_program)));
+
+	shaderInit();
 }
 
-unsigned int ShaderManager::get_grass_program() {
+static void camera_requiredLoad(Camera* camera, Uniforms* uni) {
+	uni->addUniform("far_plane", camera->getFarPlane_Pointer());
+	uni->addUniform("projection", camera->getProjection_Pointer());
+}
+
+static void lighting_requiredLoad(LightingManager* light, Uniforms* uni) {
+	light->lights_preloadShader(uni);
+	uni->addUniform("displayShadow", light->getIfShadow_Pointer());
+}
+
+static void commonRunTime_uniforms(Camera* cam, LightingManager* light, Uniforms* uni) {
+	uni->addUniform("viewPos", cam->getCameraEye_Pointer());
+	uni->addUniform("view", cam->getView_Pointer());
+}
+
+static void generalUnitformInit(Camera* camera, LightingManager* lightingManager, std::unordered_map<const char*, Shader*>& shaders, const char* programName) {
+	Uniforms* uni;
+	uni = shaders.at(programName)->getInitUniforms();
+	camera_requiredLoad(camera, uni);
+	lighting_requiredLoad(lightingManager, uni);
+	shaders.at(programName)->bind();
+	shaders.at(programName)->uniformsToShader_INIT();
+	uni = shaders.at(programName)->getRunTimeUniforms();
+	commonRunTime_uniforms(camera, lightingManager, uni);
+}
+
+void ShaderManager::shaderInit() {
+	generalUnitformInit(camera, lightingManager, shaders, Programs::terrain);
+	generalUnitformInit(camera, lightingManager, shaders, Programs::terrain_mapped);
+	generalUnitformInit(camera, lightingManager, shaders, Programs::grass);
+
+	generalUnitformInit(camera, lightingManager, shaders, Programs::model);
+	generalUnitformInit(camera, lightingManager, shaders, Programs::model_mapped);
+	generalUnitformInit(camera, lightingManager, shaders, Programs::model_animated);
+
+}
+
+Shader* ShaderManager::getShaderProgram(const char* shaderName) {
+	if (shaders.find(shaderName) == shaders.end())
+	{
+		std::cout << "[ERROR] : " << "cannot find shader" << std::endl;
+		return nullptr;
+	}
+	return shaders.at(shaderName);
+}
+
+GLuint ShaderManager::get_grass_program() {
 	return grass_program;
 }
 
-unsigned int ShaderManager::get_gBuffer_program() {
+GLuint ShaderManager::get_gBuffer_program() {
 	return gBuffer_program;
 }
 
-unsigned int ShaderManager::get_deferredShading_program() {
+GLuint ShaderManager::get_deferredShading_program() {
 	return deferredShading_program;
 }
 
-unsigned int ShaderManager::get_gBuffer_mapped_program() {
+GLuint ShaderManager::get_gBuffer_mapped_program() {
 	return gBuffer_mapped_program;
 }
 
-unsigned int ShaderManager::get_deferredShading_mapped_program() {
+GLuint ShaderManager::get_deferredShading_mapped_program() {
 	return deferredShading_mapped_program;
 }
 
-unsigned int ShaderManager::get_firstPass_program() {
+GLuint ShaderManager::get_firstPass_program() {
 	return firstPass_program;
 }
 
-unsigned int ShaderManager::get_postProcessing_program() {
+GLuint ShaderManager::get_postProcessing_program() {
 	return postProcessing_program;
 }
-unsigned int ShaderManager::get_simple_program() {
+GLuint ShaderManager::get_simple_program() {
 	return simple_program;
 }
-unsigned int ShaderManager::get_depthMapRender_program() {
+GLuint ShaderManager::get_depthMapRender_program() {
 	return depthMapRender_program;
 }
 
-unsigned int ShaderManager::get_model_program() {
+GLuint ShaderManager::get_model_program() {
 	return model_program;
 }
-unsigned int ShaderManager::get_mapped_model_program() {
+GLuint ShaderManager::get_mapped_model_program() {
 	return mapped_model_program;
 }
 
-unsigned int ShaderManager::get_gaussianBlur_program() {
+GLuint ShaderManager::get_gaussianBlur_program() {
 	return gaussianBlur_program;
 }
 
-unsigned int ShaderManager::get_animated_model_program() {
+GLuint ShaderManager::get_animated_model_program() {
 	return animated_model_program;
 }
 
-unsigned int ShaderManager::get_terrain_program() {
+GLuint ShaderManager::get_terrain_program() {
 	return terrain_program;
 }
-unsigned int ShaderManager::get_terrain_mapped_program() {
+GLuint ShaderManager::get_terrain_mapped_program() {
 	return terrain_mapped_program;
 }
 
-unsigned int ShaderManager::get_depthShader_program() {
+GLuint ShaderManager::get_depthShader_program() {
 	return depthShader_program;
 }
 
-unsigned int ShaderManager::get_skybox_program() {
+GLuint ShaderManager::get_skybox_program() {
 	return skybox_program;
 }
 
-unsigned int ShaderManager::get_particle_program() {
+GLuint ShaderManager::get_particle_program() {
 	return particle_program;
 }
 
-unsigned int ShaderManager::get_hud_program() {
+GLuint ShaderManager::get_hud_program() {
 	return hud_program;
 }
 
-unsigned int ShaderManager::get_displayNormals_program() {
+GLuint ShaderManager::get_displayNormals_program() {
 	return displayNormals_program;
 }

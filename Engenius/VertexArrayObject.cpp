@@ -23,7 +23,7 @@ static bool gl_PrintError(const char* functionName, const char* fileName, unsign
 	return true;
 }
 
-VertexArrayObject::VertexArrayObject(unsigned int indicesCount, GLenum drawMode) : indicesCount(indicesCount), drawMode(drawMode) {
+VertexArrayObject::VertexArrayObject(const unsigned int& indicesCount, GLenum drawMode) : indicesCount(indicesCount), drawMode(drawMode) {
 	GL_ERROR_CHECK(glGenVertexArrays(1, &VAO));
 	GL_ERROR_CHECK(glBindVertexArray(VAO));
 }
@@ -57,32 +57,32 @@ unsigned int VertexArrayObject::genBuffer_andAddData(GLenum target, GLsizeiptr s
 	return VBOs.size() - 1;
 }
 
-void VertexArrayObject::addData(unsigned int bufferID, GLenum target, GLsizeiptr size, const void* data, GLenum usage) {
+void VertexArrayObject::addData(const unsigned int& bufferID, GLenum target, GLsizeiptr size, const void* data, GLenum usage) {
 	GL_ERROR_CHECK(glBindBuffer(target, VBOs[bufferID]));
 	GL_ERROR_CHECK(glBufferData(target, size, data, usage));
 }
 
-void VertexArrayObject::enableVertexAttribArray(unsigned int attribID, int size, GLenum type, GLboolean normalised, GLsizei stride, size_t pointer) {
+void VertexArrayObject::enableVertexAttribArray(const unsigned int& attribID, const int& size, GLenum type, GLboolean normalised, GLsizei stride, size_t pointer) {
 	GL_ERROR_CHECK(glEnableVertexAttribArray(attribID));
 	GL_ERROR_CHECK(glVertexAttribPointer(attribID, size, type, normalised, stride, (GLvoid*)pointer));
 }
 
-void VertexArrayObject::enableVertexAttribArray_I(unsigned int attribID, int size, GLenum type, GLsizei stride, size_t pointer) {
+void VertexArrayObject::enableVertexAttribArray_I(const unsigned int& attribID, const int& size, GLenum type, GLsizei stride, size_t pointer) {
 	GL_ERROR_CHECK(glEnableVertexAttribArray(attribID));
 	GL_ERROR_CHECK(glVertexAttribIPointer(attribID, size, type, stride, (GLvoid*)pointer)); //Int version
 }
 
-void VertexArrayObject::setDivisor(unsigned int bufferID, unsigned int divisor) {
+void VertexArrayObject::setDivisor(const unsigned int& bufferID, const unsigned int& divisor) {
 	GL_ERROR_CHECK(glVertexAttribDivisor(bufferID, divisor));
 }
 
-void VertexArrayObject::setDivisor_multi(unsigned int bufferID_first, unsigned int bufferID_last, unsigned int divisor) {
+void VertexArrayObject::setDivisor_multi(const unsigned int& bufferID_first, const unsigned int& bufferID_last, const unsigned int& divisor) {
 	for (unsigned int i = bufferID_first; i < bufferID_last + 1; i++) {
 		GL_ERROR_CHECK(glVertexAttribDivisor(i, divisor));
 	}
 }
 
-void VertexArrayObject::setIndicesCount(unsigned int num) {
+void VertexArrayObject::setIndicesCount(const unsigned int& num) {
 	indicesCount = num;
 }
 
@@ -90,7 +90,7 @@ unsigned int VertexArrayObject::getIndicesCount() {
 	return indicesCount;
 }
 
-void VertexArrayObject::setRestartIndex(unsigned int num) {
+void VertexArrayObject::setRestartIndex(const unsigned int& num) {
 	restartIndex = num;
 }
 

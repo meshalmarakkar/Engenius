@@ -10,9 +10,9 @@
 
 class Skybox {
 public:
-	Skybox(unsigned int _skyboxProgram, Model* modelForSkybox);
-	void renderSkybox(const glm::mat4 projection, const glm::mat4 view);
-	void renderSkybox(const glm::mat4 projection, const glm::mat4 view, unsigned int texture);
+	Skybox(const unsigned int& _skyboxProgram, Model* modelForSkybox);
+	void renderSkybox(const glm::mat4& projection, const glm::mat4& view);
+	void renderSkybox(const glm::mat4& projection, const glm::mat4& view, const unsigned int& texture);
 
 private:
 	unsigned int skyboxProgram;

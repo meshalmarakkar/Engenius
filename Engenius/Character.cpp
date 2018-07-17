@@ -1,6 +1,6 @@
 #include "Character.h"
 //////CHANGE THE GRID AND AREA NO OR ELSE CHARACTER WONT SHOW
-Character::Character(AnimatedModel* model, glm::vec3 position, glm::vec3 scale, float yaw, btRigidBody* bounding, btPairCachingGhostObject* ghost) : model(model), Entity(model, position, scale, glm::vec3(0.0f, yaw, 0.0f), 0), bounding(bounding), ghost(ghost) {
+Character::Character(AnimatedModel* model, const glm::vec3& position, const glm::vec3& scale, const float& yaw) : model(model), Entity(model, position, scale, glm::vec3(0.0f, yaw, 0.0f), 0) {
 	speed = 0.0f;
 	strafeSpeed = 0.0f;
 	upwardsSpeed = 0.0f;
@@ -9,16 +9,12 @@ Character::Character(AnimatedModel* model, glm::vec3 position, glm::vec3 scale, 
 	transforms.resize(model->getNumBones());
 	animated = true;
 	currentState = IDLE_STATE;
+	setCullingBound(5.0f);
 }
 
-static btVector3 getLinearVelocityInBodyFrame(btRigidBody* body)
-{
-	return(body->getWorldTransform().getBasis().transpose() *
-		body->getLinearVelocity());
-}
-
-btVector3 convertglm2bt(glm::vec3 toCon) {
-	return btVector3(toCon.x, toCon.y, toCon.z);
+void Character::addCollider(btRigidBody* bounding, btPairCachingGhostObject* ghost) {
+	this->bounding = bounding;
+	this->ghost = ghost;
 }
 
 void Character::MoveForward() {
@@ -42,14 +38,17 @@ void Character::MoveRight() {
 	}*/
 }
 
-
-AnimatedModel* Character::getModel() { return this->model; }
-
-void Character::setAnimated(bool newValue) {
-	animated = newValue;
+static btVector3 getLinearVelocityInBodyFrame(const btRigidBody* body)
+{
+	return(body->getWorldTransform().getBasis().transpose() *
+		body->getLinearVelocity());
 }
 
-void Character::Update(const float yaw, glm::vec3 cameraAt, glm::vec3 cameraUp, const float terrainHeight, const float dt_secs) {
+static btVector3 convertglm2bt(const glm::vec3& toCon) {
+	return btVector3(toCon.x, toCon.y, toCon.z);
+}
+
+void Character::Update(const float& yaw, const glm::vec3& cameraAt, const glm::vec3& cameraUp, const float& terrainHeight, const float& dt_secs) {
 //	this->rotation.y = this->initialYaw - yaw;
 
 	if (speed != ZERO) {
@@ -151,11 +150,7 @@ void Character::Update(const float yaw, glm::vec3 cameraAt, glm::vec3 cameraUp, 
 	model->BoneTransform(dt_secs, transforms);
 }
 
-btRigidBody* Character::getBounding() {
-	return bounding;
-}
-
-void Character::draw(unsigned int shader) {
+void Character::draw(const unsigned int& shader, Renderer* renderer) {
 	if (animated) {
 		for (unsigned int i = 0; i < transforms.size(); i++) {
 			const unsigned int MAX_BONES = 50;
@@ -167,13 +162,14 @@ void Character::draw(unsigned int shader) {
 	glm::mat4 modelMatrix;
 	//Common::createModelMatrix(modelMatrix, position, rotation, scale);
 	Common::createModelMatrix(modelMatrix, glm::vec3(-1.0f, 0.5f, 8.5f), scale, rotation);
-//	glUniform1i(glGetUniformLocation(shader, "animated"), animated);
-	model->Draw(shader, modelMatrix);
+	glUniform1i(glGetUniformLocation(shader, "animated"), animated);
+	model->Draw(shader, modelMatrix, renderer);
 }
 
 void Character::changeAnimation() {
 	if (currentState == IDLE_STATE) {
 		currentState = WALK_STATE;
+		model->walkAnimation();
 	}
 	else if (currentState == WALK_STATE) {
 		currentState = JOG_STATE;
@@ -184,4 +180,16 @@ void Character::changeAnimation() {
 		model->walkAnimation();
 	}
 	//model->idleAnimation();
+}
+
+void Character::setAnimated(const bool& newValue) {
+	animated = newValue;
+}
+
+btRigidBody* Character::getBounding() {
+	return bounding;
+}
+
+AnimatedModel* Character::getModel() { 
+	return this->model; 
 }

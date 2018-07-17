@@ -33,7 +33,7 @@ void CollisionManager::initGrids() {
 	addHeirarchicalGrid(glm::vec2(0.026f, -52.09f), glm::vec2(1.1f, 0.9f));
 }
 
-void CollisionManager::addHeirarchicalGrid(glm::vec2 pos, glm::vec2 scale) {
+void CollisionManager::addHeirarchicalGrid(const glm::vec2& pos, const glm::vec2& scale) {
 	std::string name = "level";
 	grids.at(name)->push_back(new HeirarchicalGrid(pos, scale));
 	HeirarchicalGrid * grid = grids.at(name)->at(grids.at(name)->size() - 1);
@@ -43,7 +43,7 @@ void CollisionManager::addHeirarchicalGrid(glm::vec2 pos, glm::vec2 scale) {
 	grid->bottom = pos.y + scale.y;
 }
 
-bool CollisionManager::twoDcollisionCheck(const glm::vec2 position_A, const glm::vec2 scale_A, const float left, float right, const float top, const float bottom) {
+bool CollisionManager::twoDcollisionCheck(const glm::vec2& position_A, const glm::vec2& scale_A, const float& left, const float& right, const float& top, const float& bottom) {
 	bool collision = false;
 
 	if ((position_A.x + (scale_A.x)) >= (left) // if right side on the right of left side
@@ -57,7 +57,7 @@ bool CollisionManager::twoDcollisionCheck(const glm::vec2 position_A, const glm:
 	return collision;
 }
 
-unsigned int CollisionManager::getRelevantGrid(const glm::vec3 pos, const glm::vec3 scale) {
+unsigned int CollisionManager::getRelevantGrid(const glm::vec3& pos, const glm::vec3& scale) {
 	unsigned int indexOfHeirGrid = 0;
 	std::string name = "level";
 
@@ -72,7 +72,7 @@ unsigned int CollisionManager::getRelevantGrid(const glm::vec3 pos, const glm::v
 	return 0; //for safeguard....shouldnt get here though
 }
 
-void CollisionManager::renderBoundingBoxes(unsigned int shader, bool addMode, bool rigidBodyMode, glm::mat4 edit_modelMatrix) {
+void CollisionManager::renderBoundingBoxes(const unsigned int& shader, const bool& addMode, const bool& rigidBodyMode, const glm::mat4& edit_modelMatrix) {
 	if (rigidBodyMode) {
 		for (unsigned int h = 0; h < rigidBodies.size(); h++) {
 			renderBox(rigidBodies.at(h), shader);
@@ -220,7 +220,7 @@ void CollisionManager::update() {
 	btSettings.world->stepSimulation(static_cast<btScalar>(1 / 60.0));
 }
 
-btRigidBody* CollisionManager::addBox(float width, float height, float depth, float x, float y, float z, float mass)
+btRigidBody* CollisionManager::addBox(const float& width, const float& height, const float& depth, const float& x, const float& y, const float& z, const float& mass)
 {
 	btTransform t;
 	t.setIdentity();
@@ -241,7 +241,7 @@ btRigidBody* CollisionManager::addBox(float width, float height, float depth, fl
 	return body;
 }
 
-btRigidBody* CollisionManager::addBox(float width, float height, float depth, float x, float y, float z, float mass, collisiontype group, collisiontype mask)
+btRigidBody* CollisionManager::addBox(const float& width, const float& height, const float& depth, const float& x, const float& y, const float& z, const float& mass, collisiontype& group, collisiontype& mask)
 {
 	btTransform t;
 	t.setIdentity();
@@ -262,7 +262,7 @@ btRigidBody* CollisionManager::addBox(float width, float height, float depth, fl
 	return body;
 }
 
-btRigidBody* CollisionManager::addCapsule(float rad, float height, float x, float y, float z, float mass) {
+btRigidBody* CollisionManager::addCapsule(const float& rad, const float& height, const float& x, const float& y, const float& z, const float& mass) {
 
 	btTransform t;
 	t.setIdentity();
@@ -281,7 +281,7 @@ btRigidBody* CollisionManager::addCapsule(float rad, float height, float x, floa
 	return body;
 }
 
-void CollisionManager::renderCapsule(btRigidBody* capsule, Model *modelData, unsigned int shader, unsigned int texture) {
+void CollisionManager::renderCapsule(btRigidBody* capsule, Model *modelData, const unsigned int& shader, const unsigned int& texture) {
 
 	if (capsule->getCollisionShape()->getShapeType() != CAPSULE_SHAPE_PROXYTYPE) //cout << "Wrong collision shape ";	
 		return;
@@ -303,7 +303,7 @@ void CollisionManager::renderCapsule(btRigidBody* capsule, Model *modelData, uns
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void CollisionManager::renderBox(btRigidBody* box, unsigned int shader) {
+void CollisionManager::renderBox(btRigidBody* box, const unsigned int& shader) {
 
 	if (box->getCollisionShape()->getShapeType() != BOX_SHAPE_PROXYTYPE) 			//cout << "Wrong collision shape";
 		return;
@@ -327,11 +327,11 @@ void CollisionManager::addToWorld(btRigidBody* body) {
 	btSettings.world->addRigidBody(body);
 }
 
-void CollisionManager::addToWorld(btRigidBody* body, collisiontype COLL_TYPE, int collidesWith) {
+void CollisionManager::addToWorld(btRigidBody* body, collisiontype COLL_TYPE, const int& collidesWith) {
 	btSettings.world->addRigidBody(body, COLL_TYPE, collidesWith);
 }
 
-void CollisionManager::addGhostToWorld(btPairCachingGhostObject* ghost, collisiontype COLL_TYPE, int collidesWith) {
+void CollisionManager::addGhostToWorld(btPairCachingGhostObject* ghost, collisiontype COLL_TYPE, const int& collidesWith) {
 	btSettings.world->addCollisionObject(ghost, COLL_TYPE, collidesWith); // ?
 
 
@@ -354,4 +354,35 @@ void CollisionManager::removeObject(btRigidBody* body) {
 }
 void CollisionManager::removeObject(btPairCachingGhostObject* ghost) {
 	btSettings.world->removeCollisionObject(ghost);
+}
+
+void CollisionManager::attachPlayerCollider(Character* player, const glm::vec3& pos, const float& rad, const float& height, const float& mass) {
+	btTransform t;
+	t.setIdentity();
+	t.setOrigin(btVector3(pos.x, pos.y, pos.z));
+	btCapsuleShape* playerShape = new btCapsuleShape(rad, height);
+	btVector3 inertia(0, 0, 0);
+
+	if (mass != 0.0)
+		playerShape->calculateLocalInertia(mass, inertia);
+	btMotionState* motion = new btDefaultMotionState(t);
+	btRigidBody::btRigidBodyConstructionInfo info(mass, motion, playerShape, inertia);
+
+	btRigidBody* playerBody = new btRigidBody(info);
+	playerBody->setAngularFactor(0); // Doesn't fall sideways
+	playerBody->setSleepingThresholds(0.0, 0.0);
+	int playerCollidesWith = COL_DEFAULT | COL_TRIGGER;
+	// body, group, mask
+	addToWorld(playerBody, COL_PLAYER, playerCollidesWith);
+	playerBody->setActivationState(DISABLE_DEACTIVATION);
+	playerBody->setFriction(static_cast<btScalar>(0.0f));
+
+	// Now ghost
+	btPairCachingGhostObject* playerGhost = new btPairCachingGhostObject();		// create object
+	playerGhost->setCollisionShape(playerShape);								// set shape
+	playerGhost->setWorldTransform(t);											// set world transform	
+	playerGhost->setCollisionFlags(btCollisionObject::CF_NO_CONTACT_RESPONSE);  // disable collision response // could also add CF_CHARACTER_OBJECT // If I knew what that flag did...
+
+	addGhostToWorld(playerGhost, COL_PLAYER, playerCollidesWith);
+	player->addCollider(playerBody, playerGhost);
 }

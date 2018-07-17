@@ -45,18 +45,18 @@ public:
 	/*  Functions  */
 	// Constructor
 	
-	Mesh(const vector<Vertex> vertices, const vector<unsigned int> indices, const vector<Texture> textures);
+	Mesh(const vector<Vertex>& vertices, const vector<unsigned int>& indices, const vector<Texture>& textures);
 	//~Mesh();
 	// Render the mesh
-	void InstancedDraw(unsigned int shader, const std::vector<glm::mat4> modelMatrices, const std::vector<glm::vec2> pointIDs, const std::vector<glm::vec2> spotIDs);
-	void Draw(unsigned int shader, const glm::mat4 modelMatrices);
+	void InstancedDraw(const unsigned int& shader, const std::vector<glm::mat4>& modelMatrices, const std::vector<glm::vec2>& pointIDs, const std::vector<glm::vec2>& spotIDs);
+	void Draw(const unsigned int& shader, const glm::mat4& modelMatrices);
 
-	void bindWall(unsigned int shader);
+	void bindWall(const unsigned int& shader);
 	void unbindWall();
-	void drawWall(unsigned int shader, const glm::mat4 modelMatrix);
+	void drawWall(const unsigned int&shader, const glm::mat4& modelMatrix);
 
 	VertexArrayObject* getVAO();
-	void sendTex(GLuint shader);
+	void sendTex(const GLuint& shader);
 	//void unbind();
 
 private:

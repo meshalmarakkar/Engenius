@@ -21,7 +21,7 @@ void ParticleManager::newToRender(ToRender &tr) {
 	tr.blend->resize(MAX_PER_TYPE);
 }
 
-ParticleManager::ParticleManager(unsigned int shader) : shader(shader) {
+ParticleManager::ParticleManager(const unsigned int& shader) : shader(shader) {
 
 	particleTextures = new ParticleTexture[4]; //the wrong heap size thing!!!
 
@@ -83,13 +83,24 @@ ParticleManager::ParticleManager(unsigned int shader) : shader(shader) {
 	glBufferData(GL_ARRAY_BUFFER, MAX_PER_TYPE * sizeof(GL_FLOAT), NULL, GL_STREAM_DRAW);
 
 	glBindVertexArray(0);
+
+	//particleManager->insertSmoke(1, glm::vec3(0.0f, 2.0f, 0.0f), true);
+	//particleManager->insertSmoke(1, glm::vec3(1.0f, 2.0f, 0.0f), true);
+	//particleManager->insertSmoke(1, glm::vec3(-1.0f, 2.0f, 0.0f), true);
+	//particleManager->insertSmoke(1, glm::vec3(-1.0f, 2.0f, 0.0f), true);
+	//particleManager->insertSmoke(1, glm::vec3(-1.0f, 2.0f, 0.0f), true);
+	//particleManager->insertFire(1, glm::vec3(0.0f, 4.25f, 37.5f), true);
+	//particleManager->insertFire(1, glm::vec3(1.0f, 4.25f, 37.5f), true);
+	//particleManager->insertFire(1, glm::vec3(-1.0f, 4.25f, 37.5f), true);
+	//particleManager->insertFire(1, glm::vec3(-1.0f, 4.25f, 38.5f), true);
+	//particleManager->insertFire(1, glm::vec3(-1.0f, 4.25f, 36.5f), true);
 }
 
 void ParticleManager::SortParticles() {
 	std::sort(&particleContainer[0], &particleContainer[particlesInUse]);
 }
 
-void ParticleManager::updateRepeated(Particle &p, float dt, glm::vec3 cameraPos) {
+void ParticleManager::updateRepeated(Particle &p, const float& dt, const glm::vec3& cameraPos) {
 
 	ParticleTexture &texure = particleTextures[p.particleType];
 
@@ -143,7 +154,7 @@ void ParticleManager::updateRepeated(Particle &p, float dt, glm::vec3 cameraPos)
 	p.cameraDistance = glm::length2(p.position - cameraPos);
 }
 
-void ParticleManager::updateUnrepeated(Particle &p, float dt, glm::vec3 cameraPos) {
+void ParticleManager::updateUnrepeated(Particle &p, const float& dt, const glm::vec3& cameraPos) {
 
 	ParticleTexture &texure = particleTextures[p.particleType];
 
@@ -186,7 +197,7 @@ void ParticleManager::updateUnrepeated(Particle &p, float dt, glm::vec3 cameraPo
 	}
 }
 
-void ParticleManager::Update(float dt, glm::vec3 cameraPos) {
+void ParticleManager::Update(const float& dt, const glm::vec3& cameraPos) {
 	if (particlesInUse > 0) {
 
 		for (int i = 0; i < particlesInUse; i++) {
@@ -217,7 +228,7 @@ void ParticleManager::Update(float dt, glm::vec3 cameraPos) {
 	}
 }
 
-void ParticleManager::renderParticles(glm::mat4 view, glm::mat4 projection) {
+void ParticleManager::renderParticles(const glm::mat4& view, const glm::mat4& projection) {
 	if (particlesInUse > 0) {
 		glUseProgram(shader);
 		glUniform3f(glGetUniformLocation(shader, "CameraRight_worldspace"), view[0][0], view[1][0], view[2][0]);
@@ -282,7 +293,7 @@ void ParticleManager::renderParticles(glm::mat4 view, glm::mat4 projection) {
 	}
 }
 
-void ParticleManager::insertParticleGenerator(ParticleType particleType, bool repeatedAnimation, int numOfParticles, glm::vec3 position) {
+void ParticleManager::insertParticleGenerator(ParticleType particleType, const bool& repeatedAnimation, const int& numOfParticles, const glm::vec3& position) {
 	int increase = 0;
 	for (int i = particlesInUse; i < (particlesInUse + numOfParticles); i++) {
 		Particle &p = particleContainer[i];
@@ -306,22 +317,22 @@ void ParticleManager::insertParticleGenerator(ParticleType particleType, bool re
 	particlesInUse += increase;
 }
 
-void ParticleManager::insertFire(int numOfParticles, glm::vec3 position, bool repeatedAnimation) {
+void ParticleManager::insertFire(const int& numOfParticles, const glm::vec3& position, const bool& repeatedAnimation) {
 	insertParticleGenerator(FIRE, repeatedAnimation, numOfParticles, position);
 }
 
-void ParticleManager::insertExplosion(int numOfParticles, glm::vec3 position, bool repeatedAnimation) {
+void ParticleManager::insertExplosion(const int& numOfParticles, const glm::vec3& position, const bool& repeatedAnimation) {
 	insertParticleGenerator(EXPLOSION, repeatedAnimation, numOfParticles, position);
 }
 
-void ParticleManager::insertExplosion2(int numOfParticles, glm::vec3 position, bool repeatedAnimation) {
+void ParticleManager::insertExplosion2(const int& numOfParticles, const glm::vec3& position, const bool& repeatedAnimation) {
 	insertParticleGenerator(EXPLOSION2, repeatedAnimation, numOfParticles, position);
 }
 
-void ParticleManager::insertSmoke(int numOfParticles, glm::vec3 position, bool repeatedAnimation) {
+void ParticleManager::insertSmoke(const int& numOfParticles, const glm::vec3& position, const bool& repeatedAnimation) {
 	insertParticleGenerator(SMOKE, repeatedAnimation, numOfParticles, position);
 }
 
-void ParticleManager::moveParticleManually(glm::vec3 newPos) {
+void ParticleManager::moveParticleManually(const glm::vec3& newPos) {
 	particleContainer[0].position = newPos;
 }

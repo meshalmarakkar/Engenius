@@ -23,7 +23,7 @@ static bool gl_PrintError(const char* functionName, const char* fileName, unsign
 	return true;
 }
 
-Framebuffer::Framebuffer(unsigned int width, unsigned int height, bool create_rboDepth) {
+Framebuffer::Framebuffer(const unsigned int& width, const unsigned int& height, const bool& create_rboDepth) {
 	GL_ERROR_CHECK(glGenFramebuffers(1, &framebuffer));
 	GL_ERROR_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, framebuffer));
 
@@ -42,7 +42,7 @@ Framebuffer::~Framebuffer() {
 	;
 }
 
-void Framebuffer::createTexturesAndAttach(unsigned int num_texToAdd, unsigned int width, unsigned int height, GLenum minFilter, GLenum magFilter, GLenum wrapS, GLenum wrapT)
+void Framebuffer::createTexturesAndAttach(const unsigned int& num_texToAdd, const unsigned int& width, const unsigned int& height, GLenum minFilter, GLenum magFilter, GLenum wrapS, GLenum wrapT)
 {
 	unsigned int num_attachments = attachments.size();
 	for (unsigned int i = 0 + num_attachments; i < num_attachments + num_texToAdd; i++) {
@@ -67,7 +67,7 @@ void Framebuffer::createTexturesAndAttach(unsigned int num_texToAdd, unsigned in
 }
 
 //dont forgot to call "attachDrawBuffers" after
-void Framebuffer::createSingleTexture(GLenum internalFormat, unsigned int width, unsigned int height, GLenum format, GLenum type, GLenum minFilter, GLenum magFilter)
+void Framebuffer::createSingleTexture(GLenum internalFormat, const unsigned int& width, const unsigned int& height, GLenum format, GLenum type, GLenum minFilter, GLenum magFilter)
 {
 	GLuint colourBuffer;
 	glGenTextures(1, &colourBuffer);
@@ -101,7 +101,7 @@ void Framebuffer::unbind() {
 	GL_ERROR_CHECK(glBindFramebuffer(GL_FRAMEBUFFER, 0));
 }
 
-void Framebuffer::edit_viewport(unsigned int width, unsigned int height) {
+void Framebuffer::edit_viewport(const unsigned int& width, const unsigned int& height) {
 	glViewport(0, 0, (GLsizei)width, (GLsizei)height);
 }
 void Framebuffer::clearBuffers() {
@@ -111,6 +111,6 @@ void Framebuffer::clearScreen() {
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
-GLuint Framebuffer::getColourBuffer(unsigned int num) {
+GLuint Framebuffer::getColourBuffer(const unsigned int& num) {
 	return colourBuffers[num];
 }

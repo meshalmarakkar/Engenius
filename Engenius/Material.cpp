@@ -1,29 +1,35 @@
 #include "Material.h"
 
-Material::Material(unsigned int tex_dif, unsigned int tex_spec, unsigned int tex_norm, glm::mat4 modelMatrix, float tiling) : 
-	tex_diffuse(tex_dif), tex_specular(tex_spec), tex_normal(tex_norm), modelMatrix(modelMatrix), tiling(tiling){
+Material::Material(const float& tiling) : tiling(tiling), ifSpecularMap(false), ifNormalMap(false) { }
 
+void Material::addTexture_2D(const TextureType& tex) {
+	if ((tex.name).c_str() == TextureNames::specular)
+		ifSpecularMap = true;
+	else if ((tex.name).c_str() == TextureNames::normal)
+		ifNormalMap = true;
+	tex_2D.push_back(tex);
 }
 
-unsigned int Material::getTex_diffuse() {
-	return tex_diffuse;
+void Material::addTexture_Cubemap(const TextureType& tex) {
+	tex_Cubemap.push_back(tex);
 }
-unsigned int Material::getTex_specular() {
-	return tex_specular;
+
+std::vector<TextureType>* Material::getTextures_2D() {
+	return &tex_2D;
 }
-unsigned int Material::getTex_normal() {
-	return tex_normal;
+
+std::vector<TextureType>* Material::getTextures_Cubemap() {
+	return &tex_Cubemap;
 }
+
 float Material::getTiling() {
 	return tiling;
 }
 
-void Material::setModelMatrix(glm::vec3 pos, glm::vec3 scale, glm::vec3 rotation) {
-	;
+bool Material::getIfSpecular() {
+	return ifSpecularMap;
 }
-void Material::setModelMatrix(glm::mat4 newMatrix) {
-	modelMatrix = newMatrix;
-}
-glm::mat4* Material::getModelMatrix() {
-	return &modelMatrix;
+
+bool Material::getIfNormalMapped() {
+	return ifNormalMap;
 }

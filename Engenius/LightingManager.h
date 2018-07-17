@@ -8,54 +8,62 @@
 #include <string>
 #include <tuple>
 #include <iostream>
+#include "Uniforms.h"
+#include "RenderProperties.h"
 
 class LightingManager {
 public:
-	LightingManager(glm::vec3 cameraEye, glm::vec3 cameraAt);
+	LightingManager(const glm::vec3& cameraEye, const glm::vec3& cameraAt);
 	unsigned int getNumOfLights();
-	void lightIDsToShader(unsigned int shader, int po_1, int po_2, int po_3, int sp_1, int sp_2, int sp_3);
-	void lightsToShader(unsigned int shader);
-	std::tuple<int, int, int> getClosestLights(glm::vec3 pos);
-	std::tuple<int, int, int> getClosestSpotLights(glm::vec3 pos);
-	void setUpShadowRender_Pointlights(unsigned int shader, int lightIndex);
-	void shadowMapsToShader(unsigned int shader, int po_1, int po_2, int po_3, int sp_1, int sp_2, int sp_3);
-	void noShadowMessage(unsigned int shader);
+	void lightIDsToShader(const unsigned int& shader, const int& po_1, const int& po_2, const int& po_3, const int& sp_1, const int& sp_2, const int& sp_3);
+	void lightsToShader(const unsigned int& shader);
 
-	unsigned int getDepthCubeMap(unsigned int i);
+	void lights_preloadShader(Uniforms* uni);
+	void getLightIDs(Uniforms* uni, const int* po_1, const int* po_2, const int* po_3, const int* sp_1, const int* sp_2, const int* sp_3);
+	void getShadowMapIDs(RenderProperties* rp, const int* po_1, const int* po_2, const int* po_3);
+
+	std::tuple<int, int, int> getClosestLights(const glm::vec3& pos);
+	std::tuple<int, int, int> getClosestSpotLights(const glm::vec3& pos);
+	void setUpShadowRender_Pointlights(const unsigned int& shader, const int& lightIndex);
+	void shadowMapsToShader(const unsigned int& shader, const int& po_1, const int& po_2, const int& po_3, const int& sp_1, const int& sp_2, const int& sp_3);
+	void noShadowMessage(const unsigned int& shader);
+
+	unsigned int getDepthCubeMap(const unsigned int& i);
 	unsigned int getNumOfPointLights();
-	glm::vec3 getPointLightPosition(unsigned int i);
-	void changeExposure(bool increase);
+	glm::vec3 getPointLightPosition(const unsigned int& i);
+	void changeExposure(const bool& increase);
 	void toggleBloom();
 	bool getIfBloom();
 	void toggleShadow();
 	bool getIfShadow();
+	bool* getIfShadow_Pointer();
 	float getExposure();
-	void setExposure(float newVal);
+	void setExposure(const float& newVal);
 
-	void moveLightForward(const float dt_secs, const glm::vec3 cameraAt);
-	void moveLightBackward(const float dt_secs, const glm::vec3 cameraAt);
-	void moveLightLeft(const float dt_secs, const glm::vec3 cameraAt, const glm::vec3 cameraUp);
-	void moveLightRight(const float dt_secs, const glm::vec3 cameraAt, const glm::vec3 cameraUp);
-	void moveLightUp(const float dt_secs);
-	void moveLightDown(const float dt_secs);
+	void moveLightForward(const float& dt_secs, const glm::vec3& cameraAt);
+	void moveLightBackward(const float& dt_secs, const glm::vec3& cameraAt);
+	void moveLightLeft(const float& dt_secs, const glm::vec3& cameraAt, const glm::vec3& cameraUp);
+	void moveLightRight(const float& dt_secs, const glm::vec3& cameraAt, const glm::vec3& cameraUp);
+	void moveLightUp(const float& dt_secs);
+	void moveLightDown(const float& dt_secs);
 
-	void setConstant(bool increase);
-	void setLinear(bool increase);
-	void setQuadratic(bool increase);
+	void setConstant(const bool& increase);
+	void setLinear(const bool& increase);
+	void setQuadratic(const bool& increase);
 
-	void setAmbient(bool increase, char comp);
-	void setDiffuse(bool increase, char comp);
-	void setSpecular(bool increase, char comp);
-	void setRange(bool increase);
+	void setAmbient(const bool& increase, const char& comp);
+	void setDiffuse(const bool& increase, const char& comp);
+	void setSpecular(const bool& increase, const char& comp);
+	void setRange(const bool& increase);
 
 	void displayLightDetails();
 
-	void setPostProcessNum(int num);
+	void setPostProcessNum(const int& num);
 	int getPostProcessNum();
 
 private:
-	void initLights(glm::vec3 cameraEye, glm::vec3 cameraAt);
-	void initSpotLights(glm::vec3 cameraEye, glm::vec3 cameraAt);
+	void initLights(const glm::vec3& cameraEye, const glm::vec3& cameraAt);
+	void initSpotLights(const glm::vec3& cameraEye, const glm::vec3& cameraAt);
 	void initPointLights();
 	void initShadows();
 
@@ -122,11 +130,15 @@ private:
 	
 	const float valueChangeRate = 0.05f;
 
+	const int defaultLightID = -1;
+	const bool defaultFalse = false;
+	const bool defaultTrue = true;
+
 	unsigned int numOfLights = 0;
 	const int MAX_LIGHTS = 3; //max lights to affect an object
 
-	void addSpotLight(glm::vec3 position, glm::vec3 direction, float cutOff, float outerCutOff, float att_constant, float att_linear, float att_quadratic, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular);
-	void addPointLight(glm::vec3 position, float att_constant, float att_linear, float att_quadratic, glm::vec3 ambient, glm::vec3 diffuse, glm::vec3 specular);
+	void addSpotLight(const glm::vec3& position, const glm::vec3& direction, const float& cutOff, const float& outerCutOff, const float& att_constant, const float& att_linear, const float& att_quadratic, const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular);
+	void addPointLight(const glm::vec3& position, const float& att_constant, const float& att_linear, const float& att_quadratic, const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular);
 	
 	bool bloom;
 	float exposure;

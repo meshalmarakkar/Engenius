@@ -39,12 +39,36 @@ public:
 	void draw();
 	bool ControlCheck(const float dt_secs);
 
+	void toggleDeferredShading();
+	void setPause(const bool& newVal);
+	bool getIfPause();
+
+	void checkTrigger();
+
 private:
 	void renderScene();
 	void renderScene_GBuffer();
 
+	struct Puzzle {
+		glm::vec4 steps;
+		bool gotFirst;
+		bool gotSecond;
+		bool gotThird;
+		bool solved;
+
+		Puzzle() {
+			gotFirst = false;
+			gotSecond = false;
+			gotThird = false;
+			solved = false;
+		}
+	};
+
+	void areaControl();
+	void resetPuzzle(Puzzle *puzzle);
+	void checkStep(Puzzle *puzzle, const int& triggerNo);
+
 private:	
-	unsigned int particle_program;
 	ParticleManager* particleGenerator;
 	LightingManager* lightingManager;
 	Camera* camera;
@@ -66,6 +90,28 @@ private:
 	
 	float dt_secs;
 
+	bool ifDeferred;
+	bool pause;
+	bool endGame;
+
+	const unsigned int grid_entrance = 0;
+	const unsigned int grid_corridor = 1;
+	const unsigned int grid_generator = 2;
+
+	glm::vec4 pool_of_steps1[4];
+	glm::vec4 pool_of_steps2[4];
+
+	int previousTriggerNo;
+
+	bool controlReset_1;
+	bool controlReset_2;
+	//bool alarmStopped;
+
+	Puzzle puzzle_firstTime;
+	Puzzle puzzle_secondTime;
+
+#define NUM_EFFECTIVE_GRIDS 2
+	unsigned int renderGridNo[NUM_EFFECTIVE_GRIDS];
 };
 
 #endif

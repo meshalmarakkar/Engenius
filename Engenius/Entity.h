@@ -8,7 +8,7 @@
 
 class Entity {
 public:
-	Entity(Model* model, glm::vec3 position, glm::vec3 scale, glm::vec3 rotation, unsigned int gridNo);
+	Entity(Model* model, const glm::vec3& position, const glm::vec3& scale, const glm::vec3& rotation, const unsigned int& gridNo);
 
 	Model* getModel();
 	const glm::vec3 getPos();
@@ -20,29 +20,29 @@ public:
 	const glm::mat4 getModelMatrix();
 	const unsigned int getGridNo();
 
-	void setModelMatrix(const glm::mat4 newVal);
-	void setPos(const glm::vec3 newVal);
-	void setScale(const glm::vec3 newVal);
-	void setYaw(const float newVal);
+	void setModelMatrix(const glm::mat4& newVal);
+	void setPos(const glm::vec3& newVal);
+	void setScale(const glm::vec3& newVal);
+	void setYaw(const float& newVal);
 	float getPitch();
 	float getRoll();
 
-	void setCullingBound(const float newVal);
+	void setCullingBound(const float& newVal);
 	float getCullingBound();
 
-	void setPointLightIDs(int id1, int id2, int id3);
-	int getPointLightID(unsigned int i);
+	void setPointLightIDs(const int& id1, const int& id2, const int& id3);
+	int getPointLightID(const unsigned int& i);
 
-	void setSpotLightIDs(int id1, int id2, int id3);
-	int getSpotLightID(unsigned int i);
+	void setSpotLightIDs(const int& id1, const int& id2, const int& id3);
+	int getSpotLightID(const unsigned int& i);
 
 	int getZone();
-	void setZone(int newVal);
+	void setZone(const int& newVal);
 
-	void setShininess(const float newVal);
-	void shininessToShader(unsigned int shader);
+	void setShininess(const float& newVal);
+	void shininessToShader(const unsigned int& shader);
 
-	void setTiling(const float newValue);
+	void setTiling(const float& newValue);
 	float getTiling();
 
 protected:

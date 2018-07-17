@@ -15,41 +15,41 @@
 
 class HUDManager {
 public:
-	HUDManager(WindowManager* windowManager, unsigned int shader);
-	void addHUD(int x, int y, int sizeX, int sizeY, const std::string storageName, const std::string text, TTF_Font* font, bool allowLowTransparency, float transparency = 0.0f);
-	void addHUD(int x, int y, int sizeX, int sizeY, const std::string storageName, unsigned int texture, bool allowLowTransparency, float transparency = 0.0f);
-	void addMenuBarHUD(int x, int y, int sizeX, int sizeY, const std::string storageName, const unsigned int texture, bool allowLowTransparency, float transparency = 0.0f);
-	void addMenuBarHUD(int x, int y, int sizeX, int sizeY, const std::string storageName, const std::string text, TTF_Font* font, bool allowLowTransparency, float transparency = 0.0f);
-	void addAnimatedHUD(int x, int y, int sizeX, int sizeY, unsigned int texture, bool allowLowTransparency, float transparency = 0.0f);
+	HUDManager(WindowManager* windowManager, const unsigned int& shader);
+	void addHUD(const int& x, const int& y, const int& sizeX, const int& sizeY, const std::string& storageName, const std::string& text, TTF_Font* font, const bool& allowLowTransparency, const float& transparency = 0.0f);
+	void addHUD(const int& x, const int& y, const int& sizeX, const int& sizeY, const std::string& storageName, const unsigned int& texture, const bool& allowLowTransparency, const float& transparency = 0.0f);
+	void addMenuBarHUD(const int& x, const int& y, const int& sizeX, const int& sizeY, const std::string& storageName, const unsigned int& texture, const bool& allowLowTransparency, const float& transparency = 0.0f);
+	void addMenuBarHUD(const int& x, const int& y, const int& sizeX, const int& sizeY, const std::string& storageName, const std::string& text, TTF_Font* font, const bool& allowLowTransparency, const float& transparency = 0.0f);
+	void addAnimatedHUD(const int& x, const int& y, const int& sizeX, const int& sizeY, const unsigned int& texture, const bool& allowLowTransparency, const float& transparency = 0.0f);
 	void render();
 
-	void update(float dt_secs);
-	bool checkIfClicked(int mouseX, int mouseY, const int screenHeight, std::string buttonName);
-	bool checkSubBarClicked(int mouseX, int mouseY, const int screenHeight, std::string buttonName);
-	void displaySelected(std::string buttonName);
-	void swapComponent(bool next);
+	void update(const float& dt_secs);
+	bool checkIfClicked(const int& mouseX, const int& mouseY, const int& screenHeight, const std::string& buttonName);
+	bool checkSubBarClicked(const int& mouseX, const int& mouseY, const int& screenHeight, const std::string& buttonName);
+	void displaySelected(const std::string& buttonName);
+	void swapComponent(const bool& next);
 	std::string getCurrentComponent();
 
 private:
 	std::vector<glm::vec2> UVs;
 
 	struct AnimatedHUD : public HUDItem {
-		AnimatedHUD(int screenWidth, int screenHeight, int x, int y, int sizeX, int sizeY, unsigned int texture, bool allowLowTransparency, float transparency) : HUDItem(screenWidth, screenHeight, x, y, sizeX, sizeY, texture, allowLowTransparency, transparency) { ; }
+		AnimatedHUD(const int& screenWidth, const int& screenHeight, const int& x, const int& y, const int& sizeX, const int& sizeY, const unsigned int& texture, const bool& allowLowTransparency, const float& transparency) : HUDItem(screenWidth, screenHeight, x, y, sizeX, sizeY, texture, allowLowTransparency, transparency) { ; }
 		std::vector<glm::vec2> UVs;
 		float duration;
 	};
 
 	struct MenubarHUD : public HUDItem {
-		MenubarHUD(int screenWidth, int screenHeight, int x, int y, int sizeX, int sizeY, unsigned int texture, bool allowLowTransparency, float transparency) : HUDItem(screenWidth, screenHeight, x, y, sizeX, sizeY, texture, allowLowTransparency, transparency) { ; }
+		MenubarHUD(const int& screenWidth, const int& screenHeight, const int& x, const int& y, const int& sizeX, const int& sizeY, const unsigned int& texture, const bool& allowLowTransparency, const float& transparency) : HUDItem(screenWidth, screenHeight, x, y, sizeX, sizeY, texture, allowLowTransparency, transparency) { ; }
 		std::unordered_map<std::string, HUDItem*> subOptions;
 	};
 
 	std::unordered_map<std::string, HUDItem*> HUDs;
 	std::vector<AnimatedHUD*> AnimatedHUDs;
 	std::unordered_map<std::string, MenubarHUD*> menuBarHUDs;
-	void render(const std::vector<glm::vec2> verts, const std::vector<glm::vec2> UVs, const unsigned int texture, bool allowLowTransparency, float transparency);
-	void addSubOptions(std::unordered_map<std::string, HUDItem*> &subOptions, int x, int y, int sizeX, int sizeY, std::string storageName, unsigned int texture, bool allowLowTransparency, float transparency = 0.0f);
-	void addSubOptions(std::unordered_map<std::string, HUDItem*> &subOptions, int x, int y, int sizeX, int sizeY, std::string storageName, const std::string text, TTF_Font* font, bool allowLowTransparency, float transparency = 0.0f);
+	void render(const std::vector<glm::vec2>& verts, const std::vector<glm::vec2>& UVs, const unsigned int& texture, const bool& allowLowTransparency, const float& transparency);
+	void addSubOptions(std::unordered_map<std::string, HUDItem*> &subOptions, const int& x, const int& y, const int& sizeX, const int& sizeY, const std::string& storageName, const unsigned int& texture, const bool& allowLowTransparency, const float& transparency = 0.0f);
+	void addSubOptions(std::unordered_map<std::string, HUDItem*> &subOptions, const int& x, const int& y, const int& sizeX, const int& sizeY, const std::string& storageName, const std::string& text, TTF_Font* font, const bool& allowLowTransparency, const float& transparency = 0.0f);
 
 	void lightingSubOptions();
 

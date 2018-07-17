@@ -24,16 +24,16 @@ static const glm::vec2 VERTICES[] = {
 
 class ParticleManager {
 public:
-	ParticleManager(unsigned int shader);
+	ParticleManager(const unsigned int& shader);
 	~ParticleManager();
-	void Update(float dt, glm::vec3 cameraPos);
+	void Update(const float& dt, const glm::vec3& cameraPos);
 
-	void renderParticles(glm::mat4 view, glm::mat4 projection);
-	void insertFire(int numOfParticles, glm::vec3 position, bool repeatedAnimation);
-	void insertExplosion(int numOfParticles, glm::vec3 position, bool repeatedAnimation);
-	void insertExplosion2(int numOfParticles, glm::vec3 position, bool repeatedAnimation);
-	void insertSmoke(int numOfParticles, glm::vec3 position, bool repeatedAnimation);
-	void moveParticleManually(glm::vec3 newPos);
+	void renderParticles(const glm::mat4& view, const glm::mat4& projection);
+	void insertFire(const int& numOfParticles, const glm::vec3& position, const bool& repeatedAnimation);
+	void insertExplosion(const int& numOfParticles, const glm::vec3& position, const bool& repeatedAnimation);
+	void insertExplosion2(const int& numOfParticles, const glm::vec3& position, const bool& repeatedAnimation);
+	void insertSmoke(const int& numOfParticles, const glm::vec3& position, const bool& repeatedAnimation);
+	void moveParticleManually(const glm::vec3& newPos);
 
 private:
 	enum ParticleType {
@@ -70,9 +70,9 @@ private:
 		}
 	};
 
-	void insertParticleGenerator(ParticleType particleType, bool repeatedAnimation, int numOfParticles, glm::vec3 position);
-	void ParticleManager::updateRepeated(Particle &p, float dt, glm::vec3 cameraPos);
-	void ParticleManager::updateUnrepeated(Particle &p, float dt, glm::vec3 cameraPos);
+	void insertParticleGenerator(ParticleType particleType, const bool& repeatedAnimation, const int& numOfParticles, const glm::vec3& position);
+	void ParticleManager::updateRepeated(Particle &p, const float& dt, const glm::vec3& cameraPos);
+	void ParticleManager::updateUnrepeated(Particle &p, const float& dt, const glm::vec3& cameraPos);
 	void SortParticles();
 	const int MAX_PARTICLES = 300;
 	const int MAX_PER_TYPE = 20;

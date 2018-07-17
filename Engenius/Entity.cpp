@@ -1,6 +1,6 @@
 #include "Entity.h"
 
-Entity::Entity(Model* model, glm::vec3 position, glm::vec3 scale, glm::vec3 rotation, unsigned int gridNo) : model(model), position(position), scale(scale), rotation(rotation), gridNo(gridNo) /*initialPosition(position), initialScale(scale), initialYaw(rotation.y)*/ {
+Entity::Entity(Model* model, const glm::vec3& position, const glm::vec3& scale, const glm::vec3& rotation, const unsigned int& gridNo) : model(model), position(position), scale(scale), rotation(rotation), gridNo(gridNo) /*initialPosition(position), initialScale(scale), initialYaw(rotation.y)*/ {
 	Common::createModelMatrix(this->modelMatrix, this->position, this->scale, this->rotation);
 	shininess = 32.0f;
 	tiling = 1.0f;
@@ -16,10 +16,10 @@ const float Entity::getYaw() { return this->rotation.y; }
 const glm::mat4 Entity::getModelMatrix() { return this->modelMatrix; }
 const unsigned int Entity::getGridNo() { return this->gridNo; }
 
-void Entity::setModelMatrix(const glm::mat4 newVal) { this->modelMatrix = newVal; }
-void Entity::setPos(const glm::vec3 newVal) { this->position = newVal; }
-void Entity::setScale(const glm::vec3 newVal) { this->scale = newVal; }
-void Entity::setYaw(const float newVal) { this->rotation.y = newVal; }
+void Entity::setModelMatrix(const glm::mat4& newVal) { this->modelMatrix = newVal; }
+void Entity::setPos(const glm::vec3& newVal) { this->position = newVal; }
+void Entity::setScale(const glm::vec3& newVal) { this->scale = newVal; }
+void Entity::setYaw(const float& newVal) { this->rotation.y = newVal; }
 
 float Entity::getPitch() {
 	return rotation.x;
@@ -33,7 +33,7 @@ int Entity::getZone() {
 	return zone;
 }
 
-void Entity::setTiling(const float newValue) {
+void Entity::setTiling(const float& newValue) {
 	tiling = newValue;
 }
 
@@ -41,11 +41,11 @@ float Entity::getTiling() {
 	return tiling;
 }
 
-void Entity::setZone(int newVal) {
+void Entity::setZone(const int& newVal) {
 	zone = newVal;
 }
 
-void Entity::setCullingBound(const float newVal) {
+void Entity::setCullingBound(const float& newVal) {
 	cullingBound = newVal;
 }
 float Entity::getCullingBound() {
@@ -56,30 +56,30 @@ Model* Entity::getModel() {
 	return model;
 }
 
-void Entity::setPointLightIDs(int id1, int id2, int id3) {
+void Entity::setPointLightIDs(const int& id1, const int& id2, const int& id3) {
 	pointLightIDs[0] = id1;
 	pointLightIDs[1] = id2;
 	pointLightIDs[2] = id3;
 }
 
-int Entity::getPointLightID(unsigned int i) {
+int Entity::getPointLightID(const unsigned int& i) {
 	return pointLightIDs[i];
 }
 
-void Entity::setSpotLightIDs(int id1, int id2, int id3) {
+void Entity::setSpotLightIDs(const int& id1, const int& id2, const int& id3) {
 	spotLightIDs[0] = id1;
 	spotLightIDs[1] = id2;
 	spotLightIDs[2] = id3;
 }
 
-int Entity::getSpotLightID(unsigned int i) {
+int Entity::getSpotLightID(const unsigned int& i) {
 	return spotLightIDs[i];
 }
 
-void Entity::setShininess(const float newVal) {
+void Entity::setShininess(const float& newVal) {
 	shininess = newVal;
 }
 
-void Entity::shininessToShader(unsigned int shader) {
+void Entity::shininessToShader(const unsigned int& shader) {
 	glUniform1f(glGetUniformLocation(shader, "shininess"), shininess);
 }

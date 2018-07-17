@@ -1,14 +1,15 @@
 #include "TerrainManager.h"
+#include "Shader.h"
 #include "TextureLoader.h"
 
-TerrainManager::TerrainManager(LightingManager* lightingManager, Camera* camera, ShaderManager* shaderManager) : lightingManager(lightingManager), camera(camera), shaderManager(shaderManager){
+TerrainManager::TerrainManager(LightingManager* lightingManager, ShaderManager* shaderManager) : lightingManager(lightingManager), shaderManager(shaderManager){
 	initTerrainToWorld();
 	addLightIDs();
 	timePassed = 0.0f;
 }
 
 // Returns true iif v1 can be considered equal to v2
-bool TerrainManager::is_near(float v1, float v2) {
+bool TerrainManager::is_near(const float& v1, const float& v2) {
 	return fabs(v1 - v2) < 0.01f;
 }
 
@@ -90,7 +91,7 @@ void TerrainManager::indexVBO(
 	}
 }
 
-glm::vec3 TerrainManager::calculateNormal(int x, int z, float heights[VERTEX_COUNT][VERTEX_COUNT]) {
+glm::vec3 TerrainManager::calculateNormal(const int& x, const int& z, const float heights[VERTEX_COUNT][VERTEX_COUNT]) {
 	//	float heightL = heights[x - 1][z]; //left
 	//	float heightR = heights[x + 1][z]; //right
 	//	float heightD = heights[x][z - 1]; //down
@@ -199,22 +200,37 @@ void TerrainManager::computeTangentBasis(
 void TerrainManager::initTerrainToWorld() {
 	//2.01921,-0.0575006,4.57893 - security door position
 	
-	createTerrain(glm::vec3(-4.0, 0.0f, 4.0f), 20.0f, "diffuse.png", "../Engenius/Models/Environment/Terrain/grassGround/", "", "", heightsPlaneBumpy);
+	//mat_ground = new Material(TextureLoader::loadTexture("diffuse.png", "../Engenius/Models/Environment/Terrain/grassGround/"), 
+	//	TextureLoader::loadTexture("specular.png", "../Engenius/Models/Environment/Terrain/grassGround/"), 
+	//	TextureLoader::loadTexture("normal.png", "../Engenius/Models/Environment/Terrain/grassGround/"));
 
-	//createTerrain(glm::vec3(-4.0, 0.0f, 4.0f), 20.0f, "diffuse.png", "../Engenius/Models/Environment/Terrain/grassGround/", "", "", "normal.png", "../Engenius/Models/Environment/Terrain/grassGround/", heightsPlaneBumpy);
-	//createTerrain(glm::vec3(-4.0, 0.0f, 4.0f), 20.0f, "diffuse.bmp", "../Engenius/Models/Environment/Terrain/brick/", "", "", "normal.bmp", "../Engenius/Models/Environment/Terrain/brick/", heightsPlaneBumpy);
-	
-	terrains.resize(terrains.size());
-	mappedTerrains.resize(terrains.size());
+	mat_ground = new Material(16.0f);
+	mat_ground->addTexture_2D(TextureType(TextureNames::diffuse, TextureLoader::loadTexture("diffuse.png", "../Engenius/Models/Environment/Terrain/grassGround/")));
 
 	alphaTest = 0.25f; //0.9f;
 	windStrength = 4.0f;
 	windDirection = glm::vec3(1.0, 0.0, 1.0);
 	windDirection = glm::normalize(windDirection);
-	grassTexture = TextureLoader::loadTexture("grassPack.png", "../Engenius/Textures/");// Common::loadTexture("grassPack.dds", "../Engenius/Textures/");
+	mat_grass = new Material();
+	mat_grass->addTexture_2D(TextureType(TextureNames::diffuse, TextureLoader::loadTexture("grassPack.png", "../Engenius/Textures/")));
+
+	Shader* sh = shaderManager->getShaderProgram(Programs::grass);
+	sh->getInitUniforms()->addUniform("alphaTest", &alphaTest);
+	sh->getInitUniforms()->addUniform("windStrength", &windStrength);
+	sh->getInitUniforms()->addUniform("windDirection", &windDirection);
+	sh->bind();
+	sh->uniformsToShader_INIT();
+	sh->getRunTimeUniforms()->addUniform("timePassed", &timePassed);
+
+	createTerrain(glm::vec3(-4.0, 0.0f, 4.0f), 20.0f, mat_ground, heightsPlaneBumpy, mat_grass);
+
+	terrains.resize(terrains.size());
+	mappedTerrains.resize(terrains.size());
+
+//	tex_diff_grass = TextureLoader::loadTexture("grassPack.png", "../Engenius/Textures/");// Common::loadTexture("grassPack.dds", "../Engenius/Textures/");
 }
 
-BaseAttributes TerrainManager::calculateBaseAttributes(float size, const float vertHeights[]) {
+BaseAttributes TerrainManager::calculateBaseAttributes(const float& size, const float vertHeights[]) {
 	float HALF_TERRAIN_SIZE = size * 0.5f;
 
 	BaseAttributes attrib;
@@ -265,44 +281,32 @@ BaseAttributes TerrainManager::calculateBaseAttributes(float size, const float v
 	return attrib;
 }
 
-void TerrainManager::createTerrain(glm::vec3 pos, float size, std::string textype_diff, std::string texpath_diff, std::string textype_spec, std::string texpath_spec, const float vertHeights[], float tiling) {
+void TerrainManager::createTerrain(const glm::vec3 &pos, const float &size, Material* mat, const float vertHeights[], Material* mat_grass) {
 	BaseAttributes attrib = calculateBaseAttributes(size, vertHeights);
 	std::vector<glm::vec3> indexed_vertices;
 	std::vector<glm::vec3> indexed_normals;
 	std::vector<glm::vec2> indexed_textureCoords;
-	indexVBO(attrib.vertices, attrib.textureCoords, attrib.normals, indexed_vertices, indexed_textureCoords, indexed_normals);
-
-	terrains.push_back(new Terrain(indexed_vertices, indexed_normals, indexed_textureCoords, attrib.indices, pos, size, TextureLoader::loadTexture(textype_diff, texpath_diff), TextureLoader::loadTexture(textype_spec, texpath_spec), attrib.heights, tiling));
-}
-
-void TerrainManager::createTerrain(glm::vec3 pos, float size, std::string textype_diff, std::string texpath_diff, std::string textype_spec, std::string texpath_spec, std::string textype_norm, std::string texpath_norm, const float vertHeights[], float tiling) {
-
-	BaseAttributes attrib = calculateBaseAttributes(size, vertHeights);
-
-	std::vector<glm::vec3> indexed_vertices;
-	std::vector<glm::vec3> indexed_normals;
-	std::vector<glm::vec2> indexed_textureCoords;
-
-	std::vector<glm::vec3> tangents;
-	std::vector<glm::vec3> bitangents;
-	computeTangentBasis(attrib.vertices, attrib.textureCoords, attrib.indices, attrib.normals, tangents, bitangents);
-	std::vector<glm::vec3> indexed_tangents;
-	std::vector<glm::vec3> indexed_bitangents;
-	indexVBO_TBN(attrib.vertices, attrib.textureCoords, attrib.normals, tangents, bitangents, indexed_vertices, indexed_textureCoords, indexed_normals, indexed_tangents, indexed_bitangents);
-
-	terrains.push_back(new Terrain(indexed_vertices, indexed_normals, indexed_textureCoords, indexed_tangents, indexed_bitangents, attrib.indices, pos, size, TextureLoader::loadTexture(textype_diff, texpath_diff), TextureLoader::loadTexture(textype_spec, texpath_spec), TextureLoader::loadTexture(textype_norm, texpath_norm), attrib.heights, tiling));
-}
-
-void TerrainManager::render(Renderer* renderer, unsigned int ifShadow, glm::vec3 playerPos, float dt_secs) {
-	unsigned int shader = shaderManager->get_terrain_program();
-
-	glUseProgram(shader);
 	
-	glUniform1i(glGetUniformLocation(shader, "displayShadow"), ifShadow);
+	if (mat->getIfNormalMapped()) {
+		std::vector<glm::vec3> tangents;
+		std::vector<glm::vec3> bitangents;
+		computeTangentBasis(attrib.vertices, attrib.textureCoords, attrib.indices, attrib.normals, tangents, bitangents);
+		std::vector<glm::vec3> indexed_tangents;
+		std::vector<glm::vec3> indexed_bitangents;
+		indexVBO_TBN(attrib.vertices, attrib.textureCoords, attrib.normals, tangents, bitangents, indexed_vertices, indexed_textureCoords, indexed_normals, indexed_tangents, indexed_bitangents);
+		terrains.push_back(new Terrain(indexed_vertices, indexed_normals, indexed_textureCoords, indexed_tangents, indexed_bitangents, attrib.indices, pos, size, mat, attrib.heights, mat_grass));
 
-	farPlane_camEye_toShader(shader);
-	camera->passViewProjToShader(shader);
-	lightingManager->lightsToShader(shader);
+	}
+	else {
+		indexVBO(attrib.vertices, attrib.textureCoords, attrib.normals, indexed_vertices, indexed_textureCoords, indexed_normals);
+		terrains.push_back(new Terrain(indexed_vertices, indexed_normals, indexed_textureCoords, attrib.indices, pos, size, mat, attrib.heights, mat_grass));
+	}
+}
+
+void TerrainManager::render(Renderer* renderer, const glm::vec3& playerPos, const float& dt_secs) {
+	Shader* program = shaderManager->getShaderProgram(Programs::terrain);
+	program->bind();
+	program->uniformsToShader_RUNTIME();
 
 	int numOfMapped = 0;
 
@@ -313,81 +317,44 @@ void TerrainManager::render(Renderer* renderer, unsigned int ifShadow, glm::vec3
 				numOfMapped++;
 			}
 			else {
-				lightsToShader(shader, terrains[iter]->getPointLightID(0), terrains[iter]->getPointLightID(1), terrains[iter]->getPointLightID(2), terrains[iter]->getSpotLightID(0), terrains[iter]->getSpotLightID(1), terrains[iter]->getSpotLightID(2));
-				renderer->drawElements_w_primitiveRestart(shader, terrains[iter]->getVAO(), terrains[iter]->getMaterial());
+				renderer->drawElements_w_primitiveRestart(program, terrains[iter]->getVAO(), terrains[iter]->getRenderProperties());
 			}
 		}
 		else {
-			lightsToShader(shader, terrains[iter]->getPointLightID(0), terrains[iter]->getPointLightID(1), terrains[iter]->getPointLightID(2), terrains[iter]->getSpotLightID(0), terrains[iter]->getSpotLightID(1), terrains[iter]->getSpotLightID(2));
-			renderer->drawElements_w_primitiveRestart(shader, terrains[iter]->getVAO(), terrains[iter]->getMaterial());
+			renderer->drawElements_w_primitiveRestart(program, terrains[iter]->getVAO(), terrains[iter]->getRenderProperties());
 		}
 	}
 
 	if (numOfMapped > 0) {
-		shader = shaderManager->get_terrain_mapped_program();
-
-		glUseProgram(shader);
-	
-		glUniform1i(glGetUniformLocation(shader, "displayShadow"), ifShadow);
-
-		farPlane_camEye_toShader(shader);
-		camera->passViewProjToShader(shader);
-		lightingManager->lightsToShader(shader);
+		program = shaderManager->getShaderProgram(Programs::terrain_mapped);
+		program->bind();
+		program->uniformsToShader_RUNTIME();
 
 		for (int i = 0; i < numOfMapped; i++) {
-			lightsToShader(shader, mappedTerrains[i]->getPointLightID(0), mappedTerrains[i]->getPointLightID(1), mappedTerrains[i]->getPointLightID(2), mappedTerrains[i]->getSpotLightID(0), mappedTerrains[i]->getSpotLightID(1), mappedTerrains[i]->getSpotLightID(2));
-			renderer->drawElements_w_primitiveRestart(shader, mappedTerrains[i]->getVAO(), mappedTerrains[i]->getMaterial());
+			renderer->drawElements_w_primitiveRestart(program, mappedTerrains[i]->getVAO(), mappedTerrains[i]->getRenderProperties());
 		}
 	}
 
 	////GRASS////
-	shader = shaderManager->get_grass_program();
-	glUseProgram(shader);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, grassTexture);
-	glUniform1i(glGetUniformLocation(shader, "texture_diffuse1"), 0);
-	glUniform1f(glGetUniformLocation(shader, "alphaTest"), alphaTest);
-	glUniform1f(glGetUniformLocation(shader, "windStrength"), windStrength);
-	glUniform3fv(glGetUniformLocation(shader, "windDirection"), 1, glm::value_ptr(windDirection));
-
-	glUniform1i(glGetUniformLocation(shader, "displayShadow"), ifShadow);
-
-	farPlane_camEye_toShader(shader);
-	camera->passViewProjToShader(shader);
-	lightingManager->lightsToShader(shader);
-
 	timePassed += dt_secs;
-	glDisable(GL_CULL_FACE);
+	program = shaderManager->getShaderProgram(Programs::grass);
+	program->bind();
+	program->uniformsToShader_RUNTIME();
+
+	renderer->disableCullFace();
 	for (unsigned int iter = 0; iter < terrains.size(); iter++) {
-		lightsToShader(shader, terrains[iter]->getPointLightID(0), terrains[iter]->getPointLightID(1), terrains[iter]->getPointLightID(2), terrains[iter]->getSpotLightID(0), terrains[iter]->getSpotLightID(1), terrains[iter]->getSpotLightID(2));
-		glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(*(terrains[iter]->getModelMatrix_Grass())));
-		glUniform1f(glGetUniformLocation(shader, "timePassed"), timePassed);
-		renderer->drawArrays(terrains[iter]->getVAO_Grass());
-		//terrains[iter]->renderGrass(shader, dt_secs);
+		renderer->drawArrays(program, terrains[iter]->getVAO_Grass(), terrains[iter]->getRenderProperties_grass());
 	}
-	glEnable(GL_CULL_FACE);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	//Common::unbindTextures(0);
+	renderer->enableCullFace();
 }
 
-void TerrainManager::shadowDraw(unsigned int shader, Renderer* renderer) {
-	for (unsigned int iter = 0; iter < terrains.size(); iter++) {
-		renderer->drawElements_w_primitiveRestart(shader, terrains[iter]->getVAO(), terrains[iter]->getMaterial());
-	}
+void TerrainManager::shadowDraw(const unsigned int& shader, Renderer* renderer) {
+	//for (unsigned int iter = 0; iter < terrains.size(); iter++) {
+	//	renderer->drawElements_w_primitiveRestart(shader, terrains[iter]->getVAO(), terrains[iter]->getRenderProperties());
+	//}
 }
 
-void TerrainManager::lightsToShader(unsigned int shader, int point_id1, int point_id2, int point_id3, int spot_id1, int spot_id2, int spot_id3) {
-	lightingManager->lightIDsToShader(shader, point_id1, point_id2, point_id3, spot_id1, spot_id2, spot_id3);
-	lightingManager->shadowMapsToShader(shader, point_id1, point_id2, point_id3, spot_id1, spot_id2, spot_id3);
-	//lightingManager->spotShadowMapsToShader(shader, spotLights_id1, spotLights_id2);
-}
-
-void TerrainManager::farPlane_camEye_toShader(unsigned int shader) {
-	glUniform1f(glGetUniformLocation(shader, "far_plane"), camera->getFarPlane());
-	glUniform3fv(glGetUniformLocation(shader, "viewPos"), 1, glm::value_ptr(camera->getCameraEye()));
-}
-
-float TerrainManager::getTerrainHeight(const float x, const float z) {
+float TerrainManager::getTerrainHeight(const float& x, const float& z) {
 	for (unsigned int i = 0; i < terrains.size(); i++) {
 		if (terrains[i]->ifInTerrain(x, z))
 			return terrains[i]->getTerrainHeight(x, z);
@@ -396,15 +363,33 @@ float TerrainManager::getTerrainHeight(const float x, const float z) {
 }
 
 void TerrainManager::addLightIDs() {
-	std::tuple<int, int, int> lightIDs;
-	std::tuple<int, int, int> lightIDs2;
+	std::tuple<int, int, int> pointIDs;
+	std::tuple<int, int, int> spotIDs;
 
+	Terrain* t;
 	for (unsigned int i = 0; i < terrains.size(); i++) {
-		lightIDs = lightingManager->getClosestLights(terrains.at(i)->getCentre());
-		terrains.at(i)->setPointLightIDs(std::get<0>(lightIDs), std::get<1>(lightIDs), std::get<2>(lightIDs));
-		std::cout << "PointL: " << std::get<0>(lightIDs) << ", " << std::get<1>(lightIDs) << ", " << std::get<2>(lightIDs) << std::endl;
-		lightIDs2 = lightingManager->getClosestSpotLights(terrains.at(i)->getCentre());
-		terrains.at(i)->setSpotLightIDs(std::get<0>(lightIDs2), std::get<1>(lightIDs2), std::get<2>(lightIDs2));
-		std::cout << "SpotL: " << std::get<0>(lightIDs2) << ", " << std::get<1>(lightIDs2) << ", " << std::get<2>(lightIDs2) << std::endl;
+		t = terrains.at(i);
+		pointIDs = lightingManager->getClosestLights(terrains.at(i)->getCentre());
+		t->setPointLightIDs(std::get<0>(pointIDs), std::get<1>(pointIDs), std::get<2>(pointIDs));
+	//	std::cout << "PointL: " << std::get<0>(lightIDs) << ", " << std::get<1>(lightIDs) << ", " << std::get<2>(lightIDs) << std::endl;
+
+		spotIDs = lightingManager->getClosestSpotLights(terrains.at(i)->getCentre());
+		t->setSpotLightIDs(std::get<0>(spotIDs), std::get<1>(spotIDs), std::get<2>(spotIDs));
+	//	std::cout << "SpotL: " << std::get<0>(lightIDs2) << ", " << std::get<1>(lightIDs2) << ", " << std::get<2>(lightIDs2) << std::endl;
+
+		lightingManager->getLightIDs(terrains.at(i)->getRenderProperties()->getUniforms(), 
+			t->getPointLightID_Pointer(0), t->getPointLightID_Pointer(1), t->getPointLightID_Pointer(2),
+			t->getSpotLightID_Pointer(0), t->getSpotLightID_Pointer(1), t->getSpotLightID_Pointer(2));
+
+		lightingManager->getShadowMapIDs(terrains.at(i)->getRenderProperties(), t->getPointLightID_Pointer(0), t->getPointLightID_Pointer(1), t->getPointLightID_Pointer(2));
+
+
+		lightingManager->getLightIDs(terrains.at(i)->getRenderProperties_grass()->getUniforms(),
+			t->getPointLightID_Pointer(0), t->getPointLightID_Pointer(1), t->getPointLightID_Pointer(2),
+			t->getSpotLightID_Pointer(0), t->getSpotLightID_Pointer(1), t->getSpotLightID_Pointer(2));
+
+		lightingManager->getShadowMapIDs(terrains.at(i)->getRenderProperties_grass(), t->getPointLightID_Pointer(0), t->getPointLightID_Pointer(1), t->getPointLightID_Pointer(2));
+
+	
 	}
 }

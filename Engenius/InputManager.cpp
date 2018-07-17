@@ -1,7 +1,8 @@
 #include "InputManager.h"
+#include "GameManager.h"
 
-InputManager::InputManager(WindowManager*  windowManager, Camera* camera, EntityManager* entityManager, MousePicker* mousePicker, LightingManager* lightingManager, HUDManager* hudManager, AudioManager* audioManager, EditModeManager *editModeManager, CollisionManager* colManager, TerrainManager* terrainManager) :
-	windowManager(windowManager), camera(camera), entityManager(entityManager), mousePicker(mousePicker), lightingManager(lightingManager), hudManager(hudManager), audioManager(audioManager), editModeManager(editModeManager), colManager(colManager), terrainManager(terrainManager) {
+InputManager::InputManager(GameManager* gameManager, WindowManager*  windowManager, Camera* camera, EntityManager* entityManager, MousePicker* mousePicker, LightingManager* lightingManager, HUDManager* hudManager, AudioManager* audioManager, EditModeManager *editModeManager, CollisionManager* colManager, TerrainManager* terrainManager) :
+	gameManager(gameManager), windowManager(windowManager), camera(camera), entityManager(entityManager), mousePicker(mousePicker), lightingManager(lightingManager), hudManager(hudManager), audioManager(audioManager), editModeManager(editModeManager), colManager(colManager), terrainManager(terrainManager) {
 	warpMouse = true;
 	SDL_ShowCursor(SDL_DISABLE);
 	click_coolDown = 0.0f;
@@ -289,7 +290,7 @@ bool InputManager::KeyboardControls(SDL_Window * window, const float dt_secs) {
 		{
 			if (keys[SDL_SCANCODE_ESCAPE])
 				return false;
-			if (entityManager->getIfPause() == false) {
+			if (gameManager->getIfPause() == false) {
 				if (keys[SDL_SCANCODE_E]) {
 					camera->ToggleZoom();
 				}
@@ -311,7 +312,7 @@ bool InputManager::KeyboardControls(SDL_Window * window, const float dt_secs) {
 				}
 
 				if (keys[SDL_SCANCODE_F]) {
-					entityManager->toggleDeferredShading();
+					gameManager->toggleDeferredShading();
 				}
 
 				if (keys[SDL_SCANCODE_G]) {
@@ -326,7 +327,7 @@ bool InputManager::KeyboardControls(SDL_Window * window, const float dt_secs) {
 			}
 			else {
 				if (keys[SDL_SCANCODE_1]) {
-					entityManager->setPause(false);
+					gameManager->setPause(false);
 				}
 			}
 			if (editModeManager->get_ifEditMode())
@@ -392,7 +393,7 @@ void InputManager::MouseControls() {
 		if (sdlEvent.button.button == SDL_BUTTON_LEFT) {
 			if (can_click) {
 				can_click = false;
-				entityManager->checkTrigger();
+				gameManager->checkTrigger();
 				if (MenubarSelection() == false && editModeManager->get_ifAddMode()) {
 					editModeManager->addFunction();
 				}

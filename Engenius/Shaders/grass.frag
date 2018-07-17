@@ -37,7 +37,7 @@ in VS_OUT {
 	vec3 Normal;
 } fs_in;
 
-uniform PointLight pointLights[MAX_PER_LIGHT_TYPE];
+uniform PointLight pointLights[5];
 uniform SpotLight spotLights[MAX_PER_LIGHT_TYPE];
 
 uniform int pointLightIDs[MAX_PER_LIGHT_TYPE];

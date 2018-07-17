@@ -1,11 +1,11 @@
 #include "Mesh.h"
 
-Mesh::Mesh(const vector<Vertex> vertices, const vector<unsigned int> indices, const vector<Texture> textures) : vertices(vertices), indices(indices), textures(textures)
+Mesh::Mesh(const vector<Vertex>& vertices, const vector<unsigned int>& indices, const vector<Texture>& textures) : vertices(vertices), indices(indices), textures(textures)
 {
 	this->setupMesh();
 }
 
-void Mesh::bindWall(unsigned int shader) {
+void Mesh::bindWall(const unsigned int& shader) {
 	// bind appropriate textures
 	unsigned int diffuseNr = 1;
 	unsigned int specularNr = 1;
@@ -43,12 +43,12 @@ void Mesh::unbindWall() {
 	//textureManager->unbindTextures(0, textures.size() - 1);
 }
 
-void Mesh::drawWall(unsigned int shader, const glm::mat4 modelMatrix) {
+void Mesh::drawWall(const unsigned int& shader, const glm::mat4& modelMatrix) {
 	glUniformMatrix4fv(glGetUniformLocation(shader, "uniform_model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
 	glDrawElements(GL_TRIANGLES, this->indices.size(), GL_UNSIGNED_INT, 0);
 }
 
-void Mesh::Draw(unsigned int shader, const glm::mat4 modelMatrices)
+void Mesh::Draw(const unsigned int& shader, const glm::mat4& modelMatrices)
 {
 	// bind appropriate textures
 	unsigned int diffuseNr = 1;
@@ -91,7 +91,7 @@ VertexArrayObject* Mesh::getVAO() {
 	return VAO;
 }
 
-void Mesh::sendTex(GLuint shader) {
+void Mesh::sendTex(const GLuint& shader) {
 	// bind appropriate textures
 	unsigned int diffuseNr = 1;
 	unsigned int specularNr = 1;
@@ -117,7 +117,7 @@ void Mesh::sendTex(GLuint shader) {
 	}
 }
 
-void Mesh::InstancedDraw(unsigned int shader, const std::vector<glm::mat4> modelMatrices, const std::vector<glm::vec2> pointIDs, const std::vector<glm::vec2> spotIDs)
+void Mesh::InstancedDraw(const unsigned int& shader, const std::vector<glm::mat4>& modelMatrices, const std::vector<glm::vec2>& pointIDs, const std::vector<glm::vec2>& spotIDs)
 {	
 	// bind appropriate textures
 	unsigned int diffuseNr = 1;

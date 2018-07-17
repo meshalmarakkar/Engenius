@@ -1,5 +1,6 @@
 #include "Renderer.h"
 #include "Common.h"
+#include "Material.h"
 #include <GL/glew.h>
 
 Renderer::Renderer(WindowManager* _windowManager, ShaderManager* _shaderManager):windowManager(_windowManager), shaderManager(_shaderManager) {
@@ -167,7 +168,7 @@ void Renderer::draw_screenQuad() {
 	unbindAllTextures();
 }
 
-void Renderer::draw_finalDisplay(const float exposure, const int ifBloom, const int effectNo, bool ifPause, GLuint tex_pause, bool ifEndGame, GLuint tex_end) {
+void Renderer::draw_finalDisplay(const float& exposure, const int& ifBloom, const int& effectNo, const bool& ifPause, const GLuint& tex_pause, const bool& ifEndGame, const GLuint& tex_end) {
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -201,62 +202,74 @@ void Renderer::drawArrays(VertexArrayObject* VAO) {
 	glDrawArrays(VAO->getDrawMode(), 0, VAO->getIndicesCount());
 }
 
+void Renderer::drawArrays(Shader* shader, VertexArrayObject* VAO, RenderProperties* rp) {
+	shader->uniform("model", *(rp->getModelMatrix()));
+
+	shader->reset_texCount();
+	auto* textures_2D = rp->getMaterial()->getTextures_2D();
+	for (unsigned int i = 0; i < textures_2D->size(); i++) {
+		shader->bindTex_2D((textures_2D->at(i).name).c_str(), textures_2D->at(i).tex);
+	}
+	auto* textures_Cubemap = rp->getMaterial()->getTextures_Cubemap();
+	for (unsigned int i = 0; i < textures_Cubemap->size(); i++) {
+		shader->bindTex_Cubemap((textures_Cubemap->at(i).name).c_str(), textures_Cubemap->at(i).tex);
+	}
+
+	VAO->bind();
+	glDrawArrays(VAO->getDrawMode(), 0, VAO->getIndicesCount());
+}
+
 void Renderer::drawElements(VertexArrayObject* VAO) {
 	VAO->bind();
 	glDrawElements(VAO->getDrawMode(), VAO->getIndicesCount(), GL_UNSIGNED_INT, 0);
 }
 
-void Renderer::drawElements_w_primitiveRestart(GLuint shader, VertexArrayObject* VAO, Material* mat) {
-	glUniformMatrix4fv(glGetUniformLocation(shader, "model"), 1, GL_FALSE, glm::value_ptr(*(mat->getModelMatrix())));
-	glUniform1f(glGetUniformLocation(shader, "tiling"), mat->getTiling());
+void Renderer::drawElements_w_primitiveRestart(Shader* shader, VertexArrayObject* VAO, RenderProperties* rp) {
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, mat->getTex_diffuse());
-	glUniform1i(glGetUniformLocation(shader, "texture_diffuse1"), 0);
-	if (mat->getTex_normal()) {
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, mat->getTex_normal());
-		glUniform1i(glGetUniformLocation(shader, "texture_normal1"), 1);
-	}
+	shader->uniform("model", *(rp->getModelMatrix()));
+	shader->uniformsToShader(rp->getUniforms());
 
-	if (mat->getTex_specular()) {
-		glUniform1i(glGetUniformLocation(shader, "hasSpecularMap"), true);
-		glActiveTexture(GL_TEXTURE1);
-		glBindTexture(GL_TEXTURE_2D, mat->getTex_specular());
-		glUniform1i(glGetUniformLocation(shader, "texture_specular1"), 2);
+	Material* mat = rp->getMaterial();
+	shader->uniform("tiling", mat->getTiling());
+
+	shader->reset_texCount();
+	auto* textures_2D = mat->getTextures_2D();
+	for (unsigned int i = 0; i < textures_2D->size(); i++) {
+		shader->bindTex_2D((textures_2D->at(i).name).c_str(), textures_2D->at(i).tex);
 	}
-	else
-		glUniform1i(glGetUniformLocation(shader, "hasSpecularMap"), false);
+	auto* textures_Cubemap = mat->getTextures_Cubemap();
+	for (unsigned int i = 0; i < textures_Cubemap->size(); i++) {
+		shader->bindTex_Cubemap((textures_Cubemap->at(i).name).c_str(), textures_Cubemap->at(i).tex);
+	}
+	shader->uniform("hasSpecularMap", mat->getIfSpecular());
 
 	glEnable(GL_PRIMITIVE_RESTART);
 	glPrimitiveRestartIndex(VAO->getRestartIndex());
 	drawElements(VAO);
 	glDisable(GL_PRIMITIVE_RESTART);
-
-	unbindTextures(0, 2);
 }
 
-void Renderer::bindTexture(const unsigned int shader, const unsigned int texture, const char* name) {
+void Renderer::bindTexture(const unsigned int& shader, const unsigned int& texture, const char* name) {
 	glActiveTexture(GL_TEXTURE0 + num_nextAvailableTex);
 	glBindTexture(GL_TEXTURE_2D, texture);
 	glUniform1i(glGetUniformLocation(shader, name), num_nextAvailableTex);
 	num_nextAvailableTex++;
 }
 
-void Renderer::bindCubeMapTexture(const unsigned int shader, const unsigned int texture, const char* name) {
+void Renderer::bindCubeMapTexture(const unsigned int& shader, const unsigned int& texture, const char* name) {
 	glActiveTexture(GL_TEXTURE0 + num_nextAvailableTex);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
 	glUniform1i(glGetUniformLocation(shader, name), num_nextAvailableTex);
 	num_nextAvailableTex++;
 }
 
-void Renderer::unbindTextures(unsigned int num) {
+void Renderer::unbindTextures(const unsigned int& num) {
 	glActiveTexture(GL_TEXTURE0 + num);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 }
 
-void Renderer::unbindTextures(unsigned int first, unsigned int last) {
+void Renderer::unbindTextures(const unsigned int& first, const unsigned int& last) {
 	for (unsigned int i = first; i < last + 1; i++) {
 		glActiveTexture(GL_TEXTURE0 + i);
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -268,4 +281,12 @@ void Renderer::unbindAllTextures() {
 		glActiveTexture(GL_TEXTURE0 + i);
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
+}
+
+
+void Renderer::enableCullFace() {
+	glEnable(GL_CULL_FACE);
+}
+void Renderer::disableCullFace() {
+	glDisable(GL_CULL_FACE);
 }

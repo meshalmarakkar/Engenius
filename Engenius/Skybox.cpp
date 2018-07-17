@@ -1,12 +1,12 @@
 #include "Skybox.h"
 #include "TextureLoader.h"
 
-Skybox::Skybox(unsigned int _skyboxProgram, Model* modelForSkybox) : skyboxProgram(_skyboxProgram), skyboxModel(modelForSkybox) {
+Skybox::Skybox(const unsigned int& _skyboxProgram, Model* modelForSkybox) : skyboxProgram(_skyboxProgram), skyboxModel(modelForSkybox) {
 	skyboxTexture = TextureLoader::loadCubeMap(nightSkyTexFiles);
 	modelMatrix = glm::scale(modelMatrix, glm::vec3(1.5f, 1.5f, 1.5f));
 }
 
-void Skybox::renderSkybox(const glm::mat4 projection, const glm::mat4 view) {
+void Skybox::renderSkybox(const glm::mat4& projection, const glm::mat4& view) {
 	glDepthMask(GL_FALSE); // make sure writing to update depth test is off
 	glCullFace(GL_FRONT); // drawing inside of cube!
 
@@ -26,7 +26,7 @@ void Skybox::renderSkybox(const glm::mat4 projection, const glm::mat4 view) {
 	glDepthMask(GL_TRUE);
 }
 
-void Skybox::renderSkybox(const glm::mat4 projection, const glm::mat4 view, unsigned int texture) {
+void Skybox::renderSkybox(const glm::mat4& projection, const glm::mat4& view, const unsigned int& texture) {
 	glDepthMask(GL_FALSE); // make sure writing to update depth test is off
 	glCullFace(GL_FRONT); // drawing inside of cube!
 

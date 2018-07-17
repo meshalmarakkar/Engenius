@@ -22,20 +22,20 @@ struct Tex_Options {
 
 class Framebuffer {
 public:
-	Framebuffer(unsigned int width, unsigned int height, bool create_rboDepth);
+	Framebuffer(const unsigned int& width, const unsigned int& height, const bool& create_rboDepth);
 	~Framebuffer();
 
 	void bind();
 	void unbind();
 
-	void edit_viewport(unsigned int width, unsigned int height);
+	void edit_viewport(const unsigned int& width, const unsigned int& height);
 	void clearBuffers();
 	void clearScreen();
 
-	GLuint getColourBuffer(unsigned int num);
+	GLuint getColourBuffer(const unsigned int& num);
 
-	void createTexturesAndAttach(unsigned int num_texToAdd, unsigned int width, unsigned int height, GLenum minFilter, GLenum magFilter, GLenum wrapS, GLenum wrapT);
-	void createSingleTexture(GLenum internalFormat, unsigned int width, unsigned int height, GLenum format, GLenum type, GLenum minFilter, GLenum magFilter);
+	void createTexturesAndAttach(const unsigned int& num_texToAdd, const unsigned int& width, const unsigned int& height, GLenum minFilter, GLenum magFilter, GLenum wrapS, GLenum wrapT);
+	void createSingleTexture(GLenum internalFormat, const unsigned int& width, const unsigned int& height, GLenum format, GLenum type, GLenum minFilter, GLenum magFilter);
 	void attachDrawBuffers();
 
 private:
