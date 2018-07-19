@@ -56,15 +56,6 @@ void GameManager::init(WindowManager * windowManager) {
 
 	inputManager = new InputManager(this, windowManager, camera, entityManager, mousePicker, lightingManager, hudManager, audioManager, editModeManager, colManager, terrainManager);
 
-	glEnable(GL_DEPTH_TEST);
-	//glDepthMask(GL_TRUE); //write to depth buffer
-	//glDepthFunc(GL_LESS);
-
-	glEnable(GL_CULL_FACE);
-
-	glEnable(GL_BLEND); //blend and deferred shading....nope....
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-
 	renderer = new Renderer(windowManager, shaderManager);
 
 	ifDeferred = false;
@@ -107,15 +98,17 @@ void GameManager::renderScene() {
 
 	entityManager->draw(dt_secs, NUM_EFFECTIVE_GRIDS, renderGridNo, ifDeferred);
 
-	unsigned int shader;
+	
 	if (editModeManager->get_ifEditMode()) {
-		shader = shaderManager->get_simple_program();
-		glUseProgram(shader);
-		camera->passViewProjToShader(shader);
+		Shader* program = shaderManager->getShaderProgram(Programs::simple);
+		program->bind();
+		program->uniformsToShader_RUNTIME();
+		unsigned int shader = program->getShaderProgram();
+
 		editModeManager->draw(shader);
 	}
 
-	renderer->unbindTextures(0, lightingManager->getNumOfLights());
+	//renderer->unbindTextures(0, lightingManager->getNumOfLights());
 
 	particleGenerator->renderParticles(camera->getView(), camera->getProjection()); //render last to blend with all the objecs!!
 }
@@ -137,7 +130,7 @@ void GameManager::update(float _dt_secs) {
 		editModeManager->update(currentTerrainPointOfMouse, dt_secs);
 	}
 	colManager->update();
-	entityManager->Update(dt_secs);
+	entityManager->Update(camera, dt_secs);
 	audioManager->updateListenerPosition(camera->getCameraEye());
 
 	areaControl();
@@ -154,15 +147,22 @@ void GameManager::update(float _dt_secs) {
 bool done = false;
 void GameManager::draw() {
 	if (lightingManager->getIfShadow() == true && done ==false) {
+		unsigned int shader = shaderManager->get_depthShader_program();
+		glUniform3fv(glGetUniformLocation(shader, "viewPos"), 1, glm::value_ptr(camera->getCameraEye()));
+
 		for (unsigned int i = 0; i < lightingManager->getNumOfPointLights(); i++) {
-			unsigned int shader = shaderManager->get_depthShader_program();
 			lightingManager->setUpShadowRender_Pointlights(shader, i); // render using light's point of view
+		//	glUniform1f(glGetUniformLocation(shader, "far_plane"), camera->getFarPlane());
+		//	glUniform3fv(glGetUniformLocation(shader, "viewPos"), 1, glm::value_ptr(camera->getCameraEye()));
+
 			entityManager->shadow_draw(shader, NUM_EFFECTIVE_GRIDS, renderGridNo);
 			done = true;
 		}
 	}
 
 	if (ifDeferred) {
+	//	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+	//	renderer->disableBlend();
 		//G-Buffer Render (DEFERRED SHADING P.1)
 		renderer->setupFrame_Deferred();
 		renderScene_GBuffer();
@@ -170,29 +170,22 @@ void GameManager::draw() {
 		//Deferred Shading (DEFERRED SHADING P.2)
 		renderer->setupFrame_PostProcess();
 
-		//unsigned int shader = shaderManager->get_deferredShading_program();
-		unsigned int shader = shaderManager->get_deferredShading_mapped_program();
-		glUseProgram(shader);
-		entityManager->farPlane_camEye_toShader(shader);
-
+		Shader* program = shaderManager->getShaderProgram(Programs::deferred_shading_mapped);
+		program->bind();
+		program->uniformsToShader_RUNTIME();
+		unsigned int shader = program->getShaderProgram();
 		renderer->toShader_Buffers(shader);
 
-		lightingManager->lightsToShader(shader);
-		if (lightingManager->getIfShadow() == true)
-			glUniform1i(glGetUniformLocation(shader, "displayShadow"), true);
-		else
-			glUniform1i(glGetUniformLocation(shader, "displayShadow"), false);
-
 		//RENDER TO SCREEN WITH POST-PROCESSING
-		glDisable(GL_DEPTH_TEST);
+		renderer->disableDepthTest();
 		renderer->draw_screenQuad();
-		//Common::unbindTextures(0, 7);
+	//	renderer->enableBlend();
 	}
 	else { 
 		renderer->setupFrame_PostProcess();
 
 		renderScene();
-		glDisable(GL_DEPTH_TEST);
+		renderer->disableDepthTest();
 	}
 
 	//glBindVertexArray(quadVAO);
@@ -210,11 +203,13 @@ void GameManager::draw() {
 
 	renderer->draw_finalDisplay(lightingManager->getExposure(), lightingManager->getIfBloom(), lightingManager->getPostProcessNum(), pause, tex_pause, endGame, tex_end);
 
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	renderer->setBlendFunction(BlendOptions::gl_one_minus_src_alpha);
+
 	//At end to see objects with transparency
 	if (editModeManager->get_ifEditMode())
 		hudManager->render();
-	glEnable(GL_DEPTH_TEST);
+
+	renderer->enableDepthTest();
 	
 	SDL_GL_SwapWindow(windowManager->getWindow()); // swap buffers
 }

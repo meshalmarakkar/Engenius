@@ -6,7 +6,7 @@ LightingManager::LightingManager(const glm::vec3& cameraEye, const glm::vec3& ca
 	exposure = 5.0f;
 	bloom = false;
 	editMode = false;
-	shadow = true;
+	shadow = false;
 	postProcessNum = 0;
 }
 
@@ -92,15 +92,26 @@ void LightingManager::addSpotLight(const glm::vec3& position, const glm::vec3& d
 }
 
 void LightingManager::addPointLight(const glm::vec3& position, const float& att_constant, const float& att_linear, const float& att_quadratic, const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular) {
-	PointLight light = {
-		position,
-		att_constant, att_linear, att_quadratic,
-		ambient,
-		diffuse,
-		specular,
-		0,
-		25.0f
-	};
+	glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), SHADOW_ASPECT, SHADOW_NEAR_PLANE, SHADOW_FAR_PLANE); //perspective projection is the best suited for this
+
+																											  //TODO: PRE-MAKE THESE
+	//const int SHADOW_TRANSFORMS = 6;
+	glm::mat4 shadowTransforms[SHADOW_TRANSFORMS];
+
+	shadowTransforms[0] = shadowProj *
+		glm::lookAt(position, position + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0));
+	shadowTransforms[1] = shadowProj *
+		glm::lookAt(position, position + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0));
+	shadowTransforms[2] = shadowProj *
+		glm::lookAt(position, position + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0));
+	shadowTransforms[3] = shadowProj *
+		glm::lookAt(position, position + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0, 0.0, -1.0));
+	shadowTransforms[4] = shadowProj *
+		glm::lookAt(position, position + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, -1.0, 0.0));
+	shadowTransforms[5] = shadowProj *
+		glm::lookAt(position, position + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0));
+
+	PointLight light(position, att_constant, att_linear, att_quadratic, ambient, diffuse, specular, 0, 25.0f, shadowTransforms);
 	pointLights.push_back(light);
 	pointLights.back().id = pointLights.size() - 1;
 	numOfLights++;
@@ -259,27 +270,8 @@ void LightingManager::setUpShadowRender_Pointlights(const unsigned int& shader, 
 	glUniform1f(glGetUniformLocation(shader, "far_plane"), SHADOW_FAR_PLANE);
 	glUniform3fv(glGetUniformLocation(shader, "lightPos"), 1, glm::value_ptr(lightPos));
 
-	glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), SHADOW_ASPECT, SHADOW_NEAR_PLANE, SHADOW_FAR_PLANE); //perspective projection is the best suited for this
-
-	//TODO: PRE-MAKE THESE
-	const int SHADOW_TRANSFORMS = 6;
-	glm::mat4 shadowTransforms[SHADOW_TRANSFORMS];
-
-	shadowTransforms[0] = shadowProj *
-		glm::lookAt(lightPos, lightPos + glm::vec3(1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0));
-	shadowTransforms[1] = shadowProj *
-		glm::lookAt(lightPos, lightPos + glm::vec3(-1.0, 0.0, 0.0), glm::vec3(0.0, -1.0, 0.0));
-	shadowTransforms[2] = shadowProj *
-		glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 1.0, 0.0), glm::vec3(0.0, 0.0, 1.0));
-	shadowTransforms[3] = shadowProj *
-		glm::lookAt(lightPos, lightPos + glm::vec3(0.0, -1.0, 0.0), glm::vec3(0.0, 0.0, -1.0));
-	shadowTransforms[4] = shadowProj *
-		glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, 1.0), glm::vec3(0.0, -1.0, 0.0));
-	shadowTransforms[5] = shadowProj *
-		glm::lookAt(lightPos, lightPos + glm::vec3(0.0, 0.0, -1.0), glm::vec3(0.0, -1.0, 0.0));
-
 	for (int i = 0; i < SHADOW_TRANSFORMS; i++) {
-		glUniformMatrix4fv(glGetUniformLocation(shader, ("shadowMatrices[" + std::to_string(i) + "]").c_str()), 1, GL_FALSE, glm::value_ptr(shadowTransforms[i]));
+		glUniformMatrix4fv(glGetUniformLocation(shader, ("shadowMatrices[" + std::to_string(i) + "]").c_str()), 1, GL_FALSE, glm::value_ptr(pointLights[lightIndex].shadowTransforms[i]));
 	}
 }
 
@@ -303,27 +295,12 @@ void LightingManager::getShadowMapIDs(RenderProperties* rp, const int* po_1, con
 		if (*i > -1) {
 			rp->getMaterial()->addTexture_Cubemap(TextureType(("depthMap[" + std::to_string(iter) + "]"), pointLights[*i].depthCubeMap));
 			// pass in the shadowmaps, each in a different texture unit
-			/*unsigned int uniformIndex = glGetUniformLocation(shader, ("depthMap[" + std::to_string(iter) + "]").c_str());
-			glActiveTexture(GL_TEXTURE8 + iter);
-			glUniform1i(uniformIndex, 8 + iter);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, pointLights[*i].depthCubeMap);*/
 			rp->getUniforms()->addUniform(("depthMap_ifRender[" + std::to_string(iter) + "]"), &defaultTrue);
-
-			/*uniformIndex = glGetUniformLocation(shader, ("depthMap_ifRender[" + std::to_string(iter) + "]").c_str());
-			glUniform1i(uniformIndex, true);*/
 		}
 		else {
 			rp->getMaterial()->addTexture_Cubemap(TextureType(("depthMap[" + std::to_string(iter) + "]"), pointLights[0].depthCubeMap));
-
 			// pass in the shadowmaps, each in a different texture unit
-		/*	unsigned int uniformIndex = glGetUniformLocation(shader, ("depthMap[" + std::to_string(iter) + "]").c_str());
-			glActiveTexture(GL_TEXTURE8 + iter);
-			glUniform1i(uniformIndex, 8 + iter);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, pointLights[0].depthCubeMap);*/
 			rp->getUniforms()->addUniform(("depthMap_ifRender[" + std::to_string(iter) + "]"), &defaultFalse);
-
-			//uniformIndex = glGetUniformLocation(shader, ("depthMap_ifRender[" + std::to_string(iter) + "]").c_str());
-			//glUniform1i(uniformIndex, false);
 		}
 	}
 }

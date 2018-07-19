@@ -2,9 +2,16 @@
 
 Entity::Entity(Model* model, const glm::vec3& position, const glm::vec3& scale, const glm::vec3& rotation, const unsigned int& gridNo) : model(model), position(position), scale(scale), rotation(rotation), gridNo(gridNo) /*initialPosition(position), initialScale(scale), initialYaw(rotation.y)*/ {
 	Common::createModelMatrix(this->modelMatrix, this->position, this->scale, this->rotation);
-	shininess = 32.0f;
 	tiling = 1.0f;
 
+	renderProperties = new RenderProperties_Uniforms(&modelMatrix);
+	renderProperties->getUniforms()->addUniform("tiling", &tiling);
+	renderProperties->getUniforms()->addUniform("pointLightIDs[0]", &pointLightIDs[0]);
+	renderProperties->getUniforms()->addUniform("pointLightIDs[1]", &pointLightIDs[1]);
+	renderProperties->getUniforms()->addUniform("pointLightIDs[2]", &pointLightIDs[2]);
+	renderProperties->getUniforms()->addUniform("spotLightIDs[0]", &spotLightIDs[0]);
+	renderProperties->getUniforms()->addUniform("spotLightIDs[1]", &spotLightIDs[1]);
+	renderProperties->getUniforms()->addUniform("spotLightIDs[2]", &spotLightIDs[2]);
 }
 
 const glm::vec3 Entity::getPos() { return this->position; }
@@ -76,10 +83,6 @@ int Entity::getSpotLightID(const unsigned int& i) {
 	return spotLightIDs[i];
 }
 
-void Entity::setShininess(const float& newVal) {
-	shininess = newVal;
-}
-
-void Entity::shininessToShader(const unsigned int& shader) {
-	glUniform1f(glGetUniformLocation(shader, "shininess"), shininess);
+RenderProperties_Uniforms* Entity::getRenderProperties() {
+	return renderProperties;
 }

@@ -67,21 +67,15 @@ private:
 	void initPointLights();
 	void initShadows();
 
+	void addSpotLight(const glm::vec3& position, const glm::vec3& direction, const float& cutOff, const float& outerCutOff, const float& att_constant, const float& att_linear, const float& att_quadratic, const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular);
+	void addPointLight(const glm::vec3& position, const float& att_constant, const float& att_linear, const float& att_quadratic, const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular);
+
+private:
 	int postProcessNum;
 
 	bool editMode;
-
-	struct DirectionalLight {
-		glm::vec3 direction;
-
-		glm::vec3 ambient;
-		glm::vec3 diffuse;
-		glm::vec3 specular;
-
-		unsigned int depthMapFBO;
-		unsigned int depthMap;
-	};
-
+	
+	#define SHADOW_TRANSFORMS 6
 	struct PointLight {
 		glm::vec3 position;
 
@@ -99,6 +93,14 @@ private:
 		std::vector<unsigned int> id_objectsInRange;
 		unsigned int depthMapFBO;
 		unsigned int depthCubeMap;
+		glm::mat4 shadowTransforms[SHADOW_TRANSFORMS];
+		
+		PointLight(const glm::vec3& pos, const float& con, const float& lin, const float& qua, const glm::vec3& amb, const glm::vec3& dif, const glm::vec3& spe, const unsigned int& id, const float& range, const glm::mat4 shadowTrans[SHADOW_TRANSFORMS])
+		: position(pos), att_constant(con), att_linear(lin), att_quadratic(qua), ambient(amb), diffuse(dif), specular(spe), id(id), range(range){
+			for (int i = 0; i < SHADOW_TRANSFORMS; i++) {
+				shadowTransforms[i] = shadowTrans[i];
+			}
+		}
 	};
 
 	struct SpotLight {
@@ -124,7 +126,6 @@ private:
 		unsigned int depthMap;
 	};
 
-	DirectionalLight dirLight;
 	std::vector<PointLight> pointLights;
 	std::vector<SpotLight> spotLights;
 	
@@ -137,9 +138,6 @@ private:
 	unsigned int numOfLights = 0;
 	const int MAX_LIGHTS = 3; //max lights to affect an object
 
-	void addSpotLight(const glm::vec3& position, const glm::vec3& direction, const float& cutOff, const float& outerCutOff, const float& att_constant, const float& att_linear, const float& att_quadratic, const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular);
-	void addPointLight(const glm::vec3& position, const float& att_constant, const float& att_linear, const float& att_quadratic, const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular);
-	
 	bool bloom;
 	float exposure;
 

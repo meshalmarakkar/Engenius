@@ -4,6 +4,7 @@
 #include "Mesh.h"
 #include "Renderer.h"
 #include "Matrix4f.h"
+#include "Shader.h"
 
 // Std. Includes
 #include <string>
@@ -45,13 +46,15 @@ public:
 	std::string getName();
 	
 	// Draws the model, and thus all its meshes
-	void InstancedDraw(const unsigned int& shader, const std::vector<glm::mat4>& modelMatrices, const std::vector<glm::vec2>& pointIDs, const std::vector<glm::vec2>& spotIDs);
-	void Draw(const unsigned int& shader, const glm::mat4& modelMatrices, Renderer* renderer);
+	void InstancedDraw(Shader* shader, const std::vector<glm::mat4>& modelMatrices, const std::vector<glm::vec3>& pointIDs, const std::vector<glm::vec3>& spotIDs, const std::vector<float>& tiling);
+	
+	void Draw(Shader* shader, RenderProperties* rp, Renderer* renderer);
 	void Draw(const unsigned int& shader, const glm::mat4& modelMatrices);
 
-	void bindWall(const unsigned int& shader);
+	void bindWall(Shader* shader, Renderer* renderer);
 	void unbindWall();
-	void drawWall(const unsigned int& shader, const glm::mat4& modelMatrix, Renderer* renderer);
+	//void drawWall(Shader* shader, const glm::mat4& modelMatrix, Renderer* renderer);
+	void drawWall(Shader* shader, RenderProperties* rp, Renderer* renderer);
 
 protected:
 	const aiScene* scene;

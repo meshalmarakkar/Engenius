@@ -4,7 +4,19 @@
 #include <GL/glew.h>
 
 Renderer::Renderer(WindowManager* _windowManager, ShaderManager* _shaderManager):windowManager(_windowManager), shaderManager(_shaderManager) {
-	initScreen();
+	enableDepthTest();
+	//glDepthMask(GL_TRUE); //write to depth buffer
+	//glDepthFunc(GL_LESS);
+	enableCullFace();
+
+	enableBlend(); //blend and deferred shading....nope....
+	setBlendFunction(BlendOptions::gl_one);
+
+	VAO_screenQuad = new VertexArrayObject(6);
+	VAO_screenQuad->genBuffer_andAddData(Buffer_Options::gl_array_buffer, sizeof(quadVertices), &quadVertices, Buffer_Options::gl_static_draw);
+	VAO_screenQuad->enableVertexAttribArray(0, 2, Buffer_Options::gl_float, Buffer_Options::gl_false, 4 * sizeof(float), 0);
+	VAO_screenQuad->enableVertexAttribArray(1, 2, Buffer_Options::gl_float, Buffer_Options::gl_false, 4 * sizeof(float), 2 * sizeof(float));
+
 	initFBOs();
 }
 
@@ -13,13 +25,6 @@ Renderer::~Renderer() {
 	delete FBO_postProcess;
 	delete FBO_pingpong[2];
 	delete FBO_gBuffer;
-}
-
-void Renderer::initScreen() {
-	VAO_screenQuad = new VertexArrayObject(6);
-	VAO_screenQuad->genBuffer_andAddData(Buffer_Options::gl_array_buffer, sizeof(quadVertices), &quadVertices, Buffer_Options::gl_static_draw);
-	VAO_screenQuad->enableVertexAttribArray(0, 2, Buffer_Options::gl_float, Buffer_Options::gl_false, 4 * sizeof(float), 0);
-	VAO_screenQuad->enableVertexAttribArray(1, 2, Buffer_Options::gl_float, Buffer_Options::gl_false, 4 * sizeof(float), 2 * sizeof(float));
 }
 
 void Renderer::initFBOs() {
@@ -220,6 +225,41 @@ void Renderer::drawArrays(Shader* shader, VertexArrayObject* VAO, RenderProperti
 }
 
 void Renderer::drawElements(VertexArrayObject* VAO) {
+	//VAO->bind();
+	glDrawElements(VAO->getDrawMode(), VAO->getIndicesCount(), GL_UNSIGNED_INT, 0);
+}
+
+void Renderer::setup_model(Shader* shader, VertexArrayObject* VAO, Material* mat) {
+	shader->uniform("tiling", mat->getTiling());
+
+	shader->reset_texCount();
+	auto* textures_2D = mat->getTextures_2D();
+	for (unsigned int i = 0; i < textures_2D->size(); i++) {
+		shader->bindTex_2D((textures_2D->at(i).name).c_str(), textures_2D->at(i).tex);
+	}
+	auto* textures_Cubemap = mat->getTextures_Cubemap();
+	for (unsigned int i = 0; i < textures_Cubemap->size(); i++) {
+		shader->bindTex_Cubemap((textures_Cubemap->at(i).name).c_str(), textures_Cubemap->at(i).tex);
+	}
+	shader->uniform("hasSpecularMap", mat->getIfSpecular());
+
+	VAO->bind();
+}
+
+void Renderer::drawElements(Shader* shader, VertexArrayObject* VAO, Material* mat) {
+	shader->uniform("tiling", mat->getTiling());
+
+	shader->reset_texCount();
+	auto* textures_2D = mat->getTextures_2D();
+	for (unsigned int i = 0; i < textures_2D->size(); i++) {
+		shader->bindTex_2D((textures_2D->at(i).name).c_str(), textures_2D->at(i).tex);
+	}
+	auto* textures_Cubemap = mat->getTextures_Cubemap();
+	for (unsigned int i = 0; i < textures_Cubemap->size(); i++) {
+		shader->bindTex_Cubemap((textures_Cubemap->at(i).name).c_str(), textures_Cubemap->at(i).tex);
+	}
+	shader->uniform("hasSpecularMap", mat->getIfSpecular());
+
 	VAO->bind();
 	glDrawElements(VAO->getDrawMode(), VAO->getIndicesCount(), GL_UNSIGNED_INT, 0);
 }
@@ -245,7 +285,9 @@ void Renderer::drawElements_w_primitiveRestart(Shader* shader, VertexArrayObject
 
 	glEnable(GL_PRIMITIVE_RESTART);
 	glPrimitiveRestartIndex(VAO->getRestartIndex());
-	drawElements(VAO);
+	VAO->bind();
+	glDrawElements(VAO->getDrawMode(), VAO->getIndicesCount(), GL_UNSIGNED_INT, 0);
+	//drawElements(VAO);
 	glDisable(GL_PRIMITIVE_RESTART);
 }
 
@@ -283,10 +325,26 @@ void Renderer::unbindAllTextures() {
 	}
 }
 
+void Renderer::enableDepthTest() {
+	glEnable(GL_DEPTH_TEST);
+}
+void Renderer::disableDepthTest() {
+	glDisable(GL_DEPTH_TEST);
+}
 
 void Renderer::enableCullFace() {
 	glEnable(GL_CULL_FACE);
 }
 void Renderer::disableCullFace() {
 	glDisable(GL_CULL_FACE);
+}
+
+void Renderer::enableBlend() {
+	glEnable(GL_BLEND);
+}
+void Renderer::disableBlend() {
+	glDisable(GL_BLEND);
+}
+void Renderer::setBlendFunction(const GLenum setting) {
+	glBlendFunc(GL_SRC_ALPHA, setting);
 }

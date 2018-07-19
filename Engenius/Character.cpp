@@ -10,6 +10,11 @@ Character::Character(AnimatedModel* model, const glm::vec3& position, const glm:
 	animated = true;
 	currentState = IDLE_STATE;
 	setCullingBound(5.0f);
+
+	renderProperties->getUniforms()->addUniform("animated", &animated);
+	Common::createModelMatrix(temp_character_display_model, glm::vec3(-1.0f, 0.5f, 8.5f), this->scale, this->rotation);
+	renderProperties->setModelMatrix(&temp_character_display_model);
+
 }
 
 void Character::addCollider(btRigidBody* bounding, btPairCachingGhostObject* ghost) {
@@ -150,7 +155,7 @@ void Character::Update(const float& yaw, const glm::vec3& cameraAt, const glm::v
 	model->BoneTransform(dt_secs, transforms);
 }
 
-void Character::draw(const unsigned int& shader, Renderer* renderer) {
+void Character::boneLocationToShader(const unsigned int& shader) {
 	if (animated) {
 		for (unsigned int i = 0; i < transforms.size(); i++) {
 			const unsigned int MAX_BONES = 50;
@@ -159,11 +164,6 @@ void Character::draw(const unsigned int& shader, Renderer* renderer) {
 			glUniformMatrix4fv(uniformIndex, 1, GL_TRUE, (const GLfloat*)transforms.at(i));
 		}
 	}
-	glm::mat4 modelMatrix;
-	//Common::createModelMatrix(modelMatrix, position, rotation, scale);
-	Common::createModelMatrix(modelMatrix, glm::vec3(-1.0f, 0.5f, 8.5f), scale, rotation);
-	glUniform1i(glGetUniformLocation(shader, "animated"), animated);
-	model->Draw(shader, modelMatrix, renderer);
 }
 
 void Character::changeAnimation() {

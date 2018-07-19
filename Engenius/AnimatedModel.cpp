@@ -179,7 +179,7 @@ void AnimatedModel::ReadNodeHeirarchy(const float& AnimationTime, const aiNode* 
 	}
 }
 
-void Matrix4f_to_GLMmat4(glm::mat4 &pos, const Matrix4f& matpos) {
+static void Matrix4f_to_GLMmat4(glm::mat4 &pos, const Matrix4f& matpos) {
 	pos[0][0] = matpos.m[0][0]; pos[1][0] = matpos.m[0][1]; pos[2][0] = matpos.m[0][2]; pos[3][0] = matpos.m[0][3];
 	pos[0][1] = matpos.m[1][0]; pos[1][1] = matpos.m[1][1]; pos[2][1] = matpos.m[1][2]; pos[3][1] = matpos.m[1][3];
 	pos[0][2] = matpos.m[2][0]; pos[1][2] = matpos.m[2][1]; pos[2][2] = matpos.m[2][2]; pos[3][2] = matpos.m[2][3];

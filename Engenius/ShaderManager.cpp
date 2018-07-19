@@ -193,7 +193,7 @@ GLuint ShaderManager::initShaders(const char *vertFile, const char *fragFile, co
 	return p;
 }
 
-void ShaderManager::gl_UseProgram(GLuint shader) {
+void ShaderManager::gl_UseProgram(const GLuint& shader) {
 	glUseProgram(shader);
 	currentShader = shader;
 }
@@ -209,11 +209,11 @@ void ShaderManager::gl_CheckError() {
 }
 
 void ShaderManager::init() {
-	mapped_model_program = initShaders("../Engenius/Shaders/mapped_model.vert", "../Engenius/Shaders/mapped_model.frag");
-	model_program = initShaders("../Engenius/Shaders/model.vert", "../Engenius/Shaders/model.frag");
-	terrain_program = initShaders("../Engenius/Shaders/terrain.vert", "../Engenius/Shaders/terrain.frag");
-	terrain_mapped_program = initShaders("../Engenius/Shaders/terrain_mapped.vert", "../Engenius/Shaders/terrain_mapped.frag");
-	animated_model_program = initShaders("../Engenius/Shaders/animated_model.vert", "../Engenius/Shaders/animated_model.frag");
+	GLuint mapped_model_program = initShaders("../Engenius/Shaders/mapped_model.vert", "../Engenius/Shaders/mapped_model.frag");
+	GLuint model_program = initShaders("../Engenius/Shaders/model.vert", "../Engenius/Shaders/model.frag");
+	GLuint terrain_program = initShaders("../Engenius/Shaders/terrain.vert", "../Engenius/Shaders/terrain.frag");
+	GLuint terrain_mapped_program = initShaders("../Engenius/Shaders/terrain_mapped.vert", "../Engenius/Shaders/terrain_mapped.frag");
+	GLuint animated_model_program = initShaders("../Engenius/Shaders/animated_model.vert", "../Engenius/Shaders/animated_model.frag");
 	simple_program = initShaders("../Engenius/Shaders/simple.vert", "../Engenius/Shaders/simple.frag");
 	gaussianBlur_program = initShaders("../Engenius/Shaders/screenSpace.vert", "../Engenius/Shaders/blur.frag");
 	postProcessing_program = initShaders("../Engenius/Shaders/screenSpace.vert", "../Engenius/Shaders/postProcessing.frag");
@@ -224,11 +224,11 @@ void ShaderManager::init() {
 	depthMapRender_program = initShaders("../Engenius/Shaders/DepthMap.vert", "../Engenius/Shaders/DepthMap.frag");
 	displayNormals_program = initShaders("../Engenius/Shaders/displayNormals.vert", "../Engenius/Shaders/displayNormals.frag", "../Engenius/Shaders/displayNormals.gs");
 	firstPass_program = initShaders("../Engenius/Shaders/screenSpace.vert", "../Engenius/Shaders/firstPass.frag");
-	gBuffer_mapped_program = initShaders("../Engenius/Shaders/mapped_modelGBuffer.vert", "../Engenius/Shaders/mapped_modelGBuffer.frag");
-	deferredShading_mapped_program = initShaders("../Engenius/Shaders/screenSpace.vert", "../Engenius/Shaders/mapped_modelDeferredShading.frag");
-	gBuffer_program = initShaders("../Engenius/Shaders/modelGBuffer.vert", "../Engenius/Shaders/modelGBuffer.frag");
-	deferredShading_program = initShaders("../Engenius/Shaders/screenSpace.vert", "../Engenius/Shaders/modelDeferredShading.frag");
-	grass_program = initShaders("../Engenius/Shaders/grass.vert", "../Engenius/Shaders/grass.frag", "../Engenius/Shaders/grass.gs");
+	GLuint gBuffer_mapped_program = initShaders("../Engenius/Shaders/mapped_modelGBuffer.vert", "../Engenius/Shaders/mapped_modelGBuffer.frag");
+	GLuint deferredShading_mapped_program = initShaders("../Engenius/Shaders/screenSpace.vert", "../Engenius/Shaders/mapped_modelDeferredShading.frag");
+	GLuint gBuffer_program = initShaders("../Engenius/Shaders/modelGBuffer.vert", "../Engenius/Shaders/modelGBuffer.frag");
+	GLuint deferredShading_program = initShaders("../Engenius/Shaders/screenSpace.vert", "../Engenius/Shaders/modelDeferredShading.frag");
+	GLuint grass_program = initShaders("../Engenius/Shaders/grass.vert", "../Engenius/Shaders/grass.frag", "../Engenius/Shaders/grass.gs");
 
 	typedef std::pair<const char*, Shader*> pair;
 
@@ -273,12 +273,12 @@ static void lighting_requiredLoad(LightingManager* light, Uniforms* uni) {
 	uni->addUniform("displayShadow", light->getIfShadow_Pointer());
 }
 
-static void commonRunTime_uniforms(Camera* cam, LightingManager* light, Uniforms* uni) {
+static void commonRunTime_uniforms(Camera* cam, Uniforms* uni) {
 	uni->addUniform("viewPos", cam->getCameraEye_Pointer());
 	uni->addUniform("view", cam->getView_Pointer());
 }
 
-static void generalUnitformInit(Camera* camera, LightingManager* lightingManager, std::unordered_map<const char*, Shader*>& shaders, const char* programName) {
+static void generalUniformInit(Camera* camera, LightingManager* lightingManager, std::unordered_map<const char*, Shader*>& shaders, const char* programName) {
 	Uniforms* uni;
 	uni = shaders.at(programName)->getInitUniforms();
 	camera_requiredLoad(camera, uni);
@@ -286,18 +286,49 @@ static void generalUnitformInit(Camera* camera, LightingManager* lightingManager
 	shaders.at(programName)->bind();
 	shaders.at(programName)->uniformsToShader_INIT();
 	uni = shaders.at(programName)->getRunTimeUniforms();
-	commonRunTime_uniforms(camera, lightingManager, uni);
+	commonRunTime_uniforms(camera, uni);
+}
+
+static void cameraUniformInit(Camera* camera, std::unordered_map<const char*, Shader*>& shaders, const char* programName) {
+	Uniforms* uni;
+	uni = shaders.at(programName)->getInitUniforms();
+	camera_requiredLoad(camera, uni);
+	shaders.at(programName)->bind();
+	shaders.at(programName)->uniformsToShader_INIT();
+	uni = shaders.at(programName)->getRunTimeUniforms();
+	commonRunTime_uniforms(camera, uni);
 }
 
 void ShaderManager::shaderInit() {
-	generalUnitformInit(camera, lightingManager, shaders, Programs::terrain);
-	generalUnitformInit(camera, lightingManager, shaders, Programs::terrain_mapped);
-	generalUnitformInit(camera, lightingManager, shaders, Programs::grass);
+	generalUniformInit(camera, lightingManager, shaders, Programs::terrain);
+	generalUniformInit(camera, lightingManager, shaders, Programs::terrain_mapped);
+	generalUniformInit(camera, lightingManager, shaders, Programs::grass);
 
-	generalUnitformInit(camera, lightingManager, shaders, Programs::model);
-	generalUnitformInit(camera, lightingManager, shaders, Programs::model_mapped);
-	generalUnitformInit(camera, lightingManager, shaders, Programs::model_animated);
+	generalUniformInit(camera, lightingManager, shaders, Programs::model);
+	generalUniformInit(camera, lightingManager, shaders, Programs::model_mapped);
+	generalUniformInit(camera, lightingManager, shaders, Programs::model_animated);
 
+	//DEFERRED G-BUFFER
+	cameraUniformInit(camera, shaders, Programs::deferred_gBuffer_mapped);
+	//DEFERRED SHADING
+	const char* programName = Programs::deferred_shading_mapped;
+	Uniforms* uni = shaders.at(programName)->getInitUniforms();
+	uni->addUniform("far_plane", camera->getFarPlane_Pointer());
+	lighting_requiredLoad(lightingManager, uni);
+	shaders.at(programName)->bind();
+	shaders.at(programName)->uniformsToShader_INIT();
+	uni = shaders.at(programName)->getRunTimeUniforms();
+	uni->addUniform("viewPos", camera->getCameraEye_Pointer());
+	//commonRunTime_uniforms(camera, uni);
+	//////////////////
+
+	programName = Programs::simple;
+	uni = shaders.at(programName)->getInitUniforms();
+	uni->addUniform("projection", camera->getProjection_Pointer());
+	shaders.at(programName)->bind();
+	shaders.at(programName)->uniformsToShader_INIT();
+	uni = shaders.at(programName)->getRunTimeUniforms();
+	uni->addUniform("view", camera->getView_Pointer());
 }
 
 Shader* ShaderManager::getShaderProgram(const char* shaderName) {
@@ -307,26 +338,6 @@ Shader* ShaderManager::getShaderProgram(const char* shaderName) {
 		return nullptr;
 	}
 	return shaders.at(shaderName);
-}
-
-GLuint ShaderManager::get_grass_program() {
-	return grass_program;
-}
-
-GLuint ShaderManager::get_gBuffer_program() {
-	return gBuffer_program;
-}
-
-GLuint ShaderManager::get_deferredShading_program() {
-	return deferredShading_program;
-}
-
-GLuint ShaderManager::get_gBuffer_mapped_program() {
-	return gBuffer_mapped_program;
-}
-
-GLuint ShaderManager::get_deferredShading_mapped_program() {
-	return deferredShading_mapped_program;
 }
 
 GLuint ShaderManager::get_firstPass_program() {
@@ -343,26 +354,8 @@ GLuint ShaderManager::get_depthMapRender_program() {
 	return depthMapRender_program;
 }
 
-GLuint ShaderManager::get_model_program() {
-	return model_program;
-}
-GLuint ShaderManager::get_mapped_model_program() {
-	return mapped_model_program;
-}
-
 GLuint ShaderManager::get_gaussianBlur_program() {
 	return gaussianBlur_program;
-}
-
-GLuint ShaderManager::get_animated_model_program() {
-	return animated_model_program;
-}
-
-GLuint ShaderManager::get_terrain_program() {
-	return terrain_program;
-}
-GLuint ShaderManager::get_terrain_mapped_program() {
-	return terrain_mapped_program;
 }
 
 GLuint ShaderManager::get_depthShader_program() {

@@ -269,7 +269,7 @@ void EntityManager::initPlayer(CollisionManager* colManager) {
 	player->setSpotLightIDs(std::get<0>(lights), std::get<1>(lights), std::get<2>(lights));
 }
 
-EntityManager::EntityManager(Camera *camera, LightingManager* lightingManager, ShaderManager* shaderManager, CollisionManager* colManager, TerrainManager* terrainManager) : camera(camera), lightingManager(lightingManager), shaderManager(shaderManager), terrainManager(terrainManager){
+EntityManager::EntityManager(Camera *camera, LightingManager* lightingManager, ShaderManager* shaderManager, CollisionManager* colManager, TerrainManager* terrainManager) : lightingManager(lightingManager), shaderManager(shaderManager), terrainManager(terrainManager){
 
 	frustumCulling = new FrustumCulling();
 	frustumCulling->setCamInternals(camera->getFOV() / DEG_TO_RADIAN, camera->getRatio(), camera->getNearPlane(), camera->getFarPlane()); //divide to send as degree
@@ -289,11 +289,10 @@ void EntityManager::renderPanels(const int& NUM_EFFECTIVE_GRIDS, const unsigned 
 	Shader* program;
 
 	if (ifDeferred) {
-		shader = shaderManager->get_gBuffer_mapped_program();
-		//unsigned int shader = shaderManager->get_gBuffer_program();
-		shaderManager->gl_UseProgram(shader);
-		camera->passViewProjToShader(shader);
-		farPlane_camEye_toShader(shader);
+		program = shaderManager->getShaderProgram(Programs::deferred_gBuffer_mapped);
+		program->bind();
+		program->uniformsToShader_RUNTIME();
+		shader = program->getShaderProgram();
 	}
 	else {
 		program = shaderManager->getShaderProgram(Programs::model_mapped);
@@ -302,23 +301,48 @@ void EntityManager::renderPanels(const int& NUM_EFFECTIVE_GRIDS, const unsigned 
 		shader = program->getShaderProgram();
 	}
 
-	modelManager->getModel_envi("surround")->bindWall(shader);
+	modelManager->getModel_envi("surround")->bindWall(program, renderer);
+
+	//for (unsigned int iter = 0; iter < panels.size(); iter++) {
+	//	if (frustumCulling->sphereInFrustum(panels.at(iter)->getPos(), panels.at(iter)->getCullingBound()) != 0) {
+	//		bool rendered = false;
+	//		for (int i = 0; i < NUM_EFFECTIVE_GRIDS; i++) {
+	//			if (panels.at(iter)->getGridNo() == renderGridNo[i] && rendered == false) {
+	//				Model *objModel = panels.at(iter)->getModel();
+	//				lightIDsToShader(shader, panels[iter]->getPointLightID(0), panels[iter]->getPointLightID(1), panels[iter]->getPointLightID(2), panels[iter]->getSpotLightID(0), panels[iter]->getSpotLightID(1), panels[iter]->getSpotLightID(2));
+	//				objModel->drawWall(program, (RenderProperties*)(panels[iter]->getRenderProperties()), renderer);
+	//				rendered = true;
+	//			}
+	//		}
+	//	}
+	//}
+
+	std::vector<glm::mat4> modelMatrices;
+	std::vector<glm::vec3> pointIDs;
+	std::vector<glm::vec3> spotIDs;
+	std::vector<float> tiling;
+
 	for (unsigned int iter = 0; iter < panels.size(); iter++) {
 		if (frustumCulling->sphereInFrustum(panels.at(iter)->getPos(), panels.at(iter)->getCullingBound()) != 0) {
 			bool rendered = false;
 			for (int i = 0; i < NUM_EFFECTIVE_GRIDS; i++) {
 				if (panels.at(iter)->getGridNo() == renderGridNo[i] && rendered == false) {
-					Model *objModel = panels.at(iter)->getModel();
-					const glm::mat4 objMatrix = panels.at(iter)->getModelMatrix();
+				//	Model *objModel = panels.at(iter)->getModel();
+					modelMatrices.push_back(panels.at(iter)->getModelMatrix());
+					pointIDs.push_back(glm::vec3(panels[iter]->getPointLightID(0), panels[iter]->getPointLightID(1), panels[iter]->getPointLightID(2)));
+					spotIDs.push_back(glm::vec3(panels[iter]->getSpotLightID(0), panels[iter]->getSpotLightID(1), panels[iter]->getSpotLightID(2)));
+					tiling.push_back(panels[iter]->getTiling());
+
 					lightIDsToShader(shader, panels[iter]->getPointLightID(0), panels[iter]->getPointLightID(1), panels[iter]->getPointLightID(2), panels[iter]->getSpotLightID(0), panels[iter]->getSpotLightID(1), panels[iter]->getSpotLightID(2));
-					glUniform1f(glGetUniformLocation(shader, "tiling"), panels.at(iter)->getTiling());
-					objModel->drawWall(shader, objMatrix, renderer);
+				//	objModel->drawWall(program, (RenderProperties*)(panels[iter]->getRenderProperties()), renderer);
 					rendered = true;
 				}
 			}
 		}
 	}
-	modelManager->getModel_envi("surround")->unbindWall();
+	modelManager->getModel_envi("surround")->InstancedDraw(program, modelMatrices, pointIDs, spotIDs, tiling);
+
+//	modelManager->getModel_envi("surround")->unbindWall();
 }
 
 void EntityManager::renderObjects(const int& NUM_EFFECTIVE_GRIDS, const unsigned int renderGridNo[], const bool& ifDeferred) {
@@ -326,11 +350,10 @@ void EntityManager::renderObjects(const int& NUM_EFFECTIVE_GRIDS, const unsigned
 	Shader* program;
 
 	if (ifDeferred) {
-		shader = shaderManager->get_gBuffer_mapped_program();
-		//unsigned int shader = shaderManager->get_gBuffer_program();
-		shaderManager->gl_UseProgram(shader);
-		camera->passViewProjToShader(shader);
-		farPlane_camEye_toShader(shader);
+		program = shaderManager->getShaderProgram(Programs::deferred_gBuffer_mapped);
+		program->bind();
+		program->uniformsToShader_RUNTIME();
+		shader = program->getShaderProgram();
 	}
 	else {
 		program = shaderManager->getShaderProgram(Programs::model_mapped);
@@ -345,10 +368,8 @@ void EntityManager::renderObjects(const int& NUM_EFFECTIVE_GRIDS, const unsigned
 			for (int i = 0; i < NUM_EFFECTIVE_GRIDS; i++) {
 				if (objects.at(iter)->getGridNo() == renderGridNo[i] && rendered == false) {
 					Model *objModel = objects.at(iter)->getModel();
-					const glm::mat4 objMatrix = objects.at(iter)->getModelMatrix();
 					lightIDsToShader(shader, objects[iter]->getPointLightID(0), objects[iter]->getPointLightID(1), objects[iter]->getPointLightID(2), objects[iter]->getSpotLightID(0), objects[iter]->getSpotLightID(1), objects[iter]->getSpotLightID(2));
-					glUniform1f(glGetUniformLocation(shader, "tiling"), objects.at(iter)->getTiling());
-					objModel->Draw(shader, objMatrix, renderer);
+					objModel->Draw(program, (RenderProperties*)(objects[iter]->getRenderProperties()), renderer);
 					rendered = true;
 				}
 			}
@@ -362,11 +383,7 @@ void EntityManager::renderCharacters(const int& NUM_EFFECTIVE_GRIDS, const unsig
 
 	unsigned int shader;
 	if (ifDeferred) {
-		unsigned int shader = shaderManager->get_animated_model_program();
-		shaderManager->gl_UseProgram(shader);
-
-		farPlane_camEye_toShader(shader);
-		camera->passViewProjToShader(shader);
+		//TODO: NEED TO CREATE GBUFFER SHADER FOR ANIMATED MODELS 
 	}
 	else {
 		program = shaderManager->getShaderProgram(Programs::model_animated);
@@ -377,12 +394,14 @@ void EntityManager::renderCharacters(const int& NUM_EFFECTIVE_GRIDS, const unsig
 
 	if (frustumCulling->sphereInFrustum(glm::vec3(-1.0f, 0.5f, 8.5f), player->getCullingBound()) != 0) {
 		lightIDsToShader(shader, player->getPointLightID(0), player->getPointLightID(1), player->getPointLightID(2), player->getSpotLightID(0), player->getSpotLightID(1), player->getSpotLightID(2));
-		player->draw(shader, renderer);
+		//player->draw(program, renderer);
+		player->boneLocationToShader(shader);
+		player->getModel()->Draw(program, (RenderProperties*)(player->getRenderProperties()), renderer);
 	}
 }
 
 void EntityManager::lightIDsToShader(const unsigned int& shader, const int& point_id1, const int& point_id2, const int& point_id3, const int& spot_id1, const int& spot_id2, const int& spot_id3) {
-	lightingManager->lightIDsToShader(shader, point_id1, point_id2, point_id3, spot_id1, spot_id2, spot_id3);
+//	lightingManager->lightIDsToShader(shader, point_id1, point_id2, point_id3, spot_id1, spot_id2, spot_id3);
 	if (lightingManager->getIfShadow() == true) {
 		lightingManager->shadowMapsToShader(shader, point_id1, point_id2, point_id3, spot_id1, spot_id2, spot_id3);
 	}
@@ -391,14 +410,7 @@ void EntityManager::lightIDsToShader(const unsigned int& shader, const int& poin
 	}
 }
 
-void EntityManager::farPlane_camEye_toShader(const unsigned int& shader) {
-	glUniform1f(glGetUniformLocation(shader, "far_plane"), camera->getFarPlane());
-	glUniform3fv(glGetUniformLocation(shader, "viewPos"), 1, glm::value_ptr(camera->getCameraEye()));
-}
-
 void EntityManager::shadow_draw(const unsigned int& shader, const int& NUM_EFFECTIVE_GRIDS, const unsigned int renderGridNo[]) {
-	farPlane_camEye_toShader(shader);
-
 	//TERRAINS
 //	terrainManager->shadowDraw(shader, renderer);
 
@@ -415,7 +427,7 @@ void EntityManager::shadow_draw(const unsigned int& shader, const int& NUM_EFFEC
 				
 				//	lightIDsToShader(shader, objects[iter]->getPointLightID(0), objects[iter]->getPointLightID(1), objects[iter]->getSpotLightID(0), objects[iter]->getSpotLightID(1));
 				//	glUniform1f(glGetUniformLocation(shader, "tiling"), objects.at(iter)->getTiling());
-					objModel->Draw(shader, objMatrix, renderer);
+				//	objModel->Draw(shader, objMatrix, renderer);
 					rendered = true;
 				}
 			}
@@ -424,7 +436,7 @@ void EntityManager::shadow_draw(const unsigned int& shader, const int& NUM_EFFEC
 
 	glEnable(GL_CULL_FACE);
 	//PLAYER
-	player->draw(shader, renderer);
+//	player->draw(shader, renderer);
 }
 
 void EntityManager::draw(const float& dt_secs, const int& NUM_EFFECTIVE_GRIDS, const unsigned int renderGridNo[], const bool& ifDeferred) {
@@ -436,7 +448,7 @@ void EntityManager::draw(const float& dt_secs, const int& NUM_EFFECTIVE_GRIDS, c
 		renderCharacters(NUM_EFFECTIVE_GRIDS, renderGridNo, ifDeferred);
 }
 
-void EntityManager::Update(const float& dt_secs) {
+void EntityManager::Update(Camera* camera, const float& dt_secs) {
 	frustumCulling->setCamDef(camera->getCameraEye(), camera->getCameraDirection(), camera->getCameraUp());
 
 	float terrHeightAtPlayerPos = terrainManager->getTerrainHeight(player->getPos().x, player->getPos().z);

@@ -5,6 +5,7 @@
 #include "Model.h"
 #include "Common.h"
 #include <map>
+#include "RenderProperties.h"
 
 class Entity {
 public:
@@ -39,11 +40,10 @@ public:
 	int getZone();
 	void setZone(const int& newVal);
 
-	void setShininess(const float& newVal);
-	void shininessToShader(const unsigned int& shader);
-
 	void setTiling(const float& newValue);
 	float getTiling();
+
+	RenderProperties_Uniforms* getRenderProperties();
 
 protected:
 	Model * model;
@@ -57,10 +57,11 @@ protected:
 	float cullingBound;
 	unsigned int gridNo;
 
+	RenderProperties_Uniforms* renderProperties;
+
 private:
 	int pointLightIDs[3]; //lights that effect object
 	int spotLightIDs[3]; //lights that effect object
-	float shininess;
 	int zone;
 	float tiling;
 };

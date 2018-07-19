@@ -6,25 +6,29 @@
 
 class RenderProperties_Basic {
 public:
-	RenderProperties_Basic(Material* material, glm::mat4* modelMatrix);
-	~RenderProperties_Basic();
-
+	RenderProperties_Basic(glm::mat4* modelMatrix);
 	glm::mat4* getModelMatrix();
-
-	Material* getMaterial();
+	void setModelMatrix(glm::mat4* newModelMat);
 
 private:
-	Material * material;
 	glm::mat4* modelMatrix;
 };
 
-class RenderProperties : public RenderProperties_Basic {
+class RenderProperties_Uniforms : public RenderProperties_Basic{
 public:
-	RenderProperties(Material* material, glm::mat4* modelMatrix);
-	~RenderProperties();
-
+	RenderProperties_Uniforms(glm::mat4* modelMatrix);
 	Uniforms* getUniforms();
 
 private:
 	Uniforms uniforms;
+};
+
+class RenderProperties : public RenderProperties_Uniforms {
+public:
+	RenderProperties(Material* material, glm::mat4* modelMatrix);
+	Material* getMaterial();
+
+private:
+	Material * material;
+	
 };

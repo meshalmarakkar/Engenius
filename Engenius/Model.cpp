@@ -1,5 +1,6 @@
 #include "Model.h"
 #include "TextureLoader.h"
+#include "Material.h"
 
 //just for animation loading
 Model::Model(const std::string& path, const bool& justAnimation) : path(path) {
@@ -55,37 +56,52 @@ void Model::setToInstance(const bool& newValue) {
 	toInstance = newValue;
 }
 
-void Model::bindWall(const unsigned int& shader) {
-	glUniform1f(glGetUniformLocation(shader, "hasSpecularMap"), hasSpecularMap);
-	glUniform1i(glGetUniformLocation(shader, "instanced"), false);
-	this->meshes.at(0).sendTex(shader);
+void Model::bindWall(Shader* shader, Renderer* renderer) {
+	//glUniform1f(glGetUniformLocation(shader, "hasSpecularMap"), hasSpecularMap);
+	glUniform1i(glGetUniformLocation(shader->getShaderProgram(), "instanced"), false);
+	renderer->setup_model(shader, meshes.at(0).getVAO(), meshes.at(0).getMaterial());
+	//this->meshes.at(0).sendTex(shader);
 	//this->meshes.at(0).bindWall(shader);
 }
 void Model::unbindWall() {
-	this->meshes.at(0).unbindWall();
+	//this->meshes.at(0).unbindWall();
 }
-void Model::drawWall(const unsigned int& shader, const glm::mat4& modelMatrix, Renderer* renderer) {
-	//glUniform1f(glGetUniformLocation(shader, "hasSpecularMap"), hasSpecularMap);
-	//glUniform1i(glGetUniformLocation(shader, "instanced"), false);
-	glUniformMatrix4fv(glGetUniformLocation(shader, "uniform_model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+//void Model::drawWall(Shader* shader, const glm::mat4& modelMatrix, Renderer* renderer) {
+//	shader->uniform("uniform_model", modelMatrix);
+//	//glUniformMatrix4fv(glGetUniformLocation(shader, "uniform_model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+//
+//	renderer->drawElements(this->meshes.at(0).getVAO());
+//}
+
+void Model::drawWall(Shader* shader, RenderProperties* rp, Renderer* renderer) {
+	shader->uniform("uniform_model", *(rp->getModelMatrix()));
+	shader->uniformsToShader(rp->getUniforms());
 
 	renderer->drawElements(this->meshes.at(0).getVAO());
 }
 
-void Model::InstancedDraw(const unsigned int& shader, const std::vector<glm::mat4>& modelMatrices, const std::vector<glm::vec2>& pointIDs, const std::vector<glm::vec2>& spotIDs) {
-	glUniform1f(glGetUniformLocation(shader, "hasSpecularMap"), hasSpecularMap);
-	glUniform1i(glGetUniformLocation(shader, "instanced"), true);
-	for (unsigned int i = 0; i < this->meshes.size(); i++)
-		this->meshes.at(i).InstancedDraw(shader, modelMatrices, pointIDs, spotIDs);
-}
-void Model::Draw(const unsigned int& shader, const glm::mat4& modelMatrix, Renderer* renderer) {
-	glUniform1f(glGetUniformLocation(shader, "hasSpecularMap"), hasSpecularMap);
-	glUniform1i(glGetUniformLocation(shader, "instanced"), false);
-	glUniformMatrix4fv(glGetUniformLocation(shader, "uniform_model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
+void Model::InstancedDraw(Shader* shader, const std::vector<glm::mat4>& modelMatrices, const std::vector<glm::vec3>& pointIDs, const std::vector<glm::vec3>& spotIDs, const std::vector<float>& tiling) {
+	shader->uniform("instanced", true);
+//	shader->uniform("uniform_model", *(rp->getModelMatrix()));
+//	shader->uniformsToShader(rp->getUniforms());
+
 	for (unsigned int i = 0; i < this->meshes.size(); i++) {
 		Mesh* m = &(this->meshes.at(i));
-		m->sendTex(shader);
-		renderer->drawElements(m->getVAO());
+		m->prepareInstancedDraw(modelMatrices, pointIDs, spotIDs, tiling);
+		unsigned int num = modelMatrices.size();
+		glDrawElementsInstanced(m->getVAO()->getDrawMode(), m->getVAO()->getIndicesCount(), GL_UNSIGNED_INT, 0, num);
+		//renderer->drawElements(shader, m->getVAO(), m->getMaterial());
+	}
+}
+
+void Model::Draw(Shader* shader, RenderProperties* rp, Renderer* renderer) {
+	shader->uniform("instanced", false);
+	shader->uniform("uniform_model", *(rp->getModelMatrix()));
+	shader->uniformsToShader(rp->getUniforms());
+
+	for (unsigned int i = 0; i < this->meshes.size(); i++) {
+		Mesh* m = &(this->meshes.at(i));
+		renderer->drawElements(shader, m->getVAO(), m->getMaterial());
 	}
 }
 void Model::Draw(const unsigned int& shader, const glm::mat4& modelMatrix) {
@@ -93,7 +109,7 @@ void Model::Draw(const unsigned int& shader, const glm::mat4& modelMatrix) {
 	glUniform1i(glGetUniformLocation(shader, "instanced"), false);
 	//glUniformMatrix4fv(glGetUniformLocation(shader, "uniform_model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
 	for (unsigned int i = 0; i < this->meshes.size(); i++) {
-		this->meshes.at(i).Draw(shader, modelMatrix);
+//		this->meshes.at(i).Draw(shader, modelMatrix);
 	}
 }
 void Model::loadModel(const bool& onlyAnimation)
@@ -241,12 +257,12 @@ Mesh Model::processMesh(aiMesh* mesh)
 	vector<Texture> textures;
 	if (customTextures.diffuse != NULL) {
 		vector<Texture> diffuseMaps;
-		loadTextures(diffuseMaps, customTextures.diffuse, "texture_diffuse");
+		loadTextures(diffuseMaps, customTextures.diffuse, TextureNames::diffuse);
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 	}
 	if (customTextures.specular != NULL) {
 		vector<Texture> specularMaps;
-		loadTextures(specularMaps, customTextures.specular, "texture_specular");
+		loadTextures(specularMaps, customTextures.specular, TextureNames::specular);
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 		hasSpecularMap = true;
 	}
@@ -255,34 +271,26 @@ Mesh Model::processMesh(aiMesh* mesh)
 	}
 	if (customTextures.normal != NULL) {
 		vector<Texture> normalMaps;
-		loadTextures(normalMaps, customTextures.normal, "texture_normal");
+		loadTextures(normalMaps, customTextures.normal, TextureNames::normal);
 		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
 		mapped = true;
 	}
 	else {
 		mapped = false;
 	}
-	if (customTextures.height != NULL) {
-		vector<Texture> heightMaps;
-		loadTextures(heightMaps, customTextures.height, "texture_height");
-		textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
-	}
 
 	if (mesh->mMaterialIndex >= 0)
 	{
 		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
 
-		std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, "texture_diffuse");
+		std::vector<Texture> diffuseMaps = loadMaterialTextures(material, aiTextureType_DIFFUSE, TextureNames::diffuse);
 		textures.insert(textures.end(), diffuseMaps.begin(), diffuseMaps.end());
 
-		std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, "texture_specular");
+		std::vector<Texture> specularMaps = loadMaterialTextures(material, aiTextureType_SPECULAR, TextureNames::specular);
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
 
-		std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, "texture_normal");
+		std::vector<Texture> normalMaps = loadMaterialTextures(material, aiTextureType_HEIGHT, TextureNames::normal);
 		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-
-		std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
-		textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 	}
 
 	textures.resize(textures.size()); //so theres no extra space
@@ -311,9 +319,9 @@ void Model::loadTextures(vector<Texture> &textures, const char* str, const std::
 		Texture texture;
 		texture.id = TextureLoader::loadTexture(str, this->path);
 		texture.type = typeName;
-		if (typeName == "texture_specular")
+		if (typeName == TextureNames::specular)
 			hasSpecularMap = true;
-		if (typeName == "texture_normal")
+		if (typeName == TextureNames::normal)
 			mapped = true;
 		texture.path = str;
 		textures.push_back(texture);

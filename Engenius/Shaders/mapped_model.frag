@@ -39,8 +39,8 @@ in VS_OUT {
 	mat3 TBN;
 	vec3 viewDir;
 	vec3 tangentFragPos;
-	vec2 pointIDs;
-	vec2 spotIDs;
+	int pIDs[MAX_PER_LIGHT_TYPE];
+	int sIDs[MAX_PER_LIGHT_TYPE];
 } fs_in;
 
 uniform PointLight pointLights[5];
@@ -56,6 +56,8 @@ uniform bool depthMap_ifRender[MAX_PER_LIGHT_TYPE];
 uniform vec3 viewPos;
 uniform bool hasSpecularMap;
 uniform bool displayShadow;
+
+uniform bool instanced;
 
 layout(location = 0) out vec4 out_Color;
 layout(location = 1) out vec4 toBlur_out_Color;
@@ -95,10 +97,17 @@ void main()
     float shadow = 0.0;
 	vec3 result;
 
+	int plIDs[3];
+	int slIDs[3];
+
 	for(int i = 0; i < MAX_PER_LIGHT_TYPE; i++){
 		shadow = displayShadow && depthMap_ifRender[i] ? ShadowCalculation(pointLights[i].position, depthMap[i]) : 0.0;	
-		result += pointLightIDs[i] > -1 ? CalcPointLight(pointLights[pointLightIDs[i]], fs_in.viewDir, norm, shadow, colour, specMap) : vec3(0.0f);   
-		result += spotLightIDs[i] > -1 ? CalcSpotLight(spotLights[spotLightIDs[i]], norm, fs_in.FragPos, fs_in.viewDir, colour, specMap) : vec3(0.0f);
+		
+		plIDs[i] = instanced ? i : pointLightIDs[i];
+		slIDs[i] = instanced ? i : spotLightIDs[i];
+
+		result += plIDs[i] > -1 ? CalcPointLight(pointLights[plIDs[i]], fs_in.viewDir, norm, shadow, colour, specMap) : vec3(0.0f);   
+		result += slIDs[i] > -1 ? CalcSpotLight(spotLights[slIDs[i]], norm, fs_in.FragPos, fs_in.viewDir, colour, specMap) : vec3(0.0f);
 	}
 	
 	//eyes prefer green most and blue least

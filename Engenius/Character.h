@@ -5,7 +5,6 @@
 #include <vector>
 #include "AnimatedModel.h"
 #include "Entity.h"
-#include "Renderer.h"
 #include "Common.h"
 #include <btBulletDynamicsCommon.h>
 
@@ -15,7 +14,7 @@ public:
 
 	AnimatedModel* getModel();
 	void setAnimated(const bool& newValue);
-	void draw(const unsigned int& shader, Renderer* renderer);
+	void boneLocationToShader(const unsigned int& shader);
 	void changeAnimation();
 
 	void MoveForward();
@@ -28,6 +27,8 @@ public:
 	void addCollider(btRigidBody* bounding, btPairCachingGhostObject* ghost);
 
 private:
+	glm::mat4 temp_character_display_model;
+
 	AnimatedModel* model;
 	std::vector<Matrix4f> transforms;
 	bool animated;

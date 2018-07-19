@@ -13,6 +13,11 @@
 #include "RenderProperties.h"
 #include "Shader.h"
 
+struct BlendOptions {
+	static const GLenum gl_one = GL_ONE;
+	static const GLenum gl_one_minus_src_alpha = GL_ONE_MINUS_SRC_ALPHA;
+};
+
 class Renderer {
 public:
 	Renderer(WindowManager* _windowManager, ShaderManager* _shaderManager);
@@ -31,6 +36,8 @@ public:
 	void drawArrays(VertexArrayObject* VAO);
 	void drawArrays(Shader* shader, VertexArrayObject* VAO, RenderProperties* rp);
 	void drawElements(VertexArrayObject* VAO);
+	void setup_model(Shader* shader, VertexArrayObject* VAO, Material* material);
+	void drawElements(Shader* shader, VertexArrayObject* VAO, Material* material);
 	void drawElements_w_primitiveRestart(Shader* shader, VertexArrayObject* VAO, RenderProperties* rp);
 	void draw(VertexArrayObject* VAO);
 	void draw_screenQuad();
@@ -43,8 +50,15 @@ public:
 	void unbindTextures(const unsigned int& first, const unsigned int& last);
 	void unbindAllTextures();
 
+	void enableDepthTest();
+	void disableDepthTest();
+
 	void enableCullFace();
 	void disableCullFace();
+
+	void enableBlend();
+	void disableBlend();
+	void setBlendFunction(const GLenum setting);
 
 private:
 	void initFBOs();

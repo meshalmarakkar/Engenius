@@ -1,10 +1,10 @@
 #pragma once
 
-#include <GL/glew.h> // Contains all the necessery OpenGL includes
 #include <glm/glm.hpp>
 
 #include "Common.h"
 #include "TextureLoader.h"
+#include "Material.h"
 
 #pragma comment(lib, "assimp.lib")
 #include <assimp/Importer.hpp>
@@ -39,9 +39,7 @@ struct Texture {
 class Mesh {
 public:
 	/*  Mesh Data  */
-	vector<Vertex> vertices;
-	vector<unsigned int> indices;
-	vector<Texture> textures;
+
 	/*  Functions  */
 	// Constructor
 	
@@ -49,21 +47,23 @@ public:
 	//~Mesh();
 	// Render the mesh
 	void InstancedDraw(const unsigned int& shader, const std::vector<glm::mat4>& modelMatrices, const std::vector<glm::vec2>& pointIDs, const std::vector<glm::vec2>& spotIDs);
-	void Draw(const unsigned int& shader, const glm::mat4& modelMatrices);
-
-	void bindWall(const unsigned int& shader);
-	void unbindWall();
-	void drawWall(const unsigned int&shader, const glm::mat4& modelMatrix);
 
 	VertexArrayObject* getVAO();
-	void sendTex(const GLuint& shader);
-	//void unbind();
 
-private:
+	void prepareInstancedDraw(const std::vector<glm::mat4>& modelMatrices, const std::vector<glm::vec3>& pointIDs, const std::vector<glm::vec3>& spotIDs, const std::vector<float>& tiling);
+
+	Material* getMaterial();
+
+private:	
+	vector<Vertex> vertices;
+	vector<unsigned int> indices;
+	vector<Texture> textures;
+
+	Material* material;
 
 	/*  Render data  */
 	VertexArrayObject * VAO;
-	unsigned int ID_vboModel, ID_vboPoint, ID_vboSpot;
+	unsigned int ID_vboModel, ID_vboPoint, ID_vboSpot, ID_vboTiling;
 	/*  Functions    */
 	// Initializes all the buffer objects/arrays
 	void setupMesh();
@@ -81,6 +81,7 @@ private:
 	#define LOCATION_MODEL4			10
 	#define LOCATION_POINTID		11
 	#define LOCATION_SPOTID			12
+	#define LOCATION_TILING			13
 
 	#define NUM_BONES_PER_VERTEX	4
 };

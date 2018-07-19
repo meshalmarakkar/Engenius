@@ -1,38 +1,32 @@
 #include "RenderProperties.h"
 
-#include <glm/gtc/matrix_transform.hpp>
-#define DEG_TO_RADIAN 0.017453293f
+//#include <glm/gtc/matrix_transform.hpp>
+//#define DEG_TO_RADIAN 0.017453293f
 
-RenderProperties_Basic::RenderProperties_Basic(Material* material, glm::mat4* modelMatrix) : material(material), modelMatrix(modelMatrix) {
-
-}
-
-RenderProperties_Basic::~RenderProperties_Basic() {
+RenderProperties_Basic::RenderProperties_Basic(glm::mat4* modelMatrix) : modelMatrix(modelMatrix) {
 
 }
-
-Material* RenderProperties_Basic::getMaterial() {
-	return material;
-}
-
 glm::mat4* RenderProperties_Basic::getModelMatrix() {
 	return modelMatrix;
 }
-
-
-
-RenderProperties::RenderProperties(Material* material, glm::mat4* modelMatrix) : RenderProperties_Basic(material, modelMatrix) {
-	;//uniforms.addUniform("model", modelMatrix);
+void RenderProperties_Basic::setModelMatrix(glm::mat4* newModelMat) {
+	modelMatrix = newModelMat;
 }
 
-RenderProperties::~RenderProperties() {
-	//delete material; //terrain passes a common so double deletion is done
-}
+RenderProperties_Uniforms::RenderProperties_Uniforms(glm::mat4* modelMatrix) : RenderProperties_Basic(modelMatrix) {
 
-Uniforms* RenderProperties::getUniforms() {
+}
+Uniforms* RenderProperties_Uniforms::getUniforms() {
 	return &uniforms;
 }
 
+
+RenderProperties::RenderProperties(Material* material, glm::mat4* modelMatrix) : material(material), RenderProperties_Uniforms(modelMatrix) {
+
+}
+Material* RenderProperties::getMaterial() {
+	return material;
+}
 
 
 //void RenderProperties::setModelMatrix(const glm::mat4& newMatrix) {

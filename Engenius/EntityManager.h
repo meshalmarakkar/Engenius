@@ -23,13 +23,12 @@ public:
 
 	void draw(const float& dt_secs, const int& NUM_EFFECTIVE_GRIDS, const unsigned int renderGridNo[], const bool& ifDeferred);
 	void shadow_draw(const unsigned int& shader, const int& NUM_EFFECTIVE_GRIDS, const unsigned int renderGridNo[]);
-	void Update(const float& dt_secs);
+	void Update(Camera* camera, const float& dt_secs);
 
 	Character* getPlayer();
 	Model* getENVModel(const std::string& name);
 	void addEntityObject(const std::string& mdlName, const glm::vec3& pos, const glm::vec3& scale, const glm::vec3& rot, const float& culBound, const unsigned int& gridNo, const int& p1, const int& p2, const int& p3, const int& s1, const int& s2, const int& s3);
-	void farPlane_camEye_toShader(const unsigned int& shader);
-
+	
 	Entity* getObject(const unsigned int& i);
 	bool writeFile();
 	bool writeFile_Panels();
@@ -52,7 +51,6 @@ public:
 	}
 
 private:
-	Camera* camera;
 	FrustumCulling* frustumCulling;
 	LightingManager* lightingManager;
 	ShaderManager* shaderManager;

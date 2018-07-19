@@ -38,18 +38,13 @@ public:
 	ShaderManager(Camera* camera, LightingManager* lightingManager);
 	~ShaderManager();
 
-	void gl_UseProgram(unsigned int shader);
+	void gl_UseProgram(const GLuint& shader);
 	void gl_ClearError();
 	void gl_CheckError();
 
 	unsigned int get_postProcessing_program();
 	unsigned int get_simple_program();
-	unsigned int get_model_program();
 	unsigned int get_gaussianBlur_program();
-	unsigned int get_mapped_model_program();
-	unsigned int get_animated_model_program();
-	unsigned int get_terrain_program();
-	unsigned int get_terrain_mapped_program();
 	unsigned int get_hud_program();
 	unsigned int get_depthMapRender_program();
 	unsigned int get_depthShader_program();
@@ -57,11 +52,6 @@ public:
 	unsigned int get_particle_program();
 	unsigned int get_displayNormals_program();
 	unsigned int get_firstPass_program();
-	unsigned int get_gBuffer_mapped_program();
-	unsigned int get_deferredShading_mapped_program();
-	unsigned int get_gBuffer_program();
-	unsigned int get_deferredShading_program();
-	unsigned int get_grass_program();
 
 	Shader* getShaderProgram(const char* shaderName);
 
@@ -83,23 +73,13 @@ private:
 
 	GLuint postProcessing_program;
 	GLuint simple_program;
-	GLuint model_program;
 	GLuint gaussianBlur_program;
-	GLuint mapped_model_program;
-	GLuint animated_model_program;
-	GLuint terrain_program;
-	GLuint terrain_mapped_program;
 	GLuint hud_program;
 	GLuint depthMapRender_program;
 	GLuint skybox_program;
 	GLuint particle_program;
 	GLuint displayNormals_program;
 	GLuint firstPass_program;
-	GLuint gBuffer_mapped_program;
-	GLuint deferredShading_mapped_program;
-	GLuint gBuffer_program;
-	GLuint deferredShading_program;
-	GLuint grass_program;
 	GLuint depthShader_program;
 	
 	GLuint currentShader;
