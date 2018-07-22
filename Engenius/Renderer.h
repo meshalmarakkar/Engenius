@@ -27,8 +27,6 @@ public:
 	void setupFrame_Deferred();
 	void setupFrame_PostProcess();
 
-	void setup_Screen();
-
 	void toShader_Buffers(GLuint shader);
 
 	void SS_Bloom();
@@ -46,7 +44,6 @@ public:
 
 	void drawElements_w_primitiveRestart(Shader* shader, VertexArrayObject* VAO, RenderProperties* rp);
 	
-	void draw_screenQuad();
 	void draw_finalDisplay(const float& exposure, const int& ifBloom, const int& effectNo, const bool& ifPause, const GLuint& tex_pause, const bool& ifEndGame, const GLuint& tex_end);
 	void draw_finalDisplay(const float& exposure, const int& ifBloom, const int& effectNo, const bool& ifPause, const GLuint& tex_pause, const bool& ifEndGame, const GLuint& tex_end, unsigned int num);
 
@@ -74,9 +71,6 @@ public:
 
 private:
 	void initFBOs();
-	void initScreen();
-
-
 
 private:
 	const float quadVertices[24] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
@@ -106,4 +100,5 @@ private:
 	Framebuffer* FBO_gBuffer;
 
 	unsigned int num_nextAvailableTex;
+	bool horizontal;
 };

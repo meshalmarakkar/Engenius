@@ -118,7 +118,6 @@ void main()
 	else
 		toBlur_out_Color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
-	//out_Color = vec4(fs_in.pIDs[0], fs_in.pIDs[1], fs_in.pIDs[2], 1.0);
 	out_Color = vec4(result, 1.0);
 }
 

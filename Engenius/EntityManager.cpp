@@ -184,6 +184,7 @@ void EntityManager::renderObjects(const int& NUM_EFFECTIVE_GRIDS, const unsigned
 		shader = program->getShaderProgram();
 	}
 
+	//program->uniform("far_plane", 25.0f);
 	std::unordered_map<Model*, bool> renderedModels;
 
 	for (unsigned int iter = 0; iter < objects.size(); iter++) {

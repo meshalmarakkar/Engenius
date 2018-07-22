@@ -79,11 +79,6 @@ void Renderer::setupFrame_PostProcess() {
 	FBO_postProcess->clearScreen();
 }
 
-void Renderer::setup_Screen() {
-	//glDisable(GL_DEPTH_TEST); 
-	VAO_screenQuad->bind();
-}
-
 void Renderer::toShader_Buffers(GLuint shader) {
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, FBO_gBuffer->getColourBuffer(0));
@@ -117,32 +112,33 @@ void Renderer::SS_Bloom() {
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
 	unsigned int amount = 10;
-	bool horizontal = true, first_iteration = true;
-	glUseProgram(shaderManager->get_gaussianBlur_program());
+	horizontal = true;
+	bool first_iteration = true;
+	Shader* program = shaderManager->getShaderProgram(Programs::gaussian_blur);
+	program->bind();
 
-	setup_Screen();
+	VAO_screenQuad->bind();
 	
 	for (unsigned int i = 0; i < amount; i++)
 	{
 		FBO_pingpong[horizontal]->bind();
 		/*glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);*/
-		glUniform1i(glGetUniformLocation(shaderManager->get_gaussianBlur_program(), ("horizontal")), horizontal);
+		program->uniform("horizontal", horizontal);
 
 		// bind texture of other framebuffer (or scene if first iteration)
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, first_iteration ? FBO_postProcess->getColourBuffer(1)/*colourBuffer[1]*/ : FBO_pingpong[!horizontal]->getColourBuffer(0)/*pingpongColorbuffers[!horizontal]*/);
-		glUniform1i(glGetUniformLocation(shaderManager->get_gaussianBlur_program(), "textureToBlur"), 0);
+		//glBindTexture(GL_TEXTURE_2D, first_iteration ? FBO_postProcess->getColourBuffer(1)/*colourBuffer[1]*/ : FBO_pingpong[!horizontal]->getColourBuffer(0)/*pingpongColorbuffers[!horizontal]*/);
+		first_iteration ? program->reset_bindTex_2D("textureToBlur", FBO_postProcess->getColourBuffer(1)) : program->reset_bindTex_2D("textureToBlur", FBO_pingpong[!horizontal]->getColourBuffer(0));
 
-		draw_screenQuad();
+		glDrawArrays(GL_TRIANGLES, 0, 6);
 		horizontal = !horizontal;
 		if (first_iteration)
 			first_iteration = false;
 	}
 
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, FBO_pingpong[!horizontal]->getColourBuffer(0));// pingpongColorbuffers[!horizontal]);
-	glUniform1i(glGetUniformLocation(shaderManager->get_postProcessing_program(), "bloomBlur"), 1);
+	//glActiveTexture(GL_TEXTURE1);
+	//glBindTexture(GL_TEXTURE_2D, FBO_pingpong[!horizontal]->getColourBuffer(0));// pingpongColorbuffers[!horizontal]);
+	//glUniform1i(glGetUniformLocation(shaderManager->get_postProcessing_program(), "bloomBlur"), 1);
 }
 
 void Renderer::SS_GodRays() {
@@ -167,39 +163,33 @@ void Renderer::SS_GodRays() {
 	//	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
-void Renderer::draw_screenQuad() {
-	setup_Screen();
-	glDrawArrays(GL_TRIANGLES, 0, 6);
-//	unbindAllTextures();
-}
-
 void Renderer::draw_finalDisplay(const float& exposure, const int& ifBloom, const int& effectNo, const bool& ifPause, const GLuint& tex_pause, const bool& ifEndGame, const GLuint& tex_end, unsigned int num) {
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	
+	Shader* program = shaderManager->getShaderProgram(Programs::post_processing);
+	program->bind();
+	
+	program->reset_texCount();
+	program->uniform("exposure", exposure);
+	if (exposure)
+		program->bindTex_2D("bloomBlur", FBO_pingpong[!horizontal]->getColourBuffer(0));
+	program->uniform("bloom", ifBloom);
+	program->uniform("effect", effectNo);
 
-	setup_Screen();
-
-	glUseProgram(shaderManager->get_postProcessing_program());
-	glUniform1f(glGetUniformLocation(shaderManager->get_postProcessing_program(), ("exposure")), exposure);
-	glUniform1i(glGetUniformLocation(shaderManager->get_postProcessing_program(), ("bloom")), ifBloom);
-	glUniform1i(glGetUniformLocation(shaderManager->get_postProcessing_program(), ("effect")), effectNo);
-
-	glActiveTexture(GL_TEXTURE0);
 	if (ifPause)
-		glBindTexture(GL_TEXTURE_2D, tex_pause);
+		program->bindTex_2D("screenTexture", tex_pause);
 	else if (ifEndGame) {
-		glBindTexture(GL_TEXTURE_2D, tex_end);
+		program->bindTex_2D("screenTexture", tex_end);
 	}
 	else {
 		//glBindTexture(GL_TEXTURE_2D, gNormal);
 		//glBindTexture(GL_TEXTURE_2D, FBO_gBuffer->getColourBuffer(num));
-		glBindTexture(GL_TEXTURE_2D, FBO_postProcess->getColourBuffer(0));
+		program->bindTex_2D("screenTexture", FBO_postProcess->getColourBuffer(0));
 	}
-	glUniform1i(glGetUniformLocation(shaderManager->get_postProcessing_program(), "screenTexture"), 0);
 
-	glDrawArrays(VAO_screenQuad->getDrawMode(), 0, VAO_screenQuad->getIndicesCount());
-	//unbindTextures(0, 1);
+	drawArrays(VAO_screenQuad);
 }
 
 void Renderer::drawArrays(VertexArrayObject* VAO) {

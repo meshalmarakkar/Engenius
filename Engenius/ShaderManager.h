@@ -42,16 +42,9 @@ public:
 	void gl_ClearError();
 	void gl_CheckError();
 
-	unsigned int get_postProcessing_program();
-	unsigned int get_simple_program();
-	unsigned int get_gaussianBlur_program();
 	unsigned int get_hud_program();
-	unsigned int get_depthMapRender_program();
-	unsigned int get_depthShader_program();
-	unsigned int get_skybox_program();
+
 	unsigned int get_particle_program();
-	unsigned int get_displayNormals_program();
-	unsigned int get_firstPass_program();
 
 	Shader* getShaderProgram(const char* shaderName);
 
@@ -65,24 +58,12 @@ private:
 
 private:
 	std::unordered_map<const char*, Shader*> shaders;
-
-	//Shader * currentShader;
 	
 	Camera* camera;
 	LightingManager* lightingManager;
 
-	GLuint postProcessing_program;
-	GLuint simple_program;
-	GLuint gaussianBlur_program;
 	GLuint hud_program;
-	GLuint depthMapRender_program;
-	GLuint skybox_program;
 	GLuint particle_program;
-	GLuint displayNormals_program;
-	GLuint firstPass_program;
-	GLuint depthShader_program;
-	
-	GLuint currentShader;
 };
 
 #endif

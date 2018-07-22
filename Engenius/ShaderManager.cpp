@@ -195,7 +195,6 @@ GLuint ShaderManager::initShaders(const char *vertFile, const char *fragFile, co
 
 void ShaderManager::gl_UseProgram(const GLuint& shader) {
 	glUseProgram(shader);
-	currentShader = shader;
 }
 
 void ShaderManager::gl_ClearError() {
@@ -214,16 +213,16 @@ void ShaderManager::init() {
 	GLuint terrain_program = initShaders("../Engenius/Shaders/terrain.vert", "../Engenius/Shaders/terrain.frag");
 	GLuint terrain_mapped_program = initShaders("../Engenius/Shaders/terrain_mapped.vert", "../Engenius/Shaders/terrain_mapped.frag");
 	GLuint animated_model_program = initShaders("../Engenius/Shaders/animated_model.vert", "../Engenius/Shaders/animated_model.frag");
-	simple_program = initShaders("../Engenius/Shaders/simple.vert", "../Engenius/Shaders/simple.frag");
-	gaussianBlur_program = initShaders("../Engenius/Shaders/screenSpace.vert", "../Engenius/Shaders/blur.frag");
-	postProcessing_program = initShaders("../Engenius/Shaders/screenSpace.vert", "../Engenius/Shaders/postProcessing.frag");
-	depthShader_program = initShaders("../Engenius/Shaders/shadowMap.vert", "../Engenius/Shaders/shadowMap.frag", "../Engenius/Shaders/shadowMap.gs");
-	skybox_program = initShaders("../Engenius/Shaders/cubeMap.vert", "../Engenius/Shaders/cubeMap.frag");
+	GLuint simple_program = initShaders("../Engenius/Shaders/simple.vert", "../Engenius/Shaders/simple.frag");
+	GLuint gaussianBlur_program = initShaders("../Engenius/Shaders/screenSpace.vert", "../Engenius/Shaders/blur.frag");
+	GLuint postProcessing_program = initShaders("../Engenius/Shaders/screenSpace.vert", "../Engenius/Shaders/postProcessing.frag");
+	GLuint depthShader_program = initShaders("../Engenius/Shaders/shadowMap.vert", "../Engenius/Shaders/shadowMap.frag", "../Engenius/Shaders/shadowMap.gs");
+	GLuint skybox_program = initShaders("../Engenius/Shaders/cubeMap.vert", "../Engenius/Shaders/cubeMap.frag");
 	hud_program = initShaders("../Engenius/Shaders/screenSpace.vert", "../Engenius/Shaders/HUD.frag");
 	particle_program = initShaders("../Engenius/Shaders/particle.vert", "../Engenius/Shaders/particle.frag");
-	depthMapRender_program = initShaders("../Engenius/Shaders/DepthMap.vert", "../Engenius/Shaders/DepthMap.frag");
-	displayNormals_program = initShaders("../Engenius/Shaders/displayNormals.vert", "../Engenius/Shaders/displayNormals.frag", "../Engenius/Shaders/displayNormals.gs");
-	firstPass_program = initShaders("../Engenius/Shaders/screenSpace.vert", "../Engenius/Shaders/firstPass.frag");
+	GLuint depthMapRender_program = initShaders("../Engenius/Shaders/DepthMap.vert", "../Engenius/Shaders/DepthMap.frag");
+	GLuint displayNormals_program = initShaders("../Engenius/Shaders/displayNormals.vert", "../Engenius/Shaders/displayNormals.frag", "../Engenius/Shaders/displayNormals.gs");
+	GLuint firstPass_program = initShaders("../Engenius/Shaders/screenSpace.vert", "../Engenius/Shaders/firstPass.frag");
 	GLuint gBuffer_mapped_program = initShaders("../Engenius/Shaders/mapped_modelGBuffer.vert", "../Engenius/Shaders/mapped_modelGBuffer.frag");
 	GLuint deferredShading_mapped_program = initShaders("../Engenius/Shaders/screenSpace.vert", "../Engenius/Shaders/mapped_modelDeferredShading.frag");
 	GLuint gBuffer_program = initShaders("../Engenius/Shaders/modelGBuffer.vert", "../Engenius/Shaders/modelGBuffer.frag");
@@ -264,12 +263,12 @@ void ShaderManager::init() {
 }
 
 static void camera_requiredLoad(Camera* camera, Uniforms* uni) {
-	uni->addUniform("far_plane", camera->getFarPlane_Pointer());
 	uni->addUniform("projection", camera->getProjection_Pointer());
 }
 
 static void lighting_requiredLoad(LightingManager* light, Uniforms* uni) {
 	light->lights_preloadShader(uni);
+	uni->addUniform("far_plane", light->getShadowFarPlane());
 }
 
 static void commonRunTime_uniforms(Camera* cam, Uniforms* uni) {
@@ -282,8 +281,10 @@ static void generalUniformInit(Camera* camera, LightingManager* lightingManager,
 	uni = shaders.at(programName)->getInitUniforms();
 	camera_requiredLoad(camera, uni);
 	lighting_requiredLoad(lightingManager, uni);
+
 	shaders.at(programName)->bind();
 	shaders.at(programName)->uniformsToShader_INIT();
+
 	uni = shaders.at(programName)->getRunTimeUniforms();
 	commonRunTime_uniforms(camera, uni);
 }
@@ -312,7 +313,8 @@ void ShaderManager::shaderInit() {
 	//DEFERRED SHADING
 	const char* programName = Programs::deferred_shading_mapped;
 	Uniforms* uni = shaders.at(programName)->getInitUniforms();
-	uni->addUniform("far_plane", camera->getFarPlane_Pointer());
+	uni->addUniform("far_plane", lightingManager->getShadowFarPlane());
+	//uni->addUniform("far_plane", camera->getFarPlane_Pointer());
 	lighting_requiredLoad(lightingManager, uni);
 	shaders.at(programName)->bind();
 	shaders.at(programName)->uniformsToShader_INIT();
@@ -339,40 +341,10 @@ Shader* ShaderManager::getShaderProgram(const char* shaderName) {
 	return shaders.at(shaderName);
 }
 
-GLuint ShaderManager::get_firstPass_program() {
-	return firstPass_program;
-}
-
-GLuint ShaderManager::get_postProcessing_program() {
-	return postProcessing_program;
-}
-GLuint ShaderManager::get_simple_program() {
-	return simple_program;
-}
-GLuint ShaderManager::get_depthMapRender_program() {
-	return depthMapRender_program;
-}
-
-GLuint ShaderManager::get_gaussianBlur_program() {
-	return gaussianBlur_program;
-}
-
-GLuint ShaderManager::get_depthShader_program() {
-	return depthShader_program;
-}
-
-GLuint ShaderManager::get_skybox_program() {
-	return skybox_program;
-}
-
 GLuint ShaderManager::get_particle_program() {
 	return particle_program;
 }
 
 GLuint ShaderManager::get_hud_program() {
 	return hud_program;
-}
-
-GLuint ShaderManager::get_displayNormals_program() {
-	return displayNormals_program;
 }

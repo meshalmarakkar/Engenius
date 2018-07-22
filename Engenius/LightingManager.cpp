@@ -114,6 +114,10 @@ void LightingManager::addPointLight(const glm::vec3& position, const float& att_
 	numOfLights++;
 }
 
+const float* LightingManager::getShadowFarPlane() {
+	return &SHADOW_FAR_PLANE;
+}
+
 void LightingManager::lights_preloadShader(Uniforms* uni) {
 	for (unsigned int lightNo = 0; lightNo < pointLights.size(); lightNo++) {
 		std::string number = std::to_string(lightNo);

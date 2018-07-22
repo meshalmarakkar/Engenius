@@ -42,6 +42,8 @@ public:
 	float getExposure();
 	void setExposure(const float& newVal);
 
+	const float* getShadowFarPlane();
+
 	void setPostProcessNum(const int& num);
 	int getPostProcessNum();
 
@@ -128,10 +130,10 @@ private:
 	////SHADOWS////
 	bool shadow;
 
-	const GLfloat SHADOW_WIDTH = 1024;
-	const GLfloat SHADOW_ASPECT = SHADOW_WIDTH / SHADOW_WIDTH;
-	const GLfloat SHADOW_NEAR_PLANE = 1.0f;
-	const GLfloat SHADOW_FAR_PLANE = 25.0f;
+	const float SHADOW_WIDTH = 1024;
+	const float SHADOW_ASPECT = SHADOW_WIDTH / SHADOW_WIDTH;
+	const float SHADOW_NEAR_PLANE = 1.0f;
+	const float SHADOW_FAR_PLANE = 25.0f;
 };
 
 #endif
