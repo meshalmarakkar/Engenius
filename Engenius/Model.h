@@ -2,26 +2,18 @@
 #define MODEL
 
 #include "Mesh.h"
-#include "Renderer.h"
 #include "Matrix4f.h"
-#include "Shader.h"
 
-// Std. Includes
 #include <string>
 #include <iostream>
 #include <vector>
 
-// GL Includes
-#include <GL/glew.h> // Contains all the necessery OpenGL includes
-#include <glm/glm.hpp>
-#include <glm/gtx/quaternion.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <unordered_map>
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
-
 
 class Model
 {
@@ -32,29 +24,23 @@ public:
 	Model(const std::string& name, const string& path, const char* diffuse, const char* specular = NULL);
 	Model(const std::string& name, const string& path, const char* diffuse, const char* specular, const char* normal);
 
-	bool getIfMapped();
-
-	std::vector<Mesh>* getMeshes() { return &meshes; }
-
-	bool getToInstance();
-	void setToInstance(const bool& newValue);
-
 	void setIfDisableCullFace(const bool& newVal);
 	bool getIfDisableCullFace();
 
 	void setName(std::string newVal);
 	std::string getName();
-	
-	// Draws the model, and thus all its meshes
-	void InstancedDraw(Shader* shader, const std::vector<glm::mat4>& modelMatrices, const std::vector<glm::vec3>& pointIDs, const std::vector<glm::vec3>& spotIDs, const std::vector<float>& tiling);
-	
-	void Draw(Shader* shader, RenderProperties* rp, Renderer* renderer);
-	void Draw(const unsigned int& shader, const glm::mat4& modelMatrices);
 
-	void bindWall(Shader* shader, Renderer* renderer);
-	void unbindWall();
-	//void drawWall(Shader* shader, const glm::mat4& modelMatrix, Renderer* renderer);
-	void drawWall(Shader* shader, RenderProperties* rp, Renderer* renderer);
+	void batch_modelMatrices(const glm::mat4& modelMatrix);
+	void batch_pointIDs(const glm::ivec3& pointID);
+	void batch_spotIDs(const glm::ivec3& spotID);
+	void batch_tilings(const float& tiling);
+
+	void cleanup();
+	std::vector<Mesh>* getMeshes();
+	std::vector<glm::mat4>* getModelMatrices();
+	std::vector<glm::ivec3>* getPointIDs();
+	std::vector<glm::ivec3>* getSpotIDs();
+	std::vector<float>* getTilings();
 
 protected:
 	const aiScene* scene;
@@ -83,13 +69,10 @@ protected:
 
 private:
 	void loadTextures(vector<Texture> &textures, const char* str, const std::string& typeName);
-	vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName);
+	std::vector<Texture> loadMaterialTextures(aiMaterial* mat, aiTextureType type, const std::string& typeName);
 	void loadModel(const bool& onlyAnimation = false);
 	Mesh processMesh(aiMesh* mesh);
 
-	bool mapped;
-	bool hasSpecularMap;
-	bool toInstance;
 	bool disableCullFace;
 	std::string name;
 
@@ -105,6 +88,11 @@ private:
 		const char* height;
 	};
 	CustomTextures customTextures;
+
+	std::vector<glm::mat4> modelMatrices;
+	std::vector<glm::ivec3> pointIDs;
+	std::vector<glm::ivec3> spotIDs;
+	std::vector<float> tilings;
 };
 
 #endif

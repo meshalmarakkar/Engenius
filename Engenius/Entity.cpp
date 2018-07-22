@@ -64,23 +64,23 @@ Model* Entity::getModel() {
 }
 
 void Entity::setPointLightIDs(const int& id1, const int& id2, const int& id3) {
-	pointLightIDs[0] = id1;
-	pointLightIDs[1] = id2;
-	pointLightIDs[2] = id3;
+	pointLightIDs.x = id1;
+	pointLightIDs.y = id2;
+	pointLightIDs.z = id3;
 }
 
-int Entity::getPointLightID(const unsigned int& i) {
-	return pointLightIDs[i];
+glm::ivec3* Entity::getPointLightIDs() {
+	return &pointLightIDs;
 }
 
 void Entity::setSpotLightIDs(const int& id1, const int& id2, const int& id3) {
-	spotLightIDs[0] = id1;
-	spotLightIDs[1] = id2;
-	spotLightIDs[2] = id3;
+	spotLightIDs.x = id1;
+	spotLightIDs.y = id2;
+	spotLightIDs.z = id3;
 }
 
-int Entity::getSpotLightID(const unsigned int& i) {
-	return spotLightIDs[i];
+glm::ivec3* Entity::getSpotLightIDs() {
+	return &spotLightIDs;
 }
 
 RenderProperties_Uniforms* Entity::getRenderProperties() {

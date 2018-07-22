@@ -31,8 +31,8 @@ struct SpotLight {
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
 uniform sampler2D gAlbedoSpecular;
-uniform sampler2D gPointLightIDs;
-uniform sampler2D gSpotLightIDs;
+uniform isampler2D gPointLightIDs;
+uniform isampler2D gSpotLightIDs;
 uniform sampler2D gTBN_T;
 uniform sampler2D gTBN_B;
 uniform sampler2D gTBN_N;
@@ -47,7 +47,6 @@ uniform samplerCube depthMap[MAX_PER_LIGHT_TYPE];
 uniform bool depthMap_ifRender[MAX_PER_LIGHT_TYPE];
 
 uniform vec3 viewPos;
-uniform bool displayShadow;
 
 layout(location = 0) out vec4 out_Color;
 layout(location = 1) out vec4 toBlur_out_Color;
@@ -82,8 +81,8 @@ void main()
 	vec3 norm = texture(gNormal, texCoords).rgb;
 	vec3 colour = texture(gAlbedoSpecular, texCoords).rgb;
 	vec3 specMap = vec3(texture(gAlbedoSpecular, texCoords).a);
-	vec3 ptLightIDs = texture(gPointLightIDs, texCoords).rgb;
-	vec3 spLightIDs = texture(gSpotLightIDs, texCoords).rgb;
+	ivec3 ptLightIDs = texture(gPointLightIDs, texCoords).rgb;
+	ivec3 spLightIDs = texture(gSpotLightIDs, texCoords).rgb;
 	vec3 TBN_T = texture(gTBN_T, texCoords).rgb;
 	vec3 TBN_B = texture(gTBN_B, texCoords).rgb;
 	vec3 TBN_N = texture(gTBN_N, texCoords).rgb;
@@ -92,8 +91,8 @@ void main()
 	TBN[1][0] = TBN_B.x;	TBN[1][1] = TBN_B.y;	TBN[1][2] = TBN_B.z;
 	TBN[2][0] = TBN_N.x;	TBN[2][1] = TBN_N.y;	TBN[2][2] = TBN_N.z;
 
-	int pointLightIDs[MAX_PER_LIGHT_TYPE] = {int(ptLightIDs.x), int(ptLightIDs.y), int(ptLightIDs.z)};
-	int spotLightIDs[MAX_PER_LIGHT_TYPE] = {int(spLightIDs.x), int(spLightIDs.y), int(spLightIDs.z)};
+	int pointLightIDs[MAX_PER_LIGHT_TYPE] = {ptLightIDs.x, ptLightIDs.y, ptLightIDs.z};
+	int spotLightIDs[MAX_PER_LIGHT_TYPE] = {spLightIDs.x, spLightIDs.y, spLightIDs.z};
 	vec3 tangentViewPos  = TBN * viewPos;
 	vec3 tangentFragPos  = TBN * fragPos;
 	vec3 viewDir = normalize(tangentViewPos - tangentFragPos);
@@ -102,7 +101,7 @@ void main()
 	vec3 result;
 
 	for(int i = 0; i < MAX_PER_LIGHT_TYPE; i++){
-		shadow = 0.0f;// displayShadow && depthMap_ifRender[i] ? ShadowCalculation(pointLights[i].position, fragPos, depthMap[i]) : 0.0;	
+		shadow = 0.0f;// depthMap_ifRender[i] > -1 ? ShadowCalculation(pointLights[i].position, fragPos, depthMap[i]) : 0.0;	
 		result += pointLightIDs[i] > -1 ? CalcPointLight(pointLights[pointLightIDs[i]], viewDir, fragPos, norm, tangentFragPos, TBN, shadow, colour, specMap) : vec3(0.0f);   
 		result += spotLightIDs[i] > -1 ? CalcSpotLight(spotLights[spotLightIDs[i]], norm, fragPos, viewDir, colour, specMap) : vec3(0.0f);
 	}

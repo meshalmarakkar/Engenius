@@ -50,9 +50,9 @@ void Renderer::initFBOs() {
 	//albedospecular
 	FBO_gBuffer->createSingleTexture(Tex_Options::gl_rgba, width, height, Tex_Options::gl_rgba, Tex_Options::gl_unsigned_byte, Tex_Options::gl_nearest, Tex_Options::gl_nearest);
 	//pointLight ID
-	FBO_gBuffer->createSingleTexture(Tex_Options::gl_rgb16, width, height, Tex_Options::gl_rgb, Tex_Options::gl_int, Tex_Options::gl_nearest, Tex_Options::gl_nearest);
+	FBO_gBuffer->createSingleTexture(Tex_Options::gl_rgb32I, width, height, Tex_Options::gl_rgb_integer, Tex_Options::gl_int, Tex_Options::gl_nearest, Tex_Options::gl_nearest);
 	//spotLight ID
-	FBO_gBuffer->createSingleTexture(Tex_Options::gl_rgb16, width, height, Tex_Options::gl_rgb, Tex_Options::gl_int, Tex_Options::gl_nearest, Tex_Options::gl_nearest);
+	FBO_gBuffer->createSingleTexture(Tex_Options::gl_rgb32I, width, height, Tex_Options::gl_rgb_integer, Tex_Options::gl_int, Tex_Options::gl_nearest, Tex_Options::gl_nearest);
 	//TBN_T
 	FBO_gBuffer->createSingleTexture(Tex_Options::gl_rgb16f, width, height, Tex_Options::gl_rgb, Tex_Options::gl_float, Tex_Options::gl_nearest, Tex_Options::gl_nearest);
 	//TBN__B
@@ -170,10 +170,10 @@ void Renderer::SS_GodRays() {
 void Renderer::draw_screenQuad() {
 	setup_Screen();
 	glDrawArrays(GL_TRIANGLES, 0, 6);
-	unbindAllTextures();
+//	unbindAllTextures();
 }
 
-void Renderer::draw_finalDisplay(const float& exposure, const int& ifBloom, const int& effectNo, const bool& ifPause, const GLuint& tex_pause, const bool& ifEndGame, const GLuint& tex_end) {
+void Renderer::draw_finalDisplay(const float& exposure, const int& ifBloom, const int& effectNo, const bool& ifPause, const GLuint& tex_pause, const bool& ifEndGame, const GLuint& tex_end, unsigned int num) {
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -193,13 +193,13 @@ void Renderer::draw_finalDisplay(const float& exposure, const int& ifBloom, cons
 	}
 	else {
 		//glBindTexture(GL_TEXTURE_2D, gNormal);
-		//glBindTexture(GL_TEXTURE_2D, FBO_gBuffer->getColourBuffer(entityManager->getNum()));
+		//glBindTexture(GL_TEXTURE_2D, FBO_gBuffer->getColourBuffer(num));
 		glBindTexture(GL_TEXTURE_2D, FBO_postProcess->getColourBuffer(0));
 	}
 	glUniform1i(glGetUniformLocation(shaderManager->get_postProcessing_program(), "screenTexture"), 0);
 
 	glDrawArrays(VAO_screenQuad->getDrawMode(), 0, VAO_screenQuad->getIndicesCount());
-	unbindTextures(0, 1);
+	//unbindTextures(0, 1);
 }
 
 void Renderer::drawArrays(VertexArrayObject* VAO) {
@@ -225,8 +225,15 @@ void Renderer::drawArrays(Shader* shader, VertexArrayObject* VAO, RenderProperti
 }
 
 void Renderer::drawElements(VertexArrayObject* VAO) {
-	//VAO->bind();
+	VAO->bind();
 	glDrawElements(VAO->getDrawMode(), VAO->getIndicesCount(), GL_UNSIGNED_INT, 0);
+}
+
+void Renderer::drawElements(Model* model) {
+	for (unsigned int id = 0; id < model->getMeshes()->size(); id++) {
+		Mesh* m = &(model->getMeshes()->at(id));
+		drawElements(m->getVAO());
+	}
 }
 
 void Renderer::setup_model(Shader* shader, VertexArrayObject* VAO, Material* mat) {
@@ -246,9 +253,7 @@ void Renderer::setup_model(Shader* shader, VertexArrayObject* VAO, Material* mat
 	VAO->bind();
 }
 
-void Renderer::drawElements(Shader* shader, VertexArrayObject* VAO, Material* mat) {
-	shader->uniform("tiling", mat->getTiling());
-
+void Renderer::drawElements_instanced(Shader* shader, VertexArrayObject* VAO, Material* mat, unsigned int num) {
 	shader->reset_texCount();
 	auto* textures_2D = mat->getTextures_2D();
 	for (unsigned int i = 0; i < textures_2D->size(); i++) {
@@ -258,9 +263,18 @@ void Renderer::drawElements(Shader* shader, VertexArrayObject* VAO, Material* ma
 	for (unsigned int i = 0; i < textures_Cubemap->size(); i++) {
 		shader->bindTex_Cubemap((textures_Cubemap->at(i).name).c_str(), textures_Cubemap->at(i).tex);
 	}
-	shader->uniform("hasSpecularMap", mat->getIfSpecular());
-
+	shader->uniform("hasSpecularMap", mat->getIfSpecular()); 
+	
 	VAO->bind();
+	glDrawElementsInstanced(VAO->getDrawMode(), VAO->getIndicesCount(), GL_UNSIGNED_INT, 0, num);
+}
+
+void Renderer::drawElements(Shader* shader, VertexArrayObject* VAO, Material* mat) {
+	setup_model(shader, VAO, mat);
+	glDrawElements(VAO->getDrawMode(), VAO->getIndicesCount(), GL_UNSIGNED_INT, 0);
+}
+
+void Renderer::drawElements_WO_bind(VertexArrayObject* VAO) {
 	glDrawElements(VAO->getDrawMode(), VAO->getIndicesCount(), GL_UNSIGNED_INT, 0);
 }
 
@@ -305,26 +319,6 @@ void Renderer::bindCubeMapTexture(const unsigned int& shader, const unsigned int
 	num_nextAvailableTex++;
 }
 
-void Renderer::unbindTextures(const unsigned int& num) {
-	glActiveTexture(GL_TEXTURE0 + num);
-	glBindTexture(GL_TEXTURE_2D, 0);
-
-}
-
-void Renderer::unbindTextures(const unsigned int& first, const unsigned int& last) {
-	for (unsigned int i = first; i < last + 1; i++) {
-		glActiveTexture(GL_TEXTURE0 + i);
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-}
-
-void Renderer::unbindAllTextures() {
-	for (unsigned int i = 0; i < num_nextAvailableTex + 1; i++) {
-		glActiveTexture(GL_TEXTURE0 + i);
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-}
-
 void Renderer::enableDepthTest() {
 	glEnable(GL_DEPTH_TEST);
 }
@@ -348,3 +342,11 @@ void Renderer::disableBlend() {
 void Renderer::setBlendFunction(const GLenum setting) {
 	glBlendFunc(GL_SRC_ALPHA, setting);
 }
+
+void Renderer::enableLineDraw() {
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+}
+void Renderer::disableLineDraw() {
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+

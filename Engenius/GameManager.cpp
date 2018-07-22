@@ -48,7 +48,10 @@ void GameManager::init(WindowManager * windowManager) {
 	tex_pause = TextureLoader::loadTexture("Menu.png", "../Engenius/Textures/");
 	tex_end = TextureLoader::loadTexture("Exit.png", "../Engenius/Textures/");
 	audioManager->startGame(camera->getCameraEye());
-	entityManager = new EntityManager(camera, lightingManager, shaderManager, colManager, terrainManager);
+	
+	renderer = new Renderer(windowManager, shaderManager);
+	
+	entityManager = new EntityManager(camera, lightingManager, shaderManager, colManager, terrainManager, renderer);
 
 	editModeManager = new EditModeManager(entityManager, colManager, particleGenerator, hudManager, lightingManager, audioManager, shaderManager);
 
@@ -56,7 +59,7 @@ void GameManager::init(WindowManager * windowManager) {
 
 	inputManager = new InputManager(this, windowManager, camera, entityManager, mousePicker, lightingManager, hudManager, audioManager, editModeManager, colManager, terrainManager);
 
-	renderer = new Renderer(windowManager, shaderManager);
+	skybox = new Skybox(shaderManager->getShaderProgram(Programs::skybox), entityManager->getENVModel("cube"));
 
 	ifDeferred = false;
 	pause = true;
@@ -94,7 +97,7 @@ void GameManager::init(WindowManager * windowManager) {
 }
 
 void GameManager::renderScene() {
-	//skybox->renderSkybox(camera->getProjection(), camera->getView());
+	skybox->renderSkybox(camera->getProjection(), camera->getView(), renderer, lightingManager->getDepthCubeMap(1));
 
 	entityManager->draw(dt_secs, NUM_EFFECTIVE_GRIDS, renderGridNo, ifDeferred);
 
@@ -105,7 +108,7 @@ void GameManager::renderScene() {
 		program->uniformsToShader_RUNTIME();
 		unsigned int shader = program->getShaderProgram();
 
-		editModeManager->draw(shader);
+		editModeManager->draw(program, renderer);
 	}
 
 	//renderer->unbindTextures(0, lightingManager->getNumOfLights());
@@ -147,16 +150,17 @@ void GameManager::update(float _dt_secs) {
 bool done = false;
 void GameManager::draw() {
 	if (lightingManager->getIfShadow() == true && done ==false) {
-		unsigned int shader = shaderManager->get_depthShader_program();
-		glUniform3fv(glGetUniformLocation(shader, "viewPos"), 1, glm::value_ptr(camera->getCameraEye()));
+		Shader* program = shaderManager->getShaderProgram(Programs::shadow_depthShader);
+		program->bind();
+		unsigned int shader = program->getShaderProgram();
 
 		for (unsigned int i = 0; i < lightingManager->getNumOfPointLights(); i++) {
 			lightingManager->setUpShadowRender_Pointlights(shader, i); // render using light's point of view
 		//	glUniform1f(glGetUniformLocation(shader, "far_plane"), camera->getFarPlane());
-		//	glUniform3fv(glGetUniformLocation(shader, "viewPos"), 1, glm::value_ptr(camera->getCameraEye()));
+	//		glUniform3fv(glGetUniformLocation(shader, "viewPos"), 1, glm::value_ptr(camera->getCameraEye()));
 
-			entityManager->shadow_draw(shader, NUM_EFFECTIVE_GRIDS, renderGridNo);
-			done = true;
+			entityManager->shadow_draw(program, NUM_EFFECTIVE_GRIDS, renderGridNo);
+			//done = true;
 		}
 	}
 
@@ -201,7 +205,7 @@ void GameManager::draw() {
 //		glBlendFunc(GL_SRC_ALPHA, GL_ONE);*/
 //	}
 
-	renderer->draw_finalDisplay(lightingManager->getExposure(), lightingManager->getIfBloom(), lightingManager->getPostProcessNum(), pause, tex_pause, endGame, tex_end);
+	renderer->draw_finalDisplay(lightingManager->getExposure(), lightingManager->getIfBloom(), lightingManager->getPostProcessNum(), pause, tex_pause, endGame, tex_end, entityManager->getNum());
 
 	renderer->setBlendFunction(BlendOptions::gl_one_minus_src_alpha);
 

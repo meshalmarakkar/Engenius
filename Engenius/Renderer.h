@@ -12,6 +12,7 @@
 //#include "TextureLoader.h"
 #include "RenderProperties.h"
 #include "Shader.h"
+#include "Model.h"
 
 struct BlendOptions {
 	static const GLenum gl_one = GL_ONE;
@@ -35,20 +36,27 @@ public:
 
 	void drawArrays(VertexArrayObject* VAO);
 	void drawArrays(Shader* shader, VertexArrayObject* VAO, RenderProperties* rp);
+
+	void drawElements(Model* model);
 	void drawElements(VertexArrayObject* VAO);
+	void drawElements_WO_bind(VertexArrayObject* VAO);
+
 	void setup_model(Shader* shader, VertexArrayObject* VAO, Material* material);
 	void drawElements(Shader* shader, VertexArrayObject* VAO, Material* material);
+
 	void drawElements_w_primitiveRestart(Shader* shader, VertexArrayObject* VAO, RenderProperties* rp);
-	void draw(VertexArrayObject* VAO);
+	
 	void draw_screenQuad();
 	void draw_finalDisplay(const float& exposure, const int& ifBloom, const int& effectNo, const bool& ifPause, const GLuint& tex_pause, const bool& ifEndGame, const GLuint& tex_end);
+	void draw_finalDisplay(const float& exposure, const int& ifBloom, const int& effectNo, const bool& ifPause, const GLuint& tex_pause, const bool& ifEndGame, const GLuint& tex_end, unsigned int num);
 
+	void drawElements_instanced(Shader* shader, VertexArrayObject* VAO, Material* material, unsigned int num);
 
 	void bindTexture(const unsigned int& shader, const unsigned int& texture, const char* name);
 	void bindCubeMapTexture(const unsigned int& shader, const unsigned int& texture, const char* name);
-	void unbindTextures(const unsigned int& num);
-	void unbindTextures(const unsigned int& first, const unsigned int& last);
-	void unbindAllTextures();
+	//void unbindTextures(const unsigned int& num);
+	//void unbindTextures(const unsigned int& first, const unsigned int& last);
+	//void unbindAllTextures();
 
 	void enableDepthTest();
 	void disableDepthTest();
@@ -58,6 +66,10 @@ public:
 
 	void enableBlend();
 	void disableBlend();
+
+	void enableLineDraw();
+	void disableLineDraw();
+
 	void setBlendFunction(const GLenum setting);
 
 private:

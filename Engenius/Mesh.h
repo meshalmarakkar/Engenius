@@ -45,12 +45,12 @@ public:
 	
 	Mesh(const vector<Vertex>& vertices, const vector<unsigned int>& indices, const vector<Texture>& textures);
 	//~Mesh();
-	// Render the mesh
-	void InstancedDraw(const unsigned int& shader, const std::vector<glm::mat4>& modelMatrices, const std::vector<glm::vec2>& pointIDs, const std::vector<glm::vec2>& spotIDs);
 
 	VertexArrayObject* getVAO();
 
-	void prepareInstancedDraw(const std::vector<glm::mat4>& modelMatrices, const std::vector<glm::vec3>& pointIDs, const std::vector<glm::vec3>& spotIDs, const std::vector<float>& tiling);
+	void prepareInstancedDraw(const std::vector<glm::mat4>* modelMatrices, const std::vector<glm::ivec3>* pointIDs, const std::vector<glm::ivec3>* spotIDs, const std::vector<float>* tiling);
+
+	void prepareInstancedDraw(const std::vector<glm::mat4>* modelMatrices);
 
 	Material* getMaterial();
 

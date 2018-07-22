@@ -6,8 +6,8 @@ layout (location = 2) in vec2 texCoords;
 layout (location = 3) in vec3 tangents;
 layout (location = 4) in vec3 bitangents;
 layout (location = 7) in mat4 layout_model;
-layout (location = 11) in vec3 pointIDs;
-layout (location = 12) in vec3 spotIDs;
+layout (location = 11) in ivec3 pointIDs;
+layout (location = 12) in ivec3 spotIDs;
 layout (location = 13) in float in_tiling;
 
 uniform bool instanced;
@@ -31,13 +31,14 @@ void main()
 {
 	mat4 model;
 	if (instanced){
-		vs_out.pIDs[0] = int(pointIDs.x);
-		vs_out.pIDs[1] = int(pointIDs.y);
-		vs_out.pIDs[2] = int(pointIDs.z);
-						
-		vs_out.sIDs[0] = int(spotIDs.x);
-		vs_out.sIDs[1] = int(spotIDs.y);
-		vs_out.sIDs[2] = int(spotIDs.z);
+		vs_out.pIDs[0] = pointIDs.x;
+		vs_out.pIDs[1] = pointIDs.y;
+		vs_out.pIDs[2] = pointIDs.z;
+					
+		vs_out.sIDs[0] = spotIDs.x;
+		vs_out.sIDs[1] = spotIDs.y;
+		vs_out.sIDs[2] = spotIDs.z;
+		
 		model = layout_model;
 		vs_out.TexCoords = texCoords * in_tiling;
 	}

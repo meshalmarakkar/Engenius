@@ -36,6 +36,7 @@ public:
 	unsigned int genBuffer();
 	unsigned int genBuffer_andAddData(GLenum target, GLsizeiptr size, const void* data, GLenum usage);
 	void addData(const unsigned int& bufferID, GLenum target, GLsizeiptr size, const void* data, GLenum usage);
+	void updateData(const unsigned int& bufferID, GLenum target, GLsizeiptr size, const void* data);
 
 	void enableVertexAttribArray(const unsigned int& attribID, const int& size, GLenum type, GLboolean normalised, GLsizei stride, size_t pointer);
 	void enableVertexAttribArray_I(const unsigned int& attribID, const int& size, GLenum type, GLsizei stride, size_t pointer);

@@ -49,7 +49,6 @@ uniform bool depthMap_ifRender[MAX_PER_LIGHT_TYPE];
 
 uniform vec3 viewPos;
 uniform bool hasSpecularMap;
-uniform bool displayShadow;
 
 layout(location = 0) out vec4 out_Color;
 layout(location = 1) out vec4 toBlur_out_Color;
@@ -80,7 +79,7 @@ void main()
 	vec3 result;
 
 	for(int i = 0; i < MAX_PER_LIGHT_TYPE; i++){
-		shadow = displayShadow && depthMap_ifRender[i] ? ShadowCalculation(pointLights[i].position, depthMap[i]) : 0.0;	
+		shadow = depthMap_ifRender[i] ? ShadowCalculation(pointLights[i].position, depthMap[i]) : 0.0;	
 		result += pointLightIDs[i] > -1 ? CalcPointLight(pointLights[pointLightIDs[i]], viewDir, norm, shadow, colour, specMap) : vec3(0.0f);
 		result += spotLightIDs[i] > -1 ? CalcSpotLight(spotLights[spotLightIDs[i]], norm, fs_in.FragPos, viewDir, colour, specMap) : vec3(0.0f);  
 	}

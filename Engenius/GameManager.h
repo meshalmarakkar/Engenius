@@ -18,6 +18,7 @@
 #include "TerrainManager.h"
 #include "Renderer.h"
 #include "TextureLoader.h"
+#include "Skybox.h"
 
 #include <iostream>
 #include <math.h>
@@ -84,6 +85,8 @@ private:
 	TerrainManager * terrainManager;
 
 	Renderer* renderer;
+
+	Skybox* skybox;
 
 	unsigned int tex_pause;
 	unsigned int tex_end;

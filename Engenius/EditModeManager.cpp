@@ -49,45 +49,31 @@ void EditModeManager::update( const glm::vec3 currentTerrainPointOfMouse, float 
 		edit_SetPos(currentTerrainPointOfMouse);
 }
 
-void EditModeManager::draw(unsigned int shader) {
+void EditModeManager::draw(Shader* shader, Renderer* renderer) {
+	renderer->enableLineDraw();
 	if (mode_selected == mode_bounding) {
 		glm::mat4 edit_ModelMatrix;
 		glm::vec3 scale(mode_selected->edit_scale.x, mode_selected->edit_scale.y, mode_selected->edit_scale.z);
 		Common::createModelMatrix(edit_ModelMatrix, mode_selected->edit_pos, mode_selected->edit_yaw, scale);
 
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		colManager->renderBoundingBoxes(shader, mode_selected->addMode ? true : false, mode_selected->visualize ? true : false, edit_ModelMatrix);
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		
+		colManager->renderBoundingBoxes(shader, renderer, mode_selected->addMode ? true : false, mode_selected->visualize ? true : false, edit_ModelMatrix);		
 	}
 	else if (mode_selected == mode_objects) {
 		if (mode_selected->addMode) {
 			glm::mat4 edit_ModelMatrix;
 			Common::createModelMatrix(edit_ModelMatrix, mode_selected->edit_pos, mode_selected->edit_scale, glm::vec3(mode_selected->edit_pitch, mode_selected->edit_yaw, mode_selected->edit_roll));
-			if (mode_selected->visualize) {
-				edit_ModelIterator->second->Draw(shader, edit_ModelMatrix);
-			}
-			else {
-				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-				edit_ModelIterator->second->Draw(shader, edit_ModelMatrix);
-				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			}
+		
+			shader->uniform("uniform_model", edit_ModelMatrix);
+			renderer->drawElements(edit_ModelIterator->second);
 		}
 		else if (mode_selected->moveMode) {
 			particleManager->moveParticleManually((*edit_ObjectIterator)->getPos() + glm::vec3(0.0f, 5.0f, 0.0f));
-			if (mode_selected->visualize) {
-				(*edit_ObjectIterator)->getModel()->Draw(shader, (*edit_ObjectIterator)->getModelMatrix());
-			}
-			else {
-				glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-				(*edit_ObjectIterator)->getModel()->Draw(shader, (*edit_ObjectIterator)->getModelMatrix());
-				glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			}
+	
+			shader->uniform("uniform_model", (*edit_ObjectIterator)->getModelMatrix());
+			renderer->drawElements((*edit_ObjectIterator)->getModel());
 		}
 	}
-	else if (mode_selected == mode_lights) {
-
-	}
+	renderer->disableLineDraw();
 }
 
 ////MODES////
@@ -219,15 +205,6 @@ void EditModeManager::switchModel(bool next) {
 			}
 		}
 	}
-
-	if (mode_selected == mode_lights) {
-		if (mode_selected->addMode) {
-			;
-		}
-		if (mode_selected->moveMode) {
-			//switchLightTypes? like pointlight and spotlight;
-		}
-	}
 }
 
 ////EDIT_DISPLAYOBJECT////
@@ -275,18 +252,10 @@ void EditModeManager::edit_SetYOffset(bool increase) {
 }
 
 void EditModeManager::edit_GridNo(bool increase) {
-	if (increase) {
-		if (gridNo == 2)
-			gridNo = 0;
-		else
-			gridNo++;
-	}
-	else {
-		if (gridNo == 0)
-			gridNo = 2;
-		else
-			gridNo--;
-	}
+	if (increase)
+		gridNo == 2 ? gridNo = 0 : gridNo++;
+	else
+		gridNo == 0 ? gridNo = 2 : gridNo--;
 	std::cout << "gridNo: " << gridNo << std::endl;
 }
 
@@ -307,7 +276,7 @@ void EditModeManager::addFunction() {
 				p1 = 2;
 				p2 = 3;
 			}
-			entityManager->addEntityObject(edit_ModelIterator->first, mode_selected->edit_pos, mode_selected->edit_scale, glm::vec3(mode_selected->edit_pitch, mode_selected->edit_yaw, mode_selected->edit_roll), 1.0f, gridNo, p1, p2, 2, -1, -1, -1);
+			entityManager->addEntityObject(edit_ModelIterator->first, mode_selected->edit_pos, mode_selected->edit_scale, glm::vec3(mode_selected->edit_pitch, mode_selected->edit_yaw, mode_selected->edit_roll), 1.0f, gridNo, p1, p2, 2, -1, -1, -1, 1.0f);
 			edit_ObjectIterator = entityManager->getEnviObject_Begin();
 		}
 		if (mode_selected == mode_bounding) {

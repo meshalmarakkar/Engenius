@@ -4,12 +4,13 @@
 
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <GL/glew.h>
 #include <vector>
 #include "Model.h"
 #include "Common.h"
 #include "Character.h"
 #include <map>
+#include "Renderer.h"
+#include "Shader.h"
 #include <fstream>
 
 #include <btBulletDynamicsCommon.h>
@@ -55,7 +56,7 @@ public:
 	bool readBoundFile();
 	bool writeBoundFile();
 
-	void renderBoundingBoxes(const unsigned int& shader, const bool& addMode, const bool& rigidBodyMode, const glm::mat4& edit_modelMatrix);
+	void renderBoundingBoxes(Shader* shader, Renderer* renderer, const bool& addMode, const bool& rigidBodyMode, const glm::mat4& edit_modelMatrix);
 
 	float getHeirarchicalGridScale();
 
@@ -72,15 +73,12 @@ public:
 	btRigidBody* addBox(const float& width, const float& height, const float& depth, const float& x, const float& y, const float& z, const float& mass, collisiontype& group, collisiontype& mask);
 	btRigidBody* addCapsule(const float& rad, const float& height, const float& x, const float& y, const float& z, const float& mass);
 
-	void renderBox(btRigidBody* box, const unsigned int& shader);
-	void renderCapsule(btRigidBody* capsule, Model *modelData, const unsigned int& shader, const unsigned int& texture);
+	
 	void addToWorld(btRigidBody* body);
 	void addToWorld(btRigidBody* body, collisiontype COLL_TYPE, const int& collidesWith);
-	void addGhostToWorld(btPairCachingGhostObject* ghost);
-	void addGhostToWorld(btPairCachingGhostObject* ghost, collisiontype COLL_TYPE, const int& collidesWith);
+
 	btBroadphasePair* findWorldPair(const btBroadphasePair &pair);
-	void removeObject(btRigidBody* body);
-	void removeObject(btPairCachingGhostObject* ghost);
+
 
 	void attachPlayerCollider(Character* player, const glm::vec3& pos, const float& rad, const float& height, const float& mass);
 
@@ -88,6 +86,13 @@ private:
 	bool heirDisplay;
 
 	void initGrids();
+
+	void addGhostToWorld(btPairCachingGhostObject* ghost);
+	void addGhostToWorld(btPairCachingGhostObject* ghost, collisiontype COLL_TYPE, const int& collidesWith);
+	void renderBox(btRigidBody* box, Shader* shader, Renderer* renderer);
+	void renderCapsule(btRigidBody* capsule, Model *modelData, Shader* shader, Renderer* renderer);
+	void removeObject(btRigidBody* body);
+	void removeObject(btPairCachingGhostObject* ghost);
 	
 	bool twoDcollisionCheck(const glm::vec2& position_A, const glm::vec2& scale_A, const float& left, const float& right, const float& top, const float& bottom);
 

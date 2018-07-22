@@ -32,10 +32,12 @@ public:
 	float getCullingBound();
 
 	void setPointLightIDs(const int& id1, const int& id2, const int& id3);
-	int getPointLightID(const unsigned int& i);
+	//int getPointLightID(const unsigned int& i);
+	glm::ivec3* getPointLightIDs();
 
 	void setSpotLightIDs(const int& id1, const int& id2, const int& id3);
-	int getSpotLightID(const unsigned int& i);
+	//int getSpotLightID(const unsigned int& i);
+	glm::ivec3* getSpotLightIDs();
 
 	int getZone();
 	void setZone(const int& newVal);
@@ -60,8 +62,10 @@ protected:
 	RenderProperties_Uniforms* renderProperties;
 
 private:
-	int pointLightIDs[3]; //lights that effect object
-	int spotLightIDs[3]; //lights that effect object
+	glm::ivec3 pointLightIDs;
+	glm::ivec3 spotLightIDs;
+//	int pointLightIDs[3]; //lights that effect object
+//	int spotLightIDs[3]; //lights that effect object
 	int zone;
 	float tiling;
 };

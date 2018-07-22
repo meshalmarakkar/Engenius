@@ -270,7 +270,6 @@ static void camera_requiredLoad(Camera* camera, Uniforms* uni) {
 
 static void lighting_requiredLoad(LightingManager* light, Uniforms* uni) {
 	light->lights_preloadShader(uni);
-	uni->addUniform("displayShadow", light->getIfShadow_Pointer());
 }
 
 static void commonRunTime_uniforms(Camera* cam, Uniforms* uni) {

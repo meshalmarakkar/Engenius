@@ -10,13 +10,13 @@
 #include <iostream>
 #include "Uniforms.h"
 #include "RenderProperties.h"
+#include "Shader.h"
 
 class LightingManager {
 public:
 	LightingManager(const glm::vec3& cameraEye, const glm::vec3& cameraAt);
 	unsigned int getNumOfLights();
 	void lightIDsToShader(const unsigned int& shader, const int& po_1, const int& po_2, const int& po_3, const int& sp_1, const int& sp_2, const int& sp_3);
-	void lightsToShader(const unsigned int& shader);
 
 	void lights_preloadShader(Uniforms* uni);
 	void getLightIDs(Uniforms* uni, const int* po_1, const int* po_2, const int* po_3, const int* sp_1, const int* sp_2, const int* sp_3);
@@ -28,6 +28,9 @@ public:
 	void shadowMapsToShader(const unsigned int& shader, const int& po_1, const int& po_2, const int& po_3, const int& sp_1, const int& sp_2, const int& sp_3);
 	void noShadowMessage(const unsigned int& shader);
 
+	void shadowMapsToShader(Shader* shader, const int& po_1, const int& po_2, const int& po_3, const int& sp_1, const int& sp_2, const int& sp_3);
+	void noShadowMessage(Shader* shader);
+
 	unsigned int getDepthCubeMap(const unsigned int& i);
 	unsigned int getNumOfPointLights();
 	glm::vec3 getPointLightPosition(const unsigned int& i);
@@ -36,27 +39,8 @@ public:
 	bool getIfBloom();
 	void toggleShadow();
 	bool getIfShadow();
-	bool* getIfShadow_Pointer();
 	float getExposure();
 	void setExposure(const float& newVal);
-
-	void moveLightForward(const float& dt_secs, const glm::vec3& cameraAt);
-	void moveLightBackward(const float& dt_secs, const glm::vec3& cameraAt);
-	void moveLightLeft(const float& dt_secs, const glm::vec3& cameraAt, const glm::vec3& cameraUp);
-	void moveLightRight(const float& dt_secs, const glm::vec3& cameraAt, const glm::vec3& cameraUp);
-	void moveLightUp(const float& dt_secs);
-	void moveLightDown(const float& dt_secs);
-
-	void setConstant(const bool& increase);
-	void setLinear(const bool& increase);
-	void setQuadratic(const bool& increase);
-
-	void setAmbient(const bool& increase, const char& comp);
-	void setDiffuse(const bool& increase, const char& comp);
-	void setSpecular(const bool& increase, const char& comp);
-	void setRange(const bool& increase);
-
-	void displayLightDetails();
 
 	void setPostProcessNum(const int& num);
 	int getPostProcessNum();

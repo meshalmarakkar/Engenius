@@ -1,7 +1,7 @@
 #ifndef EDITMODEMANAGER
 #define EDITMODEMANAGER
 
-#include <GL/glew.h>
+//#include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -22,7 +22,7 @@ public:
 	EditModeManager(EntityManager* entityManager, CollisionManager* colManager, ParticleManager* particleManager, HUDManager* hudManager, LightingManager* lightingManager, AudioManager* audioManager, ShaderManager* shaderManager);
 
 	void update(const glm::vec3 currentTerrainPointOfMouse, float dt_secs);
-	void draw(unsigned int shader);
+	void draw(Shader* shader, Renderer* renderer);
 
 	int getViewMode();
 	void toggleViewMode();

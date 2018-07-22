@@ -72,10 +72,13 @@ unsigned int CollisionManager::getRelevantGrid(const glm::vec3& pos, const glm::
 	return 0; //for safeguard....shouldnt get here though
 }
 
-void CollisionManager::renderBoundingBoxes(const unsigned int& shader, const bool& addMode, const bool& rigidBodyMode, const glm::mat4& edit_modelMatrix) {
+void CollisionManager::renderBoundingBoxes(Shader* shader, Renderer* renderer, const bool& addMode, const bool& rigidBodyMode, const glm::mat4& edit_modelMatrix) {
+	shader->uniform("colour", red);
+	shader->uniform("instanced", false);
+
 	if (rigidBodyMode) {
 		for (unsigned int h = 0; h < rigidBodies.size(); h++) {
-			renderBox(rigidBodies.at(h), shader);
+			renderBox(rigidBodies.at(h), shader, renderer);
 		}
 	}
 	else {
@@ -87,18 +90,16 @@ void CollisionManager::renderBoundingBoxes(const unsigned int& shader, const boo
 				glm::vec3 pos(grids->at(h)->position.x, 0.0f, grids->at(h)->position.y);
 				glm::vec3 scale(grids->at(h)->scale.x, 0.2f, grids->at(h)->scale.y);
 				Common::createModelMatrix(model, pos, 0.0f, scale);
-				glUniform4fv(glGetUniformLocation(shader, "colour"), 1, glm::value_ptr(red));
-				cube->Draw(shader, model);
+				shader->uniform("uniform_model", model);
+				renderer->drawElements(cube);
 			}
 		}
 	}
 
 	if (addMode) {
-		glUniform4fv(glGetUniformLocation(shader, "colour"), 1, glm::value_ptr(red));
-		cube->Draw(shader, edit_modelMatrix);
+		shader->uniform("uniform_model", edit_modelMatrix);
+		renderer->drawElements(cube);
 	}
-	/*cube->Draw(shader, modelMatrices);
-	modelMatrices.clear();*/
 }
 
 float CollisionManager::getHeirarchicalGridScale() { return 1.0f; }
@@ -281,7 +282,7 @@ btRigidBody* CollisionManager::addCapsule(const float& rad, const float& height,
 	return body;
 }
 
-void CollisionManager::renderCapsule(btRigidBody* capsule, Model *modelData, const unsigned int& shader, const unsigned int& texture) {
+void CollisionManager::renderCapsule(btRigidBody* capsule, Model *modelData, Shader* shader, Renderer* renderer) {
 
 	if (capsule->getCollisionShape()->getShapeType() != CAPSULE_SHAPE_PROXYTYPE) //cout << "Wrong collision shape ";	
 		return;
@@ -295,15 +296,11 @@ void CollisionManager::renderCapsule(btRigidBody* capsule, Model *modelData, con
 	t.getOpenGLMatrix(glm::value_ptr(model));
 	model = glm::scale(model, glm::vec3(r, h, r));
 
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture);
-
-	modelData->Draw(shader, model);
-
-	glBindTexture(GL_TEXTURE_2D, 0);
+	shader->uniform("uniform_model", model);
+	renderer->drawElements(cube);
 }
 
-void CollisionManager::renderBox(btRigidBody* box, const unsigned int& shader) {
+void CollisionManager::renderBox(btRigidBody* box, Shader* shader, Renderer* renderer) {
 
 	if (box->getCollisionShape()->getShapeType() != BOX_SHAPE_PROXYTYPE) 			//cout << "Wrong collision shape";
 		return;
@@ -316,11 +313,8 @@ void CollisionManager::renderBox(btRigidBody* box, const unsigned int& shader) {
 	t.getOpenGLMatrix(glm::value_ptr(model));
 	model = glm::scale(model, glm::vec3(extent.x(), extent.y(), extent.z())); //DEFINITELY goes after
 
-	glUniform4fv(glGetUniformLocation(shader, "colour"), 1, glm::value_ptr(red));
-
-	cube->Draw(shader, model);
-
-	glBindTexture(GL_TEXTURE_2D, 0);
+	shader->uniform("uniform_model", model);
+	renderer->drawElements(cube);
 }
 
 void CollisionManager::addToWorld(btRigidBody* body) {

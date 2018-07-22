@@ -44,74 +44,42 @@ std::string Model::getName() {
 	return name;
 }
 
-bool Model::getIfMapped() {
-	return mapped;
+void Model::batch_modelMatrices(const glm::mat4& modelMatrix) {
+	modelMatrices.push_back(modelMatrix);
+}
+void Model::batch_pointIDs(const glm::ivec3& pointID) {
+	pointIDs.push_back(pointID);
+}
+void Model::batch_spotIDs(const glm::ivec3& spotID) {
+	spotIDs.push_back(spotID);
+}
+void Model::batch_tilings(const float& tiling) {
+	tilings.push_back(tiling);
+}
+void Model::cleanup() {
+	modelMatrices.clear();
+	pointIDs.clear();
+	spotIDs.clear();
+	tilings.clear();
 }
 
-bool Model::getToInstance() {
-	return toInstance;
+std::vector<Mesh>* Model::getMeshes() {
+	return &meshes;
 }
 
-void Model::setToInstance(const bool& newValue) {
-	toInstance = newValue;
+std::vector<glm::mat4>* Model::getModelMatrices() {
+	return &modelMatrices;
+}
+std::vector<glm::ivec3>* Model::getPointIDs() {
+	return &pointIDs;
+}
+std::vector<glm::ivec3>* Model::getSpotIDs() {
+	return &spotIDs;
+}
+std::vector<float>* Model::getTilings() {
+	return &tilings;
 }
 
-void Model::bindWall(Shader* shader, Renderer* renderer) {
-	//glUniform1f(glGetUniformLocation(shader, "hasSpecularMap"), hasSpecularMap);
-	glUniform1i(glGetUniformLocation(shader->getShaderProgram(), "instanced"), false);
-	renderer->setup_model(shader, meshes.at(0).getVAO(), meshes.at(0).getMaterial());
-	//this->meshes.at(0).sendTex(shader);
-	//this->meshes.at(0).bindWall(shader);
-}
-void Model::unbindWall() {
-	//this->meshes.at(0).unbindWall();
-}
-//void Model::drawWall(Shader* shader, const glm::mat4& modelMatrix, Renderer* renderer) {
-//	shader->uniform("uniform_model", modelMatrix);
-//	//glUniformMatrix4fv(glGetUniformLocation(shader, "uniform_model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-//
-//	renderer->drawElements(this->meshes.at(0).getVAO());
-//}
-
-void Model::drawWall(Shader* shader, RenderProperties* rp, Renderer* renderer) {
-	shader->uniform("uniform_model", *(rp->getModelMatrix()));
-	shader->uniformsToShader(rp->getUniforms());
-
-	renderer->drawElements(this->meshes.at(0).getVAO());
-}
-
-void Model::InstancedDraw(Shader* shader, const std::vector<glm::mat4>& modelMatrices, const std::vector<glm::vec3>& pointIDs, const std::vector<glm::vec3>& spotIDs, const std::vector<float>& tiling) {
-	shader->uniform("instanced", true);
-//	shader->uniform("uniform_model", *(rp->getModelMatrix()));
-//	shader->uniformsToShader(rp->getUniforms());
-
-	for (unsigned int i = 0; i < this->meshes.size(); i++) {
-		Mesh* m = &(this->meshes.at(i));
-		m->prepareInstancedDraw(modelMatrices, pointIDs, spotIDs, tiling);
-		unsigned int num = modelMatrices.size();
-		glDrawElementsInstanced(m->getVAO()->getDrawMode(), m->getVAO()->getIndicesCount(), GL_UNSIGNED_INT, 0, num);
-		//renderer->drawElements(shader, m->getVAO(), m->getMaterial());
-	}
-}
-
-void Model::Draw(Shader* shader, RenderProperties* rp, Renderer* renderer) {
-	shader->uniform("instanced", false);
-	shader->uniform("uniform_model", *(rp->getModelMatrix()));
-	shader->uniformsToShader(rp->getUniforms());
-
-	for (unsigned int i = 0; i < this->meshes.size(); i++) {
-		Mesh* m = &(this->meshes.at(i));
-		renderer->drawElements(shader, m->getVAO(), m->getMaterial());
-	}
-}
-void Model::Draw(const unsigned int& shader, const glm::mat4& modelMatrix) {
-	glUniform1f(glGetUniformLocation(shader, "hasSpecularMap"), hasSpecularMap);
-	glUniform1i(glGetUniformLocation(shader, "instanced"), false);
-	//glUniformMatrix4fv(glGetUniformLocation(shader, "uniform_model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
-	for (unsigned int i = 0; i < this->meshes.size(); i++) {
-//		this->meshes.at(i).Draw(shader, modelMatrix);
-	}
-}
 void Model::loadModel(const bool& onlyAnimation)
 {
 	// Read file via ASSIMP
@@ -129,7 +97,6 @@ void Model::loadModel(const bool& onlyAnimation)
 	m_NumBones = 0;
 
 	if (!onlyAnimation) {
-		toInstance = false;
 
 		// Process all of the meshes
 		for (unsigned int i = 0; i < scene->mNumMeshes; i++)
@@ -264,19 +231,11 @@ Mesh Model::processMesh(aiMesh* mesh)
 		vector<Texture> specularMaps;
 		loadTextures(specularMaps, customTextures.specular, TextureNames::specular);
 		textures.insert(textures.end(), specularMaps.begin(), specularMaps.end());
-		hasSpecularMap = true;
-	}
-	else {
-		hasSpecularMap = false;
 	}
 	if (customTextures.normal != NULL) {
 		vector<Texture> normalMaps;
 		loadTextures(normalMaps, customTextures.normal, TextureNames::normal);
 		textures.insert(textures.end(), normalMaps.begin(), normalMaps.end());
-		mapped = true;
-	}
-	else {
-		mapped = false;
 	}
 
 	if (mesh->mMaterialIndex >= 0)
@@ -319,10 +278,6 @@ void Model::loadTextures(vector<Texture> &textures, const char* str, const std::
 		Texture texture;
 		texture.id = TextureLoader::loadTexture(str, this->path);
 		texture.type = typeName;
-		if (typeName == TextureNames::specular)
-			hasSpecularMap = true;
-		if (typeName == TextureNames::normal)
-			mapped = true;
 		texture.path = str;
 		textures.push_back(texture);
 		textures_loaded.push_back(texture);  // store it as texture loaded for entire model, to ensure we won't unnecesery load duplicate textures.

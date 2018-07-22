@@ -6,7 +6,7 @@ LightingManager::LightingManager(const glm::vec3& cameraEye, const glm::vec3& ca
 	exposure = 5.0f;
 	bloom = false;
 	editMode = false;
-	shadow = false;
+	shadow = true;
 	postProcessNum = 0;
 }
 
@@ -41,7 +41,6 @@ void LightingManager::initShadows() {
 
 void LightingManager::initSpotLights(const glm::vec3& cameraEye, const glm::vec3& cameraAt) {
 	//addSpotLight(glm::vec3(10.0f, 5.0f, 0.0f), glm::vec3(0.0f, -1.0f, -1.0f), std::cos(glm::radians(42.5f)), std::cos(glm::radians(47.5f)), 1.0f, 0.09f, 0.032f, glm::vec3(0.5f, 0.1f, 0.1f), glm::vec3(0.5f, 0.1f, 0.1f), glm::vec3(1.0f, 1.0f, 1.0f));
-
 }
 
 void LightingManager::initPointLights() {
@@ -94,8 +93,6 @@ void LightingManager::addSpotLight(const glm::vec3& position, const glm::vec3& d
 void LightingManager::addPointLight(const glm::vec3& position, const float& att_constant, const float& att_linear, const float& att_quadratic, const glm::vec3& ambient, const glm::vec3& diffuse, const glm::vec3& specular) {
 	glm::mat4 shadowProj = glm::perspective(glm::radians(90.0f), SHADOW_ASPECT, SHADOW_NEAR_PLANE, SHADOW_FAR_PLANE); //perspective projection is the best suited for this
 
-																											  //TODO: PRE-MAKE THESE
-	//const int SHADOW_TRANSFORMS = 6;
 	glm::mat4 shadowTransforms[SHADOW_TRANSFORMS];
 
 	shadowTransforms[0] = shadowProj *
@@ -115,51 +112,6 @@ void LightingManager::addPointLight(const glm::vec3& position, const float& att_
 	pointLights.push_back(light);
 	pointLights.back().id = pointLights.size() - 1;
 	numOfLights++;
-}
-
-void LightingManager::lightsToShader(const unsigned int& shader) {
-	//UPDATE ARRAY SIZE IN SHADERS!!
-	for (unsigned int lightNo = 0; lightNo < pointLights.size(); lightNo++) {
-		std::string number = std::to_string(lightNo);
-		unsigned int uniformIndex = glGetUniformLocation(shader, ("pointLights[" + number + "].position").c_str());
-		glUniform3fv(uniformIndex, 1, glm::value_ptr(pointLights.at(lightNo).position));
-		uniformIndex = glGetUniformLocation(shader, ("pointLights[" + number + "].ambient").c_str());
-		glUniform3fv(uniformIndex, 1, glm::value_ptr(pointLights.at(lightNo).ambient));
-		uniformIndex = glGetUniformLocation(shader, ("pointLights[" + number + "].diffuse").c_str());
-		glUniform3fv(uniformIndex, 1, glm::value_ptr(pointLights.at(lightNo).diffuse));
-		uniformIndex = glGetUniformLocation(shader, ("pointLights[" + number + "].specular").c_str());
-		glUniform3fv(uniformIndex, 1, glm::value_ptr(pointLights.at(lightNo).specular));
-		uniformIndex = glGetUniformLocation(shader, ("pointLights[" + number + "].constant").c_str());
-		glUniform1f(uniformIndex, pointLights.at(lightNo).att_constant);
-		uniformIndex = glGetUniformLocation(shader, ("pointLights[" + number + "].linear").c_str());
-		glUniform1f(uniformIndex, pointLights.at(lightNo).att_linear);
-		uniformIndex = glGetUniformLocation(shader, ("pointLights[" + number + "].quadratic").c_str());
-		glUniform1f(uniformIndex, pointLights.at(lightNo).att_quadratic);
-	}
-
-	for (unsigned int lightNo = 0; lightNo < spotLights.size(); lightNo++) {
-		std::string number = std::to_string(lightNo);
-		unsigned int uniformIndex = glGetUniformLocation(shader, ("spotLights[" + number + "].position").c_str());
-		glUniform3fv(uniformIndex, 1, glm::value_ptr(spotLights.at(lightNo).position));
-		uniformIndex = glGetUniformLocation(shader, ("spotLights[" + number + "].direction").c_str());
-		glUniform3fv(uniformIndex, 1, glm::value_ptr(spotLights.at(lightNo).direction));
-		uniformIndex = glGetUniformLocation(shader, ("spotLights[" + number + "].cutOff").c_str());
-		glUniform1f(uniformIndex, spotLights.at(lightNo).cutOff);
-		uniformIndex = glGetUniformLocation(shader, ("spotLights[" + number + "].outerCutOff").c_str());
-		glUniform1f(uniformIndex, spotLights.at(lightNo).outerCutOff);
-		uniformIndex = glGetUniformLocation(shader, ("spotLights[" + number + "].constant").c_str());
-		glUniform1f(uniformIndex, spotLights.at(lightNo).att_constant);
-		uniformIndex = glGetUniformLocation(shader, ("spotLights[" + number + "].linear").c_str());
-		glUniform1f(uniformIndex, spotLights.at(lightNo).att_linear);
-		uniformIndex = glGetUniformLocation(shader, ("spotLights[" + number + "].quadratic").c_str());
-		glUniform1f(uniformIndex, spotLights.at(lightNo).att_quadratic);
-		uniformIndex = glGetUniformLocation(shader, ("spotLights[" + number + "].ambient").c_str());
-		glUniform3fv(uniformIndex, 1, glm::value_ptr(spotLights.at(lightNo).ambient));
-		uniformIndex = glGetUniformLocation(shader, ("spotLights[" + number + "].diffuse").c_str());
-		glUniform3fv(uniformIndex, 1, glm::value_ptr(spotLights.at(lightNo).diffuse));
-		uniformIndex = glGetUniformLocation(shader, ("spotLights[" + number + "].specular").c_str());
-		glUniform3fv(uniformIndex, 1, glm::value_ptr(spotLights.at(lightNo).specular));
-	}
 }
 
 void LightingManager::lights_preloadShader(Uniforms* uni) {
@@ -264,7 +216,7 @@ void LightingManager::setUpShadowRender_Pointlights(const unsigned int& shader, 
 	glBindFramebuffer(GL_FRAMEBUFFER, pointLights[lightIndex].depthMapFBO);
 	glViewport(0, 0, (GLsizei)SHADOW_WIDTH, (GLsizei)SHADOW_WIDTH);
 	glClear(GL_DEPTH_BUFFER_BIT); // clear FBO
-	glUseProgram(shader);
+//	glUseProgram(shader);
 
 	glm::vec3 lightPos = getPointLightPosition(lightIndex);
 	glUniform1f(glGetUniformLocation(shader, "far_plane"), SHADOW_FAR_PLANE);
@@ -333,27 +285,31 @@ void LightingManager::shadowMapsToShader(const unsigned int& shader, const int& 
 			glUniform1i(uniformIndex, true);
 		}
 		else {
-			std::string number = std::to_string(iter);
-			// pass in the shadowmaps, each in a different texture unit
-			unsigned int uniformIndex = glGetUniformLocation(shader, ("depthMap[" + std::to_string(iter) + "]").c_str());
-			glActiveTexture(GL_TEXTURE8 + iter);
-			glUniform1i(uniformIndex, 8 + iter);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, pointLights[0].depthCubeMap);
+			//std::string number = std::to_string(iter);
+			//// pass in the shadowmaps, each in a different texture unit
+			//unsigned int uniformIndex = glGetUniformLocation(shader, ("depthMap[" + std::to_string(iter) + "]").c_str());
+			//glActiveTexture(GL_TEXTURE8 + iter);
+			//glUniform1i(uniformIndex, 8 + iter);
+			//glBindTexture(GL_TEXTURE_CUBE_MAP, pointLights[0].depthCubeMap);
 
-			uniformIndex = glGetUniformLocation(shader, ("depthMap_ifRender[" + std::to_string(iter) + "]").c_str());
+		unsigned int	uniformIndex = glGetUniformLocation(shader, ("depthMap_ifRender[" + std::to_string(iter) + "]").c_str());
 			glUniform1i(uniformIndex, false);
 		}
 	}
+}
+
+bool LightingManager::getIfShadow() {
+	return shadow;
 }
 
 void LightingManager::noShadowMessage(const unsigned int& shader) {
 	for (int iter = 0; iter < MAX_LIGHTS; iter++) {
 		std::string number = std::to_string(iter);
 		// pass in the shadowmaps, each in a different texture unit
-		unsigned int uniformIndex = glGetUniformLocation(shader, ("depthMap[" + std::to_string(iter) + "]").c_str());
+		unsigned int uniformIndex; /*= glGetUniformLocation(shader, ("depthMap[" + std::to_string(iter) + "]").c_str());
 		glActiveTexture(GL_TEXTURE8 + iter);
 		glUniform1i(uniformIndex, 8 + iter);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, pointLights[0].depthCubeMap);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, pointLights[0].depthCubeMap);*/
 
 		uniformIndex = glGetUniformLocation(shader, ("depthMap_ifRender[" + std::to_string(iter) + "]").c_str());
 		glUniform1i(uniformIndex, false);
@@ -404,112 +360,11 @@ void LightingManager::toggleShadow() {
 	shadow = !shadow;
 }
 
-bool LightingManager::getIfShadow() {
-	return shadow;
-}
-
-bool* LightingManager::getIfShadow_Pointer() {
-	return &shadow;
-}
-
 void LightingManager::setPostProcessNum(const int& num) {
 	postProcessNum = num;
 }
 int LightingManager::getPostProcessNum() {
 	return postProcessNum;
-}
-
-void LightingManager::moveLightForward(const float& dt_secs, const glm::vec3& cameraAt) {
-	glm::vec3 dir = cameraAt * 75.0f * dt_secs;
-	pointLights.at(0).position.x += dir.x;
-	pointLights.at(0).position.z += dir.z;	
-}
-
-void LightingManager::moveLightBackward(const float& dt_secs, const glm::vec3& cameraAt) {
-	glm::vec3 dir = cameraAt * 75.0f * dt_secs;
-	pointLights.at(0).position.x -= dir.x;
-	pointLights.at(0).position.z -= dir.z;
-}
-
-void LightingManager::moveLightLeft(const float& dt_secs, const glm::vec3& cameraAt, const glm::vec3& cameraUp) {
-	glm::vec3 dir = glm::normalize(glm::cross(cameraAt, cameraUp)) * 75.0f * dt_secs;
-	pointLights.at(0).position.x -= dir.x;
-	pointLights.at(0).position.z -= dir.z;
-}
-
-void LightingManager::moveLightRight(const float& dt_secs, const glm::vec3& cameraAt, const glm::vec3& cameraUp) {
-	glm::vec3 dir = glm::normalize(glm::cross(cameraAt, cameraUp)) * 75.0f * dt_secs;
-	pointLights.at(0).position.x += dir.x;
-	pointLights.at(0).position.z += dir.z;
-}
-
-void LightingManager::moveLightUp(const float& dt_secs) {
-	float movement = 75.0f * dt_secs;
-	pointLights.at(0).position.y += movement;
-}
-
-void LightingManager::moveLightDown(const float& dt_secs) {
-	float movement = 75.0f * dt_secs;
-	pointLights.at(0).position.y -= movement;
-}
-
-
-void LightingManager::setConstant(const bool& increase) {
-	increase ? pointLights.at(0).att_constant += valueChangeRate : pointLights.at(0).att_constant -= valueChangeRate;
-}
-void LightingManager::setLinear(const bool& increase) {
-	increase ? pointLights.at(0).att_linear += valueChangeRate : pointLights.at(0).att_linear -= valueChangeRate;
-}
-void LightingManager::setQuadratic(const bool& increase) {
-	increase ? pointLights.at(0).att_quadratic += valueChangeRate : pointLights.at(0).att_quadratic -= valueChangeRate;
-}
-
-void LightingManager::setAmbient(const bool& increase, const char& comp) {
-	if (comp == 'x') {
-		increase ? pointLights.at(0).ambient.x += valueChangeRate : pointLights.at(0).ambient.x -= valueChangeRate;
-	}
-	else if (comp == 'y') {
-		increase ? pointLights.at(0).ambient.y += valueChangeRate : pointLights.at(0).ambient.y -= valueChangeRate;
-	}
-	else {
-		increase ? pointLights.at(0).ambient.z += valueChangeRate : pointLights.at(0).ambient.z -= valueChangeRate;
-	}
-}
-void LightingManager::setDiffuse(const bool& increase, const char& comp) {
-	if (comp == 'x') {
-		increase ? pointLights.at(0).diffuse.x += valueChangeRate : pointLights.at(0).diffuse.x -= valueChangeRate;
-	}
-	else if (comp == 'y') {
-		increase ? pointLights.at(0).diffuse.y += valueChangeRate : pointLights.at(0).diffuse.y -= valueChangeRate;
-	}
-	else {
-		increase ? pointLights.at(0).diffuse.z += valueChangeRate : pointLights.at(0).diffuse.z -= valueChangeRate;
-	}
-}
-void LightingManager::setSpecular(const bool& increase, const char& comp) {
-	if (comp == 'x') {
-		increase ? pointLights.at(0).specular.x += valueChangeRate : pointLights.at(0).specular.x -= valueChangeRate;
-	}
-	else if (comp == 'y') {
-		increase ? pointLights.at(0).specular.y += valueChangeRate : pointLights.at(0).specular.y -= valueChangeRate;
-	}
-	else {
-		increase ? pointLights.at(0).specular.z += valueChangeRate : pointLights.at(0).specular.z -= valueChangeRate;
-	}
-}
-
-void LightingManager::setRange(const bool& increase) {
-	float rangeChangeRate = 5.0f;
-	increase ? pointLights.at(0).range += rangeChangeRate : pointLights.at(0).range -= rangeChangeRate;
-}
-
-void LightingManager::displayLightDetails() {
-	for (unsigned int i = 0; i < pointLights.size(); i++) {
-		std::cout << "\nconst: " << pointLights.at(i).att_constant << ", lin: " << pointLights.at(i).att_linear << ", quad: " << pointLights.at(i).att_quadratic << std::endl;
-		std::cout << "amb: (" << pointLights.at(i).ambient.x << ", " << pointLights.at(i).ambient.y << ", " << pointLights.at(i).ambient.z << ")" << std::endl;
-		std::cout << "diff: (" << pointLights.at(i).diffuse.x << ", " << pointLights.at(i).diffuse.y << ", " << pointLights.at(i).diffuse.z << ")" << std::endl;
-		std::cout << "spec: (" << pointLights.at(i).specular.x << ", " << pointLights.at(i).specular.y << ", " << pointLights.at(i).specular.z << ")" << std::endl;
-	}
 }
 
 std::tuple<int, int, int> LightingManager::getClosestLights(const glm::vec3& pos) {

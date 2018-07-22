@@ -63,7 +63,6 @@ uniform sampler2D depthMap_DirLight;
 
 uniform vec3 viewPos;
 uniform bool hasSpecularMap;
-uniform bool displayShadow;
 
 layout(location = 0) out vec4 out_Color;
 layout(location = 1) out vec4 toBlur_out_Color;
@@ -97,7 +96,7 @@ void main()
 	vec3 result ;//= CalcDirLight(dirLight, norm, fs_in.viewDir, colour, specMap, shadow);
 
 	for(int i = 0; i < MAX_PER_LIGHT_TYPE; i++){
-		shadow = displayShadow && depthMap_ifRender[i] ? ShadowCalculation(pointLights[i].position, depthMap[i]) : 0.0;	
+		shadow = depthMap_ifRender[i] ? ShadowCalculation(pointLights[i].position, depthMap[i]) : 0.0;	
 		result += pointLightIDs[i] > -1 ? CalcPointLight(pointLights[pointLightIDs[i]], fs_in.viewDir, norm, shadow, colour, specMap) : vec3(0.0f);   
 		result += spotLightIDs[i] > -1 ? CalcSpotLight(spotLights[spotLightIDs[i]], norm, fs_in.FragPos, fs_in.viewDir, colour, specMap) : vec3(0.0f);
 	}

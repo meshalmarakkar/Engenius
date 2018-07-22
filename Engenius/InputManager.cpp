@@ -17,7 +17,7 @@ void InputManager::EditModeControls(const Uint8 *keys, const float dt_secs) {
 	if (keys[SDL_SCANCODE_B]) {
 		colManager->writeBoundFile();
 	}
-	\
+	
 	if (keys[SDL_SCANCODE_N]) {
 		entityManager->writeFile();
 	}
@@ -28,10 +28,6 @@ void InputManager::EditModeControls(const Uint8 *keys, const float dt_secs) {
 
 	if (keys[SDL_SCANCODE_Y]) {
 		lightingManager->toggleShadow();
-	}
-
-	if (keys[SDL_SCANCODE_U]) {
-		lightingManager->toggleBloom();
 	}
 
 	if (keys[SDL_SCANCODE_X]) {
@@ -106,86 +102,6 @@ void InputManager::EditModeControls(const Uint8 *keys, const float dt_secs) {
 		else if (keys[SDL_SCANCODE_0]) {
 			lightingManager->setPostProcessNum(0);
 			std::cout << "normal" << std::endl;
-		}
-
-		if (keys[SDL_SCANCODE_I])
-			lightingManager->moveLightForward(dt_secs, camera->getCameraAt());
-		else if (keys[SDL_SCANCODE_K])
-			lightingManager->moveLightBackward(dt_secs, camera->getCameraAt());
-		if (keys[SDL_SCANCODE_J])
-			lightingManager->moveLightLeft(dt_secs, camera->getCameraAt(), camera->getCameraUp());
-		else if (keys[SDL_SCANCODE_L])
-			lightingManager->moveLightRight(dt_secs, camera->getCameraAt(), camera->getCameraUp());
-		if (keys[SDL_SCANCODE_O])
-			lightingManager->moveLightUp(dt_secs);
-		else if (keys[SDL_SCANCODE_P])
-			lightingManager->moveLightDown(dt_secs);
-
-		std::string currentComponent = hudManager->getCurrentComponent();
-		if (keys[SDL_SCANCODE_KP_7]) {
-			if (currentComponent == "constant")
-				lightingManager->setConstant(true);
-			else if (currentComponent == "linear")
-				lightingManager->setLinear(true);
-			else if (currentComponent == "quadratic")
-				lightingManager->setQuadratic(true);
-			else if (currentComponent == "ambient")
-				lightingManager->setAmbient(true, 'x');
-			else if (currentComponent == "diffuse")
-				lightingManager->setDiffuse(true, 'x');
-			else if (currentComponent == "specular")
-				lightingManager->setSpecular(true, 'x');
-			else if (currentComponent == "range")
-				lightingManager->setRange(true);
-		}
-		else if (keys[SDL_SCANCODE_KP_1]) {
-			if (currentComponent == "constant")
-				lightingManager->setConstant(false);
-			else if (currentComponent == "linear")
-				lightingManager->setLinear(false);
-			else if (currentComponent == "quadratic")
-				lightingManager->setQuadratic(false);
-			else if (currentComponent == "ambient")
-				lightingManager->setAmbient(false, 'x');
-			else if (currentComponent == "diffuse")
-				lightingManager->setDiffuse(false, 'x');
-			else if (currentComponent == "specular")
-				lightingManager->setSpecular(false, 'x');
-		}
-		if (keys[SDL_SCANCODE_KP_8]) {
-			if (currentComponent == "ambient")
-				lightingManager->setAmbient(true, 'y');
-			else if (currentComponent == "diffuse")
-				lightingManager->setDiffuse(true, 'y');
-			else if (currentComponent == "specular")
-				lightingManager->setSpecular(true, 'y');
-		}
-		else if (keys[SDL_SCANCODE_KP_2]) {
-			if (currentComponent == "ambient")
-				lightingManager->setAmbient(false, 'y');
-			else if (currentComponent == "diffuse")
-				lightingManager->setDiffuse(false, 'y');
-			else if (currentComponent == "specular")
-				lightingManager->setSpecular(false, 'y');
-		}
-		if (keys[SDL_SCANCODE_KP_9]) {
-			if (currentComponent == "ambient")
-				lightingManager->setAmbient(true, 'z');
-			else if (currentComponent == "diffuse")
-				lightingManager->setDiffuse(true, 'z');
-			else if (currentComponent == "specular")
-				lightingManager->setSpecular(true, 'z');
-		}
-		else if (keys[SDL_SCANCODE_KP_3]) {
-			if (currentComponent == "ambient")
-				lightingManager->setAmbient(false, 'z');
-			else if (currentComponent == "diffuse")
-				lightingManager->setDiffuse(false, 'z');
-			else if (currentComponent == "specular")
-				lightingManager->setSpecular(false, 'z');
-		}
-		if (keys[SDL_SCANCODE_KP_0]) {
-			lightingManager->displayLightDetails();
 		}
 	}
 
@@ -316,8 +232,7 @@ bool InputManager::KeyboardControls(SDL_Window * window, const float dt_secs) {
 				}
 
 				if (keys[SDL_SCANCODE_G]) {
-					glm::vec3 playerPos = entityManager->getPlayer()->getPos();
-					std::cout << "P Pos: " << playerPos.x << ", " << playerPos.y << ", " << playerPos.z << "\n";
+					entityManager->shadowTest();
 				}
 
 				if (keys[SDL_SCANCODE_H]) {

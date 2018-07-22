@@ -11,10 +11,13 @@ struct Tex_Options {
 	static const GLenum gl_clamp_to_edge = GL_CLAMP_TO_EDGE;
 	static const GLenum gl_rgba = GL_RGBA;
 	static const GLenum gl_rgb = GL_RGB;
+	static const GLenum gl_rgb32I = GL_RGB32I;
+	static const GLenum gl_rgb_integer = GL_RGB_INTEGER;
 	static const GLenum gl_rgb16f = GL_RGB16F;
 	static const GLenum gl_rgb16 = GL_RGB16;
 	static const GLenum gl_float = GL_FLOAT;
 	static const GLenum gl_int = GL_INT;
+	static const GLenum gl_byte = GL_BYTE;
 	static const GLenum gl_unsigned_byte = GL_UNSIGNED_BYTE;
 
 	static const GLenum none = 0;

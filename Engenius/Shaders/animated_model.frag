@@ -35,8 +35,8 @@ in VS_OUT {
 	vec2 TexCoords;
 	vec3 FragPos;
 	vec3 Normal;
-	vec2 pointIDs;
-	vec2 spotIDs;
+	int pIDs[MAX_PER_LIGHT_TYPE];
+	int sIDs[MAX_PER_LIGHT_TYPE];
 } fs_in;
 
 uniform PointLight pointLights[5];
@@ -51,7 +51,8 @@ uniform bool depthMap_ifRender[MAX_PER_LIGHT_TYPE];
 
 uniform vec3 viewPos;
 uniform bool hasSpecularMap;
-uniform bool displayShadow;
+
+uniform bool instanced;
 
 layout(location = 0) out vec4 out_Color;
 layout(location = 1) out vec4 toBlur_out_Color;
@@ -88,12 +89,21 @@ void main()
 	vec3 colour = texture(texture_diffuse1, fs_in.TexCoords).rgb;
 	vec3 specMap = hasSpecularMap ? texture(texture_specular1, fs_in.TexCoords).rgb : vec3(1.0f);
 
+	int plIDs[3];
+	int slIDs[3];
+
     float shadow = 0.0;
 	vec3 result;
 	for(int i = 0; i < MAX_PER_LIGHT_TYPE; i++){
-		shadow = displayShadow && depthMap_ifRender[i] ? ShadowCalculation(pointLights[i].position, depthMap[i]) : 0.0;	
-		result += pointLightIDs[i] > -1 ? CalcPointLight(pointLights[pointLightIDs[i]], viewDir, norm, shadow, colour, specMap) : vec3(0.0f);   
-		result += spotLightIDs[i] > -1 ? CalcSpotLight(spotLights[spotLightIDs[i]], norm, fs_in.FragPos, viewDir, colour, specMap) : vec3(0.0f);
+		plIDs[i] = instanced ? i : pointLightIDs[i];
+		slIDs[i] = instanced ? -1 : spotLightIDs[i];
+
+		//plIDs[i] = instanced ? fs_in.pIDs[i] : pointLightIDs[i];
+		//slIDs[i] = instanced ? fs_in.sIDs[i] : spotLightIDs[i];
+
+		shadow = depthMap_ifRender[i] ? ShadowCalculation(pointLights[i].position, depthMap[i]) : 0.0;	
+		result += plIDs[i] > -1 ? CalcPointLight(pointLights[plIDs[i]], viewDir, norm, shadow, colour, specMap) : vec3(0.0f);   
+		result += slIDs[i] > -1 ? CalcSpotLight(spotLights[slIDs[i]], norm, fs_in.FragPos, viewDir, colour, specMap) : vec3(0.0f);
 	}
 	
 	//out_Color = vec4(vec3(gl_FragCoord.z), 1.0); //Depth buffer visualization (non-linear)

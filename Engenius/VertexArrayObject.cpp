@@ -62,6 +62,11 @@ void VertexArrayObject::addData(const unsigned int& bufferID, GLenum target, GLs
 	GL_ERROR_CHECK(glBufferData(target, size, data, usage));
 }
 
+void VertexArrayObject::updateData(const unsigned int& bufferID, GLenum target, GLsizeiptr size, const void* data) {
+	GL_ERROR_CHECK(glBindBuffer(target, VBOs[bufferID]));
+	GL_ERROR_CHECK(glBufferSubData(target, 0, size, data));
+}
+
 void VertexArrayObject::enableVertexAttribArray(const unsigned int& attribID, const int& size, GLenum type, GLboolean normalised, GLsizei stride, size_t pointer) {
 	GL_ERROR_CHECK(glEnableVertexAttribArray(attribID));
 	GL_ERROR_CHECK(glVertexAttribPointer(attribID, size, type, normalised, stride, (GLvoid*)pointer));

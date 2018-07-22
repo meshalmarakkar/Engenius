@@ -31,7 +31,6 @@ struct SpotLight {
 uniform sampler2D texture_diffuse1;
 uniform sampler2D texture_specular1;
 uniform sampler2D texture_normal1;
-uniform sampler2D texture_height1;
 
 in VS_OUT {
 	vec2 TexCoords;
@@ -55,7 +54,6 @@ uniform bool depthMap_ifRender[MAX_PER_LIGHT_TYPE];
 
 uniform vec3 viewPos;
 uniform bool hasSpecularMap;
-uniform bool displayShadow;
 
 uniform bool instanced;
 
@@ -101,10 +99,13 @@ void main()
 	int slIDs[3];
 
 	for(int i = 0; i < MAX_PER_LIGHT_TYPE; i++){
-		shadow = displayShadow && depthMap_ifRender[i] ? ShadowCalculation(pointLights[i].position, depthMap[i]) : 0.0;	
+		shadow = depthMap_ifRender[i] ? ShadowCalculation(pointLights[i].position, depthMap[i]) : 0.0f;		
 		
 		plIDs[i] = instanced ? i : pointLightIDs[i];
-		slIDs[i] = instanced ? i : spotLightIDs[i];
+		slIDs[i] = instanced ? -1 : spotLightIDs[i];
+
+	//	plIDs[i] = instanced ? fs_in.pIDs[i] : pointLightIDs[i];
+	//	slIDs[i] = instanced ? fs_in.sIDs[i] : spotLightIDs[i];
 
 		result += plIDs[i] > -1 ? CalcPointLight(pointLights[plIDs[i]], fs_in.viewDir, norm, shadow, colour, specMap) : vec3(0.0f);   
 		result += slIDs[i] > -1 ? CalcSpotLight(spotLights[slIDs[i]], norm, fs_in.FragPos, fs_in.viewDir, colour, specMap) : vec3(0.0f);
@@ -117,6 +118,7 @@ void main()
 	else
 		toBlur_out_Color = vec4(0.0f, 0.0f, 0.0f, 1.0f);
 
+	//out_Color = vec4(fs_in.pIDs[0], fs_in.pIDs[1], fs_in.pIDs[2], 1.0);
 	out_Color = vec4(result, 1.0);
 }
 
