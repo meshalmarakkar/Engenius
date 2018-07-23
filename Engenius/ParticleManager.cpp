@@ -5,23 +5,23 @@ ParticleManager::~ParticleManager()
 {
 	delete particleContainer;
 	delete particleTextures;
-	glDeleteBuffers(1, &vao);
-	glDeleteBuffers(1, &vboVertices);
-	glDeleteBuffers(1, &vboPositions);
-	glDeleteBuffers(1, &vboUVs);
-	glDeleteBuffers(1, &vboBlend);
+	//glDeleteBuffers(1, &vao);
+	//glDeleteBuffers(1, &vboVertices);
+	//glDeleteBuffers(1, &vboPositions);
+	//glDeleteBuffers(1, &vboUVs);
+	//glDeleteBuffers(1, &vboBlend);
 }
 
 void ParticleManager::newToRender(ToRender &tr) {
 	tr.positions = new std::vector<glm::vec3>;
 	tr.UVs = new std::vector<glm::vec4>;
 	tr.blend = new std::vector<float>;
-	tr.positions->resize(MAX_PER_TYPE);
-	tr.UVs->resize(MAX_PER_TYPE);
-	tr.blend->resize(MAX_PER_TYPE);
+	tr.positions->reserve(MAX_PER_TYPE);
+	tr.UVs->reserve(MAX_PER_TYPE);
+	tr.blend->reserve(MAX_PER_TYPE);
 }
 
-ParticleManager::ParticleManager(const unsigned int& shader) : shader(shader) {
+ParticleManager::ParticleManager(Shader* shader) : shaderProgram(shader) {
 
 	particleTextures = new ParticleTexture[4]; //the wrong heap size thing!!!
 
@@ -61,34 +61,27 @@ ParticleManager::ParticleManager(const unsigned int& shader) : shader(shader) {
 	newToRender(tr);
 	particleToRender->insert(std::make_pair(SMOKE, tr));
 
+	VAO = new VertexArrayObject(6, Buffer_Options::gl_triangle_strip);
 
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao); // bind VAO 0 as current object
+	vboVertices = VAO->genBuffer_andAddData(Buffer_Options::gl_array_buffer, sizeof(VERTICES) * sizeof(glm::vec2), VERTICES, Buffer_Options::gl_static_draw);
+	VAO->enableVertexAttribArray(0, 2, Buffer_Options::gl_float, Buffer_Options::gl_false, 0, 0);
 
-	glGenBuffers(1, &vboVertices); //generate three buffers
-	glBindBuffer(GL_ARRAY_BUFFER, vboVertices);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(VERTICES) * sizeof(glm::vec2), VERTICES, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+	vboPositions = VAO->genBuffer_andAddData(Buffer_Options::gl_array_buffer, MAX_PER_TYPE * sizeof(glm::vec3), NULL, Buffer_Options::gl_stream_draw);
+	VAO->enableVertexAttribArray(1, 3, Buffer_Options::gl_float, Buffer_Options::gl_false, 0, 0);
 
-	glGenBuffers(1, &vboPositions);
-	glBindBuffer(GL_ARRAY_BUFFER, vboPositions);
-	glBufferData(GL_ARRAY_BUFFER, MAX_PER_TYPE * sizeof(glm::vec3), NULL, GL_STREAM_DRAW);
+	vboUVs = VAO->genBuffer_andAddData(Buffer_Options::gl_array_buffer, MAX_PER_TYPE * sizeof(glm::vec4), NULL, Buffer_Options::gl_stream_draw);
+	VAO->enableVertexAttribArray(2, 4, Buffer_Options::gl_float, Buffer_Options::gl_false, 0, 0);
 
-	glGenBuffers(1, &vboUVs);
-	glBindBuffer(GL_ARRAY_BUFFER, vboUVs);
-	glBufferData(GL_ARRAY_BUFFER, MAX_PER_TYPE * sizeof(glm::vec4), NULL, GL_STREAM_DRAW);
+	vboBlend = VAO->genBuffer_andAddData(Buffer_Options::gl_array_buffer, MAX_PER_TYPE * sizeof(GL_FLOAT), NULL, Buffer_Options::gl_stream_draw);
+	VAO->enableVertexAttribArray(3, 1, Buffer_Options::gl_float, Buffer_Options::gl_false, 0, 0);
 
-	glGenBuffers(1, &vboBlend);
-	glBindBuffer(GL_ARRAY_BUFFER, vboBlend);
-	glBufferData(GL_ARRAY_BUFFER, MAX_PER_TYPE * sizeof(GL_FLOAT), NULL, GL_STREAM_DRAW);
+	VAO->setDivisor(vboVertices, 0);
+	VAO->setDivisor_multi(vboPositions, vboBlend, 1);
 
-	glBindVertexArray(0);
+	insertSmoke(1, glm::vec3(0.0f, 2.0f, 0.0f), true);
+	insertSmoke(1, glm::vec3(1.0f, 2.0f, 0.0f), true);
+	insertSmoke(1, glm::vec3(-1.0f, 2.0f, 0.0f), true);
 
-	//particleManager->insertSmoke(1, glm::vec3(0.0f, 2.0f, 0.0f), true);
-	//particleManager->insertSmoke(1, glm::vec3(1.0f, 2.0f, 0.0f), true);
-	//particleManager->insertSmoke(1, glm::vec3(-1.0f, 2.0f, 0.0f), true);
-	//particleManager->insertSmoke(1, glm::vec3(-1.0f, 2.0f, 0.0f), true);
-	//particleManager->insertSmoke(1, glm::vec3(-1.0f, 2.0f, 0.0f), true);
 	//particleManager->insertFire(1, glm::vec3(0.0f, 4.25f, 37.5f), true);
 	//particleManager->insertFire(1, glm::vec3(1.0f, 4.25f, 37.5f), true);
 	//particleManager->insertFire(1, glm::vec3(-1.0f, 4.25f, 37.5f), true);
@@ -221,25 +214,24 @@ void ParticleManager::Update(const float& dt, const glm::vec3& cameraPos) {
 				}
 			}
 
-			particleToRender->at(p.particleType).positions->push_back(p.position);
-			particleToRender->at(p.particleType).UVs->push_back(p.texOffsets);
-			particleToRender->at(p.particleType).blend->push_back(p.blend);
+			particleToRender->at(p.particleType).positions->emplace_back(p.position);
+			particleToRender->at(p.particleType).UVs->emplace_back(p.texOffsets);
+			particleToRender->at(p.particleType).blend->emplace_back(p.blend);
 		}
 	}
 }
 
-void ParticleManager::renderParticles(const glm::mat4& view, const glm::mat4& projection) {
+void ParticleManager::renderParticles(const glm::mat4& view, const glm::mat4& projection, Renderer* renderer) {
 	if (particlesInUse > 0) {
-		glUseProgram(shader);
-		glUniform3f(glGetUniformLocation(shader, "CameraRight_worldspace"), view[0][0], view[1][0], view[2][0]);
-		glUniform3f(glGetUniformLocation(shader, "CameraUp_worldspace"), view[0][1], view[1][1], view[2][1]);
-		glm::mat4 ViewProjectionMatrix = projection * view;
-		glUniformMatrix4fv(glGetUniformLocation(shader, "VP"), 1, GL_FALSE, &ViewProjectionMatrix[0][0]);
+		shaderProgram->bind();
+		shaderProgram->uniform("CameraRight_worldspace", glm::vec3(view[0][0], view[1][0], view[2][0]));
+		shaderProgram->uniform("CameraUp_worldspace", glm::vec3(view[0][1], view[1][1], view[2][1]));
+		shaderProgram->uniform("VP", projection * view);
 
-		glEnable(GL_BLEND);
-		glDepthMask(GL_FALSE);
+		renderer->enableBlend();
+		renderer->depthMask_false();
 
-		glBindVertexArray(vao);
+		VAO->bind();
 
 		for (std::unordered_map<ParticleType, ToRender>::iterator it = particleToRender->begin(); it != particleToRender->end(); ++it) {
 			unsigned int numOfCurrentType = it->second.positions->size();
@@ -247,36 +239,19 @@ void ParticleManager::renderParticles(const glm::mat4& view, const glm::mat4& pr
 			if (numOfCurrentType > 0) {
 
 				if (currentTexture.additive)
-					glBlendFunc(GL_SRC_ALPHA, GL_ONE);
+					renderer->setBlendFunction(BlendOptions::gl_one);
 				else
-					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+					renderer->setBlendFunction(BlendOptions::gl_one_minus_src_alpha);
 
-				glActiveTexture(GL_TEXTURE0);
-				glBindTexture(GL_TEXTURE_2D, currentTexture.texture);
-				glUniform1i(glGetUniformLocation(shader, "textureMap"), 0);
-				glUniform1f(glGetUniformLocation(shader, "size"), currentTexture.optimumSize);
-				glUniform1ui(glGetUniformLocation(shader, "number_of_rows"), currentTexture.num_of_rows);
+				shaderProgram->bindTex_2D("textureMap", currentTexture.texture);
+				shaderProgram->uniform("size", currentTexture.optimumSize);
+				shaderProgram->uniform("number_of_rows", currentTexture.num_of_rows);
 
-				Common::enableVertexAttribArray(0,3);
-							
-				glBindBuffer(GL_ARRAY_BUFFER, vboPositions);
-				glBufferSubData(GL_ARRAY_BUFFER, 0, numOfCurrentType * sizeof(glm::vec3), &it->second.positions->at(0));
-				glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
-				
-				glBindBuffer(GL_ARRAY_BUFFER, vboUVs);
-				glBufferSubData(GL_ARRAY_BUFFER, 0, numOfCurrentType * sizeof(glm::vec4), &it->second.UVs->at(0));
-				glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
+				VAO->updateData(vboPositions, Buffer_Options::gl_array_buffer, numOfCurrentType * sizeof(glm::vec3), &it->second.positions->at(0));
+				VAO->updateData(vboUVs, Buffer_Options::gl_array_buffer, numOfCurrentType * sizeof(glm::vec4), &it->second.UVs->at(0));
+				VAO->updateData(vboBlend, Buffer_Options::gl_array_buffer, numOfCurrentType * sizeof(GL_FLOAT), &it->second.blend->at(0));
 
-				glBindBuffer(GL_ARRAY_BUFFER, vboBlend);
-				glBufferSubData(GL_ARRAY_BUFFER, 0, numOfCurrentType * sizeof(GL_FLOAT), &it->second.blend->at(0));
-				glVertexAttribPointer(3, 1, GL_FLOAT, GL_FALSE, 0, (GLvoid*)0);
-
-				glVertexAttribDivisor(0, 0); // VERTICES : always reuse the same 4 VERTICES -> 0
-				glVertexAttribDivisor(1, 1); // positions : one per quad -> 1
-				glVertexAttribDivisor(2, 1);
-				glVertexAttribDivisor(3, 1);
-
-				glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, sizeof(VERTICES), numOfCurrentType);
+				renderer->drawArrays_instanced(VAO, numOfCurrentType);
 
 				it->second.positions->clear();
 				it->second.UVs->clear();
@@ -284,12 +259,8 @@ void ParticleManager::renderParticles(const glm::mat4& view, const glm::mat4& pr
 			}
 		}
 
-		glDepthMask(GL_TRUE);
-		glDisable(GL_BLEND);
-		Common::disableVertexAttribArray(0, 3);
-		glBindVertexArray(0);
-		glBindTexture(GL_TEXTURE_2D, 0);
-	//	Common::unbindTextures(0);
+		renderer->depthMask_true();
+		renderer->disableBlend();
 	}
 }
 

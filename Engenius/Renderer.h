@@ -32,8 +32,10 @@ public:
 	void SS_Bloom();
 	void SS_GodRays();
 
+	void draw_screenQuad();
 	void drawArrays(VertexArrayObject* VAO);
 	void drawArrays(Shader* shader, VertexArrayObject* VAO, RenderProperties* rp);
+	void drawArrays_WO_bind(VertexArrayObject* VAO);
 
 	void drawElements(Model* model);
 	void drawElements(VertexArrayObject* VAO);
@@ -47,6 +49,7 @@ public:
 	void draw_finalDisplay(const float& exposure, const int& ifBloom, const int& effectNo, const bool& ifPause, const GLuint& tex_pause, const bool& ifEndGame, const GLuint& tex_end);
 	void draw_finalDisplay(const float& exposure, const int& ifBloom, const int& effectNo, const bool& ifPause, const GLuint& tex_pause, const bool& ifEndGame, const GLuint& tex_end, unsigned int num);
 
+	void drawArrays_instanced(VertexArrayObject* VAO, unsigned int num);
 	void drawElements_instanced(Shader* shader, VertexArrayObject* VAO, Material* material, unsigned int num);
 
 	void bindTexture(const unsigned int& shader, const unsigned int& texture, const char* name);
@@ -66,6 +69,10 @@ public:
 
 	void enableLineDraw();
 	void disableLineDraw();
+
+	void depthMask_false();
+
+	void depthMask_true();
 
 	void setBlendFunction(const GLenum setting);
 

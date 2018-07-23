@@ -22,10 +22,10 @@ private:
 	//int SCREENHEIGHT = 600;
 	//int SCREENWIDTH = 1600; //16:9 ratio
 	//int SCREENHEIGHT = 900;
-//	int SCREENWIDTH = 1024; //16:9 ratio
-//	int SCREENHEIGHT = 576;
-	int SCREENWIDTH = 768; //16:9 ratio
-	int SCREENHEIGHT = 432;
+	int SCREENWIDTH = 1024; //16:9 ratio
+	int SCREENHEIGHT = 576;
+//	int SCREENWIDTH = 768; //16:9 ratio
+//	int SCREENHEIGHT = 432;
 	int fullScreenWidth;
 	int fullScreenHeight;
 	bool fullScreen;

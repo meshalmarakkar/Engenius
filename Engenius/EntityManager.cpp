@@ -168,23 +168,16 @@ void EntityManager::shadowTest() {
 }
 
 void EntityManager::renderObjects(const int& NUM_EFFECTIVE_GRIDS, const unsigned int renderGridNo[], const bool& ifDeferred) {
-	unsigned int shader;
 	Shader* program;
 
-	if (ifDeferred) {
+	if (ifDeferred)
 		program = shaderManager->getShaderProgram(Programs::deferred_gBuffer_mapped);
-		program->bind();
-		program->uniformsToShader_RUNTIME();
-		shader = program->getShaderProgram();
-	}
-	else {
+	else
 		program = shaderManager->getShaderProgram(Programs::model_mapped);
-		program->bind();
-		program->uniformsToShader_RUNTIME();
-		shader = program->getShaderProgram();
-	}
+	program->bind();
+	program->uniformsToShader_RUNTIME();
+	unsigned int shader = program->getShaderProgram();
 
-	//program->uniform("far_plane", 25.0f);
 	std::unordered_map<Model*, bool> renderedModels;
 
 	for (unsigned int iter = 0; iter < objects.size(); iter++) {
@@ -209,8 +202,6 @@ void EntityManager::renderObjects(const int& NUM_EFFECTIVE_GRIDS, const unsigned
 	//TODO: FIX THIS!!!! fix the instanced rendering as pointlightID doesnt work.
 	//It is set to 0, 1, 2 for now so the corresponding shadow maps used here.
 	lightIDsToShader(shader, glm::ivec3(0, 1, 2), glm::ivec3(-1, -1, -1));
-
-//	program->uniform("displayShadow", shad);
 
 	for (std::unordered_map<Model*, bool>::iterator it = renderedModels.begin(); it != renderedModels.end(); it++) {
 		Model* model = (*it).first;
@@ -259,16 +250,13 @@ void EntityManager::renderCharacters(const int& NUM_EFFECTIVE_GRIDS, const unsig
 	//Player
 	Shader* program;
 
-	unsigned int shader;
-	if (ifDeferred) {
-		//TODO: NEED TO CREATE GBUFFER SHADER FOR ANIMATED MODELS 
-	}
-	else {
+	if (ifDeferred)
+		;//TODO: NEED TO CREATE GBUFFER SHADER FOR ANIMATED MODELS 
+	else
 		program = shaderManager->getShaderProgram(Programs::model_animated);
-		program->bind();
-		program->uniformsToShader_RUNTIME();
-		shader = program->getShaderProgram();
-	}
+	program->bind();
+	program->uniformsToShader_RUNTIME();
+	unsigned int shader = program->getShaderProgram();
 
 	if (frustumCulling->sphereInFrustum(glm::vec3(-1.0f, 0.5f, 8.5f), player->getCullingBound()) != 0) {
 		lightIDsToShader(shader, *(player->getPointLightIDs()), *(player->getSpotLightIDs()));

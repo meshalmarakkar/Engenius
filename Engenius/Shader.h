@@ -17,6 +17,7 @@ public:
 	void unbind();
 
 	void uniform(const std::string& name, const float& info);
+	void uniform(const std::string& name, const unsigned int& info);
 	void uniform(const std::string& name, const int& info);
 	void uniform(const std::string& name, const glm::vec3& info);
 	void uniform(const std::string& name, const glm::vec4& info);

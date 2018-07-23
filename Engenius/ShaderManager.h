@@ -42,10 +42,6 @@ public:
 	void gl_ClearError();
 	void gl_CheckError();
 
-	unsigned int get_hud_program();
-
-	unsigned int get_particle_program();
-
 	Shader* getShaderProgram(const char* shaderName);
 
 private:
@@ -61,9 +57,6 @@ private:
 	
 	Camera* camera;
 	LightingManager* lightingManager;
-
-	GLuint hud_program;
-	GLuint particle_program;
 };
 
 #endif

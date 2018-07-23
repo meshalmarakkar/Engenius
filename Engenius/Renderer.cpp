@@ -127,7 +127,6 @@ void Renderer::SS_Bloom() {
 		program->uniform("horizontal", horizontal);
 
 		// bind texture of other framebuffer (or scene if first iteration)
-		//glBindTexture(GL_TEXTURE_2D, first_iteration ? FBO_postProcess->getColourBuffer(1)/*colourBuffer[1]*/ : FBO_pingpong[!horizontal]->getColourBuffer(0)/*pingpongColorbuffers[!horizontal]*/);
 		first_iteration ? program->reset_bindTex_2D("textureToBlur", FBO_postProcess->getColourBuffer(1)) : program->reset_bindTex_2D("textureToBlur", FBO_pingpong[!horizontal]->getColourBuffer(0));
 
 		glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -135,10 +134,6 @@ void Renderer::SS_Bloom() {
 		if (first_iteration)
 			first_iteration = false;
 	}
-
-	//glActiveTexture(GL_TEXTURE1);
-	//glBindTexture(GL_TEXTURE_2D, FBO_pingpong[!horizontal]->getColourBuffer(0));// pingpongColorbuffers[!horizontal]);
-	//glUniform1i(glGetUniformLocation(shaderManager->get_postProcessing_program(), "bloomBlur"), 1);
 }
 
 void Renderer::SS_GodRays() {
@@ -163,6 +158,10 @@ void Renderer::SS_GodRays() {
 	//	glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
+void Renderer::draw_screenQuad() {
+	drawArrays(VAO_screenQuad);
+}
+
 void Renderer::draw_finalDisplay(const float& exposure, const int& ifBloom, const int& effectNo, const bool& ifPause, const GLuint& tex_pause, const bool& ifEndGame, const GLuint& tex_end, unsigned int num) {
 	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -170,8 +169,7 @@ void Renderer::draw_finalDisplay(const float& exposure, const int& ifBloom, cons
 	
 	Shader* program = shaderManager->getShaderProgram(Programs::post_processing);
 	program->bind();
-	
-	program->reset_texCount();
+
 	program->uniform("exposure", exposure);
 	if (exposure)
 		program->bindTex_2D("bloomBlur", FBO_pingpong[!horizontal]->getColourBuffer(0));
@@ -194,6 +192,10 @@ void Renderer::draw_finalDisplay(const float& exposure, const int& ifBloom, cons
 
 void Renderer::drawArrays(VertexArrayObject* VAO) {
 	VAO->bind();
+	glDrawArrays(VAO->getDrawMode(), 0, VAO->getIndicesCount());
+}
+
+void Renderer::drawArrays_WO_bind(VertexArrayObject* VAO) {
 	glDrawArrays(VAO->getDrawMode(), 0, VAO->getIndicesCount());
 }
 
@@ -257,6 +259,10 @@ void Renderer::drawElements_instanced(Shader* shader, VertexArrayObject* VAO, Ma
 	
 	VAO->bind();
 	glDrawElementsInstanced(VAO->getDrawMode(), VAO->getIndicesCount(), GL_UNSIGNED_INT, 0, num);
+}
+
+void Renderer::drawArrays_instanced(VertexArrayObject* VAO, unsigned int num) {
+	glDrawArraysInstanced(VAO->getDrawMode(), 0, VAO->getIndicesCount(), num);
 }
 
 void Renderer::drawElements(Shader* shader, VertexArrayObject* VAO, Material* mat) {
@@ -340,3 +346,10 @@ void Renderer::disableLineDraw() {
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
+void Renderer::depthMask_false() {
+	glDepthMask(GL_FALSE);
+}
+
+void Renderer::depthMask_true() {
+	glDepthMask(GL_TRUE);
+}

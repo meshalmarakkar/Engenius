@@ -2,7 +2,6 @@
 #define PARTICLEMANAGER
 
 #include <algorithm>
-#include <GL/glew.h>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <ctime>
@@ -12,23 +11,17 @@
 #include <math.h>
 #include <unordered_map>
 
-static const glm::vec2 VERTICES[] = {
-	glm::vec2(-0.5f, 0.5f),
-	glm::vec2(-0.5f, -0.5f),
-	glm::vec2(0.5f, 0.5f),
-	glm::vec2(0.5f, -0.5f),
-	glm::vec2(0.5f, 0.5f),
-	glm::vec2(-0.5f, -0.5f),
-};
-
+#include "VertexArrayObject.h"
+#include "Shader.h"
+#include "Renderer.h"
 
 class ParticleManager {
 public:
-	ParticleManager(const unsigned int& shader);
+	ParticleManager(Shader* shader);
 	~ParticleManager();
 	void Update(const float& dt, const glm::vec3& cameraPos);
 
-	void renderParticles(const glm::mat4& view, const glm::mat4& projection);
+	void renderParticles(const glm::mat4& view, const glm::mat4& projection, Renderer* renderer);
 	void insertFire(const int& numOfParticles, const glm::vec3& position, const bool& repeatedAnimation);
 	void insertExplosion(const int& numOfParticles, const glm::vec3& position, const bool& repeatedAnimation);
 	void insertExplosion2(const int& numOfParticles, const glm::vec3& position, const bool& repeatedAnimation);
@@ -36,6 +29,14 @@ public:
 	void moveParticleManually(const glm::vec3& newPos);
 
 private:
+	const glm::vec2 VERTICES[6] = {
+		glm::vec2(-0.5f, 0.5f),
+		glm::vec2(-0.5f, -0.5f),
+		glm::vec2(0.5f, 0.5f),
+		glm::vec2(0.5f, -0.5f),
+		glm::vec2(0.5f, 0.5f),
+		glm::vec2(-0.5f, -0.5f),
+	};
 	enum ParticleType {
 		FIRE = 0,
 		EXPLOSION = 1,
@@ -49,7 +50,6 @@ private:
 		float optimumLifeLength = 0.0f;
 		bool additive;
 	};
-
 	struct Particle {
 		ParticleType particleType;
 		bool repeatedAnimation;
@@ -74,12 +74,19 @@ private:
 	void ParticleManager::updateRepeated(Particle &p, const float& dt, const glm::vec3& cameraPos);
 	void ParticleManager::updateUnrepeated(Particle &p, const float& dt, const glm::vec3& cameraPos);
 	void SortParticles();
+
+private:
 	const int MAX_PARTICLES = 300;
 	const int MAX_PER_TYPE = 20;
 	int particlesInUse = 0;
 
-	unsigned int shader;
+	VertexArrayObject* VAO;
+	unsigned int vboVertices;
+	unsigned int vboPositions;
+	unsigned int vboUVs;
+	unsigned int vboBlend;
 
+	Shader* shaderProgram;
 
 	struct ToRender {
 		std::vector<glm::vec3>* positions;
@@ -91,26 +98,5 @@ private:
 
 	Particle * particleContainer;
 	ParticleTexture * particleTextures;
-
-	unsigned int vao;
-	unsigned int vboVertices;
-	unsigned int vboPositions;
-	unsigned int vboUVs;
-	unsigned int vboBlend;
 };
-
-
-//class ParticleManager {
-//public:
-//	ParticleManager();
-//	void render(unsigned int shader, glm::mat4 view, glm::mat4 projection);
-//
-//private:
-//	const float VERTICES[8] = { -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, 0.5f, 0.5f, -0.5f };
-//	unsigned int vao, vboVertices, vboPositions, vboUVs;
-//	const int MAX_PER_TYPE = 20;
-//
-//};
-
-
 #endif

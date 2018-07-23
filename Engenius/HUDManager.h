@@ -12,16 +12,18 @@
 #include <map>
 #include "HUDItem.h"
 #include "WindowManager.h"
+#include "Renderer.h"
+#include "VertexArrayObject.h"
 
 class HUDManager {
 public:
-	HUDManager(WindowManager* windowManager, const unsigned int& shader);
+	HUDManager(WindowManager* windowManager, Shader* shader);
 	void addHUD(const int& x, const int& y, const int& sizeX, const int& sizeY, const std::string& storageName, const std::string& text, TTF_Font* font, const bool& allowLowTransparency, const float& transparency = 0.0f);
 	void addHUD(const int& x, const int& y, const int& sizeX, const int& sizeY, const std::string& storageName, const unsigned int& texture, const bool& allowLowTransparency, const float& transparency = 0.0f);
 	void addMenuBarHUD(const int& x, const int& y, const int& sizeX, const int& sizeY, const std::string& storageName, const unsigned int& texture, const bool& allowLowTransparency, const float& transparency = 0.0f);
 	void addMenuBarHUD(const int& x, const int& y, const int& sizeX, const int& sizeY, const std::string& storageName, const std::string& text, TTF_Font* font, const bool& allowLowTransparency, const float& transparency = 0.0f);
 	void addAnimatedHUD(const int& x, const int& y, const int& sizeX, const int& sizeY, const unsigned int& texture, const bool& allowLowTransparency, const float& transparency = 0.0f);
-	void render();
+	void render(Renderer* renderer);
 
 	void update(const float& dt_secs);
 	bool checkIfClicked(const int& mouseX, const int& mouseY, const int& screenHeight, const std::string& buttonName);
@@ -47,17 +49,20 @@ private:
 	std::unordered_map<std::string, HUDItem*> HUDs;
 	std::vector<AnimatedHUD*> AnimatedHUDs;
 	std::unordered_map<std::string, MenubarHUD*> menuBarHUDs;
-	void render(const std::vector<glm::vec2>& verts, const std::vector<glm::vec2>& UVs, const unsigned int& texture, const bool& allowLowTransparency, const float& transparency);
+	void render(const std::vector<glm::vec2>& verts, const unsigned int& texture, const bool& allowLowTransparency, const float& transparency, Renderer* renderer);
+	void render_animated(const std::vector<glm::vec2>& verts, const std::vector<glm::vec2>& UVs, const unsigned int& texture, const bool& allowLowTransparency, const float& transparency, Renderer* renderer);
+
 	void addSubOptions(std::unordered_map<std::string, HUDItem*> &subOptions, const int& x, const int& y, const int& sizeX, const int& sizeY, const std::string& storageName, const unsigned int& texture, const bool& allowLowTransparency, const float& transparency = 0.0f);
 	void addSubOptions(std::unordered_map<std::string, HUDItem*> &subOptions, const int& x, const int& y, const int& sizeX, const int& sizeY, const std::string& storageName, const std::string& text, TTF_Font* font, const bool& allowLowTransparency, const float& transparency = 0.0f);
 
 	void lightingSubOptions();
 
 	WindowManager* windowManager;
+	VertexArrayObject* VAO;
+	Shader* shaderProgram;
+	unsigned int VBO_verts;
+	unsigned int VBO_uvs;
 
-	unsigned int shader;
-	unsigned int vao;
-	unsigned int vbo[2];
 	TTF_Font * textFont;
 	unsigned int crosshairTexture;
 	unsigned int fireTexture;

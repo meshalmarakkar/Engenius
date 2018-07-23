@@ -51,7 +51,7 @@ int textureFromFile(const std::string& path)
 }
 
 // initialize hud manager, open font
-HUDManager::HUDManager(WindowManager* windowManager, const unsigned int& shader) : windowManager(windowManager), shader(shader) {
+HUDManager::HUDManager(WindowManager* windowManager, Shader* shader) : windowManager(windowManager), shaderProgram(shader) {
 
 	glm::vec2 uv_up_left = glm::vec2(0.0f, 0.0f);
 	glm::vec2 uv_up_right = glm::vec2(1.0f, 0.0f);
@@ -65,6 +65,7 @@ HUDManager::HUDManager(WindowManager* windowManager, const unsigned int& shader)
 	UVs.push_back(uv_down_right);
 	UVs.push_back(uv_up_right);
 	UVs.push_back(uv_down_left);
+
 
 	//// set up TrueType / SDL_ttf
 	if (TTF_Init() == -1)
@@ -108,14 +109,15 @@ HUDManager::HUDManager(WindowManager* windowManager, const unsigned int& shader)
 	lightingSubOptions();
 	addMenuBarHUD(spacing + spacingPlusSizeX + spacingPlusSizeX + spacingPlusSizeX, menuBar_PosY, menuBar_SizeX, menuBar_SizeY, "menu_audio", tex_audio, true, 0.4f);
 
-	addAnimatedHUD(spacing, windowManager->getScreenHeight() / 2, menuBar_SizeY, menuBar_SizeY, fireTexture, false);
+	addAnimatedHUD(spacing, windowManager->getScreenHeight() / 2, menuBar_SizeX, menuBar_SizeX, fireTexture, false);
 
-	glGenVertexArrays(1, &vao);
-	glBindVertexArray(vao); // bind VAO 0 as current object
+	VAO = new VertexArrayObject(6, Buffer_Options::gl_triangles);
+	//generate two buffers
+	VBO_verts = VAO->genBuffer_andAddData(Buffer_Options::gl_array_buffer, 6 * sizeof(glm::vec2), NULL, Buffer_Options::gl_stream_draw);
+	VAO->enableVertexAttribArray(VBO_verts, 2, Buffer_Options::gl_float, Buffer_Options::gl_false, 0, 0);
 
-	glGenBuffers(1, vbo); //generate two buffers
-
-	glBindVertexArray(0);
+	VBO_uvs = VAO->genBuffer_andAddData(Buffer_Options::gl_array_buffer, UVs.size() * sizeof(glm::vec2), &UVs[0], Buffer_Options::gl_static_draw);
+	VAO->enableVertexAttribArray(VBO_uvs, 2, Buffer_Options::gl_float, Buffer_Options::gl_false, 0, 0);
 }
 
 void HUDManager::lightingSubOptions() {
@@ -230,55 +232,47 @@ void HUDManager::update(const float& dt_secs) {
 	}
 }
 
-void HUDManager::render(const std::vector<glm::vec2>& verts, const std::vector<glm::vec2>& UVs, const unsigned int& texture, const bool& allowLowTransparency, const float& transparency) {
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnableVertexAttribArray(0); // Enable attribute index 0
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]); // bind VBO 0
-	glBufferData(GL_ARRAY_BUFFER, verts.size() * sizeof(glm::vec2), &verts.at(0), GL_STATIC_DRAW);// VERTICES data in attribute index 0, 3 floats per vertex
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);//first 0 is layout location
-
-	glUniform1f(glGetUniformLocation(shader, "transparency"), transparency);
-
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glUniform1i(glGetUniformLocation(shader, "textureMap"), 0);
-
-	glDrawArrays(GL_TRIANGLES, 0, verts.size());
-	glDisable(GL_BLEND);
+void HUDManager::render(const std::vector<glm::vec2>& verts, const unsigned int& texture, const bool& allowLowTransparency, const float& transparency, Renderer* renderer) {
+	VAO->updateData(VBO_verts, Buffer_Options::gl_array_buffer, verts.size() * sizeof(glm::vec2), &verts.at(0));
+	shaderProgram->uniform("transparency", transparency);
+	shaderProgram->uniform("allowLowTransparency", allowLowTransparency);
+	shaderProgram->reset_bindTex_2D("textureMap", texture);
+	renderer->drawArrays_WO_bind(VAO);
 }
 
-void HUDManager::render() {
-	glUseProgram(shader);
+void HUDManager::render_animated(const std::vector<glm::vec2>& verts, const std::vector<glm::vec2>& UVs, const unsigned int& texture, const bool& allowLowTransparency, const float& transparency, Renderer* renderer) {
+	VAO->updateData(VBO_uvs, Buffer_Options::gl_array_buffer, UVs.size() * sizeof(glm::vec2), &UVs.at(0));
+	render(verts, texture, allowLowTransparency, transparency, renderer);
+}
 
-	glBindVertexArray(vao); // bind VAO 0 as current object
+void HUDManager::render(Renderer* renderer) {
+	shaderProgram->bind();
+	VAO->bind();
 
-	glEnableVertexAttribArray(1); // Enable attribute index 1
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]); // bind VBO 1
-	glBufferData(GL_ARRAY_BUFFER, UVs.size() * sizeof(glm::vec2), &UVs[0], GL_STATIC_DRAW);// Position data in attribute index 1, 3 floats per vertex
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);//first 1 is layout location
+	renderer->enableBlend();
+	renderer->setBlendFunction(BlendOptions::gl_one_minus_src_alpha);
 
 	for (std::unordered_map<std::string, HUDItem*>::iterator it = HUDs.begin(); it != HUDs.end(); ++it) {
-		render(it->second->getVerts(), UVs, it->second->getTexture(), it->second->getAllowLowTransparency(), it->second->getTransparency());
+		render(it->second->getVerts(), it->second->getTexture(), it->second->getAllowLowTransparency(), it->second->getTransparency(), renderer);
 	}
 
 	for (unsigned int i = 0; i < AnimatedHUDs.size(); i++) {
-		render(AnimatedHUDs.at(i)->getVerts(), AnimatedHUDs.at(i)->UVs, AnimatedHUDs.at(i)->getTexture(), AnimatedHUDs.at(i)->getAllowLowTransparency(), AnimatedHUDs.at(i)->getTransparency());
+		render_animated(AnimatedHUDs.at(i)->getVerts(), AnimatedHUDs.at(i)->UVs, AnimatedHUDs.at(i)->getTexture(), AnimatedHUDs.at(i)->getAllowLowTransparency(), AnimatedHUDs.at(i)->getTransparency(), renderer);
 	}
 
+	//reset UVs in VAO to non animated version
+	VAO->updateData(VBO_uvs, Buffer_Options::gl_array_buffer, UVs.size() * sizeof(glm::vec2), &UVs.at(0));
+
 	for (std::unordered_map<std::string, MenubarHUD*>::iterator it = menuBarHUDs.begin(); it != menuBarHUDs.end(); ++it) {
-		render(it->second->getVerts(), UVs, it->second->getTexture(), it->second->getAllowLowTransparency(), it->second->getTransparency());
+		render(it->second->getVerts(), it->second->getTexture(), it->second->getAllowLowTransparency(), it->second->getTransparency(), renderer);
 		if (it->second->getIfClicked() == true) {
 			for (std::unordered_map<std::string, HUDItem*>::iterator iter = it->second->subOptions.begin(); iter != it->second->subOptions.end(); ++iter) {
-				render(iter->second->getVerts(), UVs, iter->second->getTexture(), iter->second->getAllowLowTransparency(), iter->second->getTransparency());
+				render(iter->second->getVerts(), iter->second->getTexture(), iter->second->getAllowLowTransparency(), iter->second->getTransparency(), renderer);
 			}
 		}
 	}
 
-	glDisableVertexAttribArray(0);
-	glDisableVertexAttribArray(1);
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, 0);
+	renderer->disableBlend();
 }
 
 bool HUDManager::checkIfClicked(const int& mouseX, const int& mouseY, const int& screenHeight, const std::string& buttonName) {

@@ -19,6 +19,7 @@ void Shader::uniformsToShader_RUNTIME() {
 
 void Shader::bind() {
 	glUseProgram(program);
+	reset_texCount();
 }
 
 void Shader::unbind() {
@@ -31,6 +32,9 @@ GLuint Shader::getShaderProgram() {
 
 void Shader::uniform(const std::string& name, const float& info) {
 	glUniform1f(glGetUniformLocation(program, (name).c_str()), info);
+}
+void Shader::uniform(const std::string& name, const unsigned int& info) {
+	glUniform1ui(glGetUniformLocation(program, (name).c_str()), info);
 }
 void Shader::uniform(const std::string& name, const int& info) {
 	glUniform1i(glGetUniformLocation(program, (name).c_str()), info);

@@ -35,10 +35,10 @@ void GameManager::init(WindowManager * windowManager) {
 	lightingManager = new LightingManager(camera->getCameraEye(), camera->getCameraAt());
 	shaderManager = new ShaderManager(camera, lightingManager);
 
-	hudManager = new HUDManager(windowManager, shaderManager->get_hud_program());
+	hudManager = new HUDManager(windowManager, shaderManager->getShaderProgram(Programs::hud));
 	audioManager = new AudioManager();
 	
-	particleGenerator = new ParticleManager(shaderManager->get_particle_program());
+	particleGenerator = new ParticleManager(shaderManager->getShaderProgram(Programs::particle));
 
 	//TODO: check what has to be stored and what has to be deleted from gameManager; like colManager for example
 	colManager = new CollisionManager();
@@ -65,12 +65,10 @@ void GameManager::init(WindowManager * windowManager) {
 	pause = true;
 	endGame = false;
 
-
 	controlReset_1 = false;
 	controlReset_2 = false;
 	//	alarmStopped = false;
 	previousTriggerNo = 0;
-
 
 	renderGridNo[0] = 1;
 	renderGridNo[1] = 0;
@@ -97,7 +95,7 @@ void GameManager::init(WindowManager * windowManager) {
 }
 
 void GameManager::renderScene() {
-	skybox->renderSkybox(camera->getProjection(), camera->getView(), renderer, lightingManager->getDepthCubeMap(1));
+	skybox->renderSkybox(camera->getProjection(), camera->getView(), renderer);
 
 	entityManager->draw(dt_secs, NUM_EFFECTIVE_GRIDS, renderGridNo, ifDeferred);
 
@@ -113,7 +111,7 @@ void GameManager::renderScene() {
 
 	//renderer->unbindTextures(0, lightingManager->getNumOfLights());
 
-	particleGenerator->renderParticles(camera->getView(), camera->getProjection()); //render last to blend with all the objecs!!
+	particleGenerator->renderParticles(camera->getView(), camera->getProjection(), renderer); //render last to blend with all the objecs!!
 }
 
 void GameManager::renderScene_GBuffer() {
@@ -156,8 +154,6 @@ void GameManager::draw() {
 
 		for (unsigned int i = 0; i < lightingManager->getNumOfPointLights(); i++) {
 			lightingManager->setUpShadowRender_Pointlights(shader, i); // render using light's point of view
-		//	glUniform1f(glGetUniformLocation(shader, "far_plane"), camera->getFarPlane());
-	//		glUniform3fv(glGetUniformLocation(shader, "viewPos"), 1, glm::value_ptr(camera->getCameraEye()));
 
 			entityManager->shadow_draw(program, NUM_EFFECTIVE_GRIDS, renderGridNo);
 			//done = true;
@@ -211,7 +207,7 @@ void GameManager::draw() {
 
 	//At end to see objects with transparency
 	if (editModeManager->get_ifEditMode())
-		hudManager->render();
+		hudManager->render(renderer);
 
 	renderer->enableDepthTest();
 	
