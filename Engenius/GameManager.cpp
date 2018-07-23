@@ -92,6 +92,8 @@ void GameManager::init(WindowManager * windowManager) {
 
 	std::cout << "1st: " << puzzle_firstTime.steps.x << puzzle_firstTime.steps.y << puzzle_firstTime.steps.z << puzzle_firstTime.steps.w << std::endl;
 	std::cout << "1st: " << puzzle_secondTime.steps.x << puzzle_secondTime.steps.y << puzzle_secondTime.steps.z << puzzle_secondTime.steps.w << std::endl;
+
+	audioManager->startGame(camera->getCameraEye());
 }
 
 void GameManager::renderScene() {
