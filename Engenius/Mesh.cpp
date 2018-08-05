@@ -1,5 +1,4 @@
 #include "Mesh.h"
-#include <GL/glew.h> // Contains all the necessery OpenGL includes
 
 Mesh::Mesh(const vector<Vertex>& vertices, const vector<unsigned int>& indices, const vector<Texture>& textures) : vertices(vertices), indices(indices), textures(textures)
 {

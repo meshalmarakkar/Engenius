@@ -1,54 +1,8 @@
 #include "HUDManager.h"
+#include "TextureLoader.h"
+#include "ErrorCheck.h"
 
-unsigned int textToTexture(const char * str, TTF_Font* font) {
-
-	SDL_Surface * stringImage = TTF_RenderText_Blended(font, str, { 255, 255, 255 });
-
-	if (stringImage == 0) {
-		std::cout << "String surface not created." << std::endl;
-	}
-
-	unsigned int texID;
-	glGenTextures(1, &texID);
-
-	glBindTexture(GL_TEXTURE_2D, texID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, stringImage->w, stringImage->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, stringImage->pixels);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	SDL_FreeSurface(stringImage);
-
-	return texID;
-}
-
-int textureFromFile(const std::string& path)
-{
-	const char* pathToFile = path.c_str();
-
-	int width, height;
-	unsigned char* image;
-
-	if (SOIL_load_image(pathToFile, &width, &height, 0, SOIL_LOAD_AUTO))
-		image = SOIL_load_image(pathToFile, &width, &height, 0, SOIL_LOAD_AUTO);//SOIL_LOAD_AUTO
-	else
-		return 0;
-
-	unsigned int texID;
-	glGenTextures(1, &texID); // generate texture ID
-
-	glBindTexture(GL_TEXTURE_2D, texID);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
-	glBindTexture(GL_TEXTURE_2D, 0);
-	SOIL_free_image_data(image);
-
-	return texID;	// return value of texture ID
-}
+#include <iostream>
 
 // initialize hud manager, open font
 HUDManager::HUDManager(WindowManager* windowManager, Shader* shader) : windowManager(windowManager), shaderProgram(shader) {
@@ -75,31 +29,32 @@ HUDManager::HUDManager(WindowManager* windowManager, Shader* shader) : windowMan
 	if (textFont == NULL)
 		std::cout << "Failed to open font - OpenSans-Regular.ttf" << std::endl;
 
-	crosshairTexture = textureFromFile("../Engenius/Textures/crosshair.png");
-	fireTexture = textureFromFile("../Engenius/Textures/firetorch2.png");
+	#define tl TextureLoader 
+	crosshairTexture = tl::loadTexture_SS("../Engenius/Textures/crosshair.png");
+	fireTexture = tl::loadTexture_SS("../Engenius/Textures/firetorch2.png");
 
-	tex_background = textureFromFile("../Engenius/Buttons/button_background.png");
-	tex_objects = textureFromFile("../Engenius/Buttons/button_objects.png");
-	tex_bounding = textureFromFile("../Engenius/Buttons/button_bounding.png");
-	tex_lighting = textureFromFile("../Engenius/Buttons/button_lighting.png");
-	tex_audio = textureFromFile("../Engenius/Buttons/button_audio.png");
+	tex_background = tl::loadTexture_SS("../Engenius/Buttons/button_background.png");
+	tex_objects = tl::loadTexture_SS("../Engenius/Buttons/button_objects.png");
+	tex_bounding = tl::loadTexture_SS("../Engenius/Buttons/button_bounding.png");
+	tex_lighting = tl::loadTexture_SS("../Engenius/Buttons/button_lighting.png");
+	tex_audio = tl::loadTexture_SS("../Engenius/Buttons/button_audio.png");
 
-	components.insert(std::make_pair("ambient", textureFromFile("../Engenius/Buttons/button_ambient.png")));
-	components.insert(std::make_pair("diffuse", textureFromFile("../Engenius/Buttons/button_diffuse.png")));
-	components.insert(std::make_pair("specular", textureFromFile("../Engenius/Buttons/button_specular.png")));
-	components.insert(std::make_pair("constant", textureFromFile("../Engenius/Buttons/button_constant.png")));
-	components.insert(std::make_pair("linear", textureFromFile("../Engenius/Buttons/button_linear.png")));
-	components.insert(std::make_pair("quadratic", textureFromFile("../Engenius/Buttons/button_quadratic.png")));
-	components.insert(std::make_pair("range", textureFromFile("../Engenius/Buttons/button_range.png")));
+	components.insert(std::make_pair("ambient", tl::loadTexture_SS("../Engenius/Buttons/button_ambient.png")));
+	components.insert(std::make_pair("diffuse", tl::loadTexture_SS("../Engenius/Buttons/button_diffuse.png")));
+	components.insert(std::make_pair("specular", tl::loadTexture_SS("../Engenius/Buttons/button_specular.png")));
+	components.insert(std::make_pair("constant", tl::loadTexture_SS("../Engenius/Buttons/button_constant.png")));
+	components.insert(std::make_pair("linear", tl::loadTexture_SS("../Engenius/Buttons/button_linear.png")));
+	components.insert(std::make_pair("quadratic", tl::loadTexture_SS("../Engenius/Buttons/button_quadratic.png")));
+	components.insert(std::make_pair("range", tl::loadTexture_SS("../Engenius/Buttons/button_range.png")));
 
 	componentIter = components.begin();
 
-	tex_eye = textureFromFile("../Engenius/Buttons/icon_eye.png");
-	tex_add = textureFromFile("../Engenius/Buttons/icon_add.png");
-	tex_move = textureFromFile("../Engenius/Buttons/icon_move.png");
+	tex_eye = tl::loadTexture_SS("../Engenius/Buttons/icon_eye.png");
+	tex_add = tl::loadTexture_SS("../Engenius/Buttons/icon_add.png");
+	tex_move = tl::loadTexture_SS("../Engenius/Buttons/icon_move.png");
 
-	tex_increase = textureFromFile("../Engenius/Buttons/icon_up.png");
-	tex_decrease = textureFromFile("../Engenius/Buttons/icon_down.png");
+	tex_increase = tl::loadTexture_SS("../Engenius/Buttons/icon_up.png");
+	tex_decrease = tl::loadTexture_SS("../Engenius/Buttons/icon_down.png");
 
 	int spacingPlusSizeX = spacing + menuBar_SizeX;
 	menuBar_PosY = windowManager->getScreenHeight() - 35;
@@ -108,6 +63,9 @@ HUDManager::HUDManager(WindowManager* windowManager, Shader* shader) : windowMan
 	addMenuBarHUD(spacing + spacingPlusSizeX + spacingPlusSizeX, menuBar_PosY, menuBar_SizeX, menuBar_SizeY, "menu_lighting", tex_lighting, true, 0.4f);
 	lightingSubOptions();
 	addMenuBarHUD(spacing + spacingPlusSizeX + spacingPlusSizeX + spacingPlusSizeX, menuBar_PosY, menuBar_SizeX, menuBar_SizeY, "menu_audio", tex_audio, true, 0.4f);
+
+	//addMenuBarHUD(spacing + spacingPlusSizeX + spacingPlusSizeX + spacingPlusSizeX + spacingPlusSizeX, menuBar_PosY, menuBar_SizeX, menuBar_SizeY, "menu_test", "test", textFont, true, 0.4f);
+
 
 	addAnimatedHUD(spacing, windowManager->getScreenHeight() / 2, menuBar_SizeX, menuBar_SizeX, fireTexture, false);
 
@@ -154,7 +112,7 @@ void HUDManager::addHUD(const int& x, const int& y, const int& sizeX, const int&
 }
 void HUDManager::addHUD(const int& x, const int& y, const int& sizeX, const int& sizeY, const std::string& storageName, const std::string& text, TTF_Font* font, const bool& allowLowTransparency, const float& transparency) {
 	const char *cstr = text.c_str();
-	unsigned int texture = textToTexture(cstr, textFont);
+	unsigned int texture = TextureLoader::textToTexture(cstr, textFont);
 	addHUD(x, y, sizeX, sizeY, storageName, allowLowTransparency, texture);
 }
 
@@ -166,7 +124,7 @@ void HUDManager::addSubOptions(std::unordered_map<std::string, HUDItem*> &subOpt
 }
 void HUDManager::addSubOptions(std::unordered_map<std::string, HUDItem*> &subOptions, const int& x, const int& y, const int& sizeX, const int& sizeY, const std::string& storageName, const std::string& text, TTF_Font* font, const bool& allowLowTransparency, const float& transparency) {
 	const char *cstr = text.c_str();
-	addSubOptions(subOptions, x, y, sizeX, sizeY, storageName, allowLowTransparency, textToTexture(cstr, font));
+	addSubOptions(subOptions, x, y, sizeX, sizeY, storageName, allowLowTransparency, TextureLoader::textToTexture(cstr, font));
 }
 
 void HUDManager::addMenuBarHUD(const int& x, const int& y, const int& sizeX, const int& sizeY, const std::string& storageName, const unsigned int& texture, const bool& allowLowTransparency, const float& transparency) {
@@ -185,7 +143,7 @@ void HUDManager::addMenuBarHUD(const int& x, const int& y, const int& sizeX, con
 
 void HUDManager::addMenuBarHUD(const int& x, const int& y, const int& sizeX, const int& sizeY, const std::string& storageName, const std::string& text, TTF_Font* font, const bool& allowLowTransparency, const float& transparency) {
 	const char *cstr = text.c_str();
-	unsigned int texture = textToTexture(cstr, font);
+	unsigned int texture = TextureLoader::textToTexture(cstr, font);
 	addMenuBarHUD(x, y, sizeX, sizeY, storageName, allowLowTransparency, texture);
 }
 

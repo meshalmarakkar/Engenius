@@ -22,10 +22,6 @@ void InputManager::EditModeControls(const Uint8 *keys, const float dt_secs) {
 		entityManager->writeFile();
 	}
 
-	if (keys[SDL_SCANCODE_T]) {
-		entityManager->changeAnimation();
-	}
-
 	if (keys[SDL_SCANCODE_Y]) {
 		lightingManager->toggleShadow();
 	}
@@ -229,6 +225,10 @@ bool InputManager::KeyboardControls(SDL_Window * window, const float dt_secs) {
 
 				if (keys[SDL_SCANCODE_F]) {
 					gameManager->toggleDeferredShading();
+				}
+
+				if (keys[SDL_SCANCODE_T]) {
+					entityManager->changeAnimation();
 				}
 
 				if (keys[SDL_SCANCODE_G]) {

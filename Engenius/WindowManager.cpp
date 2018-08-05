@@ -11,6 +11,10 @@ void WindowManager::destroy() {
 	SDL_Quit();
 }
 
+void WindowManager::swapWindow() {
+	SDL_GL_SwapWindow(window);
+}
+
 SDL_Window * WindowManager::getWindow() {
 	return window;
 }

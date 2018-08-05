@@ -3,7 +3,6 @@
 
 #include <GL/glew.h>
 #include <vector>
-#include <iostream>
 
 struct Buffer_Options {
 	static const GLenum gl_array_buffer = GL_ARRAY_BUFFER;

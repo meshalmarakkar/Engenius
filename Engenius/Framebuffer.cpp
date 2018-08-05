@@ -1,27 +1,7 @@
 #include "Framebuffer.h"
+#include "ErrorCheck.h"
 
-#define ASSERT(x) if (!(x)) __debugbreak();
-
-#ifdef _DEBUG
-	#define GL_ERROR_CHECK(x) gl_ClearError();\
-		x;\
-		ASSERT(gl_PrintError(#x, __FILE__, __LINE__)); //print function name, file its in, & line no
-#else
-	#define GL_ERROR_CHECK(x) x; //dont need checks in release mode
-#endif // DEBUG
-
-static void gl_ClearError() {
-	while (glGetError() != GL_NO_ERROR); //do in loop to get everything
-}
-
-static bool gl_PrintError(const char* functionName, const char* fileName, unsigned int line) {
-	while (GLenum error = glGetError()) {
-		std::cout << "[GL_ERROR] : " << error << ", line : " << line << std::endl;
-		std::cout << "           : " << functionName << " -in- " << fileName << std::endl;
-		return false;
-	}
-	return true;
-}
+#include <iostream>
 
 Framebuffer::Framebuffer(const unsigned int& width, const unsigned int& height, const bool& create_rboDepth) {
 	GL_ERROR_CHECK(glGenFramebuffers(1, &framebuffer));
@@ -47,9 +27,9 @@ void Framebuffer::createTexturesAndAttach(const unsigned int& num_texToAdd, cons
 	unsigned int num_attachments = attachments.size();
 	for (unsigned int i = 0 + num_attachments; i < num_attachments + num_texToAdd; i++) {
 		GLuint colourBuffer;
-		glGenTextures(1, &colourBuffer);
+		GL_ERROR_CHECK(glGenTextures(1, &colourBuffer));
 
-		glBindTexture(GL_TEXTURE_2D, colourBuffer);
+		GL_ERROR_CHECK(glBindTexture(GL_TEXTURE_2D, colourBuffer));
 		GL_ERROR_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, (GLsizei)width, (GLsizei)height, 0, GL_RGB, GL_FLOAT, NULL));
 		GL_ERROR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter));
 		GL_ERROR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter));
@@ -70,8 +50,8 @@ void Framebuffer::createTexturesAndAttach(const unsigned int& num_texToAdd, cons
 void Framebuffer::createSingleTexture(GLenum internalFormat, const unsigned int& width, const unsigned int& height, GLenum format, GLenum type, GLenum minFilter, GLenum magFilter)
 {
 	GLuint colourBuffer;
-	glGenTextures(1, &colourBuffer);
-	glBindTexture(GL_TEXTURE_2D, colourBuffer);
+	GL_ERROR_CHECK(glGenTextures(1, &colourBuffer));
+	GL_ERROR_CHECK(glBindTexture(GL_TEXTURE_2D, colourBuffer));
 	GL_ERROR_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, (GLsizei)width, (GLsizei)height, 0, format, type, NULL));
 	GL_ERROR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter));
 	GL_ERROR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter));
@@ -102,13 +82,13 @@ void Framebuffer::unbind() {
 }
 
 void Framebuffer::edit_viewport(const unsigned int& width, const unsigned int& height) {
-	glViewport(0, 0, (GLsizei)width, (GLsizei)height);
+	GL_ERROR_CHECK(glViewport(0, 0, (GLsizei)width, (GLsizei)height));
 }
 void Framebuffer::clearBuffers() {
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	GL_ERROR_CHECK(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 }
 void Framebuffer::clearScreen() {
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	GL_ERROR_CHECK(glClearColor(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
 GLuint Framebuffer::getColourBuffer(const unsigned int& num) {

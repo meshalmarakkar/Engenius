@@ -1,6 +1,5 @@
 #include "GameManager.h"
-#include <stdlib.h>     /* srand, rand */
-#include <time.h>       /* time */
+#include <stdlib.h>     /* srand, rand */ 
 
 GameManager::GameManager() {
 	dt_secs = 0.0f;
@@ -17,19 +16,17 @@ GameManager::~GameManager() {
 	delete audioManager;
 	delete editModeManager;
 	delete shaderManager;
-	delete windowManager;
 	delete colManager;
 	delete terrainManager;
 }
 
-bool GameManager::ControlCheck(const float dt_secs) {
+bool GameManager::ControlCheck(const float dt_secs, WindowManager* windowManager) {
 	this->dt_secs = dt_secs;
 	return inputManager->KeyboardControls(windowManager->getWindow(), dt_secs);
 }
 
 void GameManager::init(WindowManager * windowManager) {
-	this->windowManager = windowManager;
-	SDL_GL_SwapWindow(windowManager->getWindow()); // swap buffers once
+	windowManager->swapWindow();// swap buffers
 
 	camera = new Camera(windowManager->getScreenWidth(), windowManager->getScreenHeight());
 	lightingManager = new LightingManager(camera->getCameraEye(), camera->getCameraAt());
@@ -118,7 +115,6 @@ void GameManager::renderScene() {
 
 void GameManager::renderScene_GBuffer() {
 	entityManager->draw(dt_secs, NUM_EFFECTIVE_GRIDS, renderGridNo, ifDeferred);
-	//entityManager->draw_GBuffer(NUM_EFFECTIVE_GRIDS, renderGridNo);
 }
 
 void GameManager::update(float _dt_secs) {
@@ -148,7 +144,7 @@ void GameManager::update(float _dt_secs) {
 }
 
 bool done = false;
-void GameManager::draw() {
+void GameManager::draw(WindowManager* windowManager) {
 	if (lightingManager->getIfShadow() == true && done ==false) {
 		Shader* program = shaderManager->getShaderProgram(Programs::shadow_depthShader);
 		program->bind();
@@ -213,7 +209,7 @@ void GameManager::draw() {
 
 	renderer->enableDepthTest();
 	
-	SDL_GL_SwapWindow(windowManager->getWindow()); // swap buffers
+	windowManager->swapWindow();// swap buffers
 }
 
 void GameManager::toggleDeferredShading() {

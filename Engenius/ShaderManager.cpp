@@ -1,5 +1,6 @@
 #include "ShaderManager.h"
 #include "Uniforms.h"
+#include "ErrorCheck.h"
 
 #include <iostream>
 #include <fstream>
@@ -52,17 +53,21 @@ void printShaderError(const int shader) {
 	GLchar *logMessage;
 
 	// Find out how long the error message is
-	if (!glIsShader(shader))
-		glGetProgramiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
-	else
-		glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
+	if (!glIsShader(shader)) {
+		GL_ERROR_CHECK(glGetProgramiv(shader, GL_INFO_LOG_LENGTH, &maxLength));
+	}
+	else {
+		GL_ERROR_CHECK(glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength));
+	}
 
 	if (maxLength > 0) { // If message has some contents
 		logMessage = new GLchar[maxLength];
-		if (!glIsShader(shader))
-			glGetProgramInfoLog(shader, maxLength, &logLength, logMessage);
-		else
-			glGetShaderInfoLog(shader,maxLength, &logLength, logMessage);
+		if (!glIsShader(shader)) {
+			GL_ERROR_CHECK(glGetProgramInfoLog(shader, maxLength, &logLength, logMessage));
+		}
+		else {
+			GL_ERROR_CHECK(glGetShaderInfoLog(shader, maxLength, &logLength, logMessage));
+		}
 		std::cout << "Shader Info Log:" << std::endl << logMessage << std::endl;
 		delete [] logMessage;
 	}
@@ -86,20 +91,20 @@ GLuint ShaderManager::initShaders(const char *vertFile, const char *fragFile) {
 	const char * vv = vs;
 	const char * ff = fs;
 
-	glShaderSource(v, 1, &vv,&vlen);
-	glShaderSource(f, 1, &ff,&flen);
+	GL_ERROR_CHECK(glShaderSource(v, 1, &vv,&vlen));
+	GL_ERROR_CHECK(glShaderSource(f, 1, &ff,&flen));
 	
 	int compiled;
 
-	glCompileShader(v);
-	glGetShaderiv(v, GL_COMPILE_STATUS, &compiled);
+	GL_ERROR_CHECK(glCompileShader(v));
+	GL_ERROR_CHECK(glGetShaderiv(v, GL_COMPILE_STATUS, &compiled));
 	if (!compiled) {
 		std::cout << vertFile << " : Shader not compiled : [VERTEX]" << std::endl;
 		printShaderError(v);
 	} 
 
-	glCompileShader(f);
-	glGetShaderiv(f, GL_COMPILE_STATUS, &compiled);
+	GL_ERROR_CHECK(glCompileShader(f));
+	GL_ERROR_CHECK(glGetShaderiv(f, GL_COMPILE_STATUS, &compiled));
 	if (!compiled) {
 		std::cout << fragFile << " : Shader not compiled : [FRAGMENT]" << std::endl;
 		printShaderError(f);
@@ -107,16 +112,16 @@ GLuint ShaderManager::initShaders(const char *vertFile, const char *fragFile) {
 	
 	p = glCreateProgram();
 		
-	glAttachShader(p,v);
-	glAttachShader(p,f);
+	GL_ERROR_CHECK(glAttachShader(p,v));
+	GL_ERROR_CHECK(glAttachShader(p,f));
 
-	glLinkProgram(p);
+	GL_ERROR_CHECK(glLinkProgram(p));
 	//glGetShaderiv(f, GL_COMPILE_STATUS, &compiled);
 	//if (!compiled) {
 	//	std::cout << fragFile << " : Linking Failed." << std::endl;
 	//	printShaderError(f);
 	//}
-	glUseProgram(p);
+	GL_ERROR_CHECK(glUseProgram(p));
 
 	delete [] vs; // dont forget to free allocated memory
 	delete [] fs; // we allocated this in the loadFile function...
@@ -145,28 +150,28 @@ GLuint ShaderManager::initShaders(const char *vertFile, const char *fragFile, co
 	const char * ff = fs;
 	const char * gg = gs;
 
-	glShaderSource(v, 1, &vv, &vlen);
-	glShaderSource(f, 1, &ff, &flen);
-	glShaderSource(g, 1, &gg, &glen);
+	GL_ERROR_CHECK(glShaderSource(v, 1, &vv, &vlen));
+	GL_ERROR_CHECK(glShaderSource(f, 1, &ff, &flen));
+	GL_ERROR_CHECK(glShaderSource(g, 1, &gg, &glen));
 
 	int compiled;
 
-	glCompileShader(v);
-	glGetShaderiv(v, GL_COMPILE_STATUS, &compiled);
+	GL_ERROR_CHECK(glCompileShader(v));
+	GL_ERROR_CHECK(glGetShaderiv(v, GL_COMPILE_STATUS, &compiled));
 	if (!compiled) {
 		std::cout << vertFile << " : Shader not compiled : [VERTEX]" << std::endl;
 		printShaderError(v);
 	} 
 
-	glCompileShader(f);
-	glGetShaderiv(f, GL_COMPILE_STATUS, &compiled);
+	GL_ERROR_CHECK(glCompileShader(f));
+	GL_ERROR_CHECK(glGetShaderiv(f, GL_COMPILE_STATUS, &compiled));
 	if (!compiled) {
 		std::cout << fragFile << " : Shader not compiled : [FRAGMENT]" << std::endl;
 		printShaderError(f);
 	} 
 
-	glCompileShader(g);
-	glGetShaderiv(g, GL_COMPILE_STATUS, &compiled);
+	GL_ERROR_CHECK(glCompileShader(g));
+	GL_ERROR_CHECK(glGetShaderiv(g, GL_COMPILE_STATUS, &compiled));
 	if (!compiled) {
 		std::cout << geomFile << " : Shader not compiled : [GEOMETRY]" << std::endl;
 		printShaderError(g);
@@ -174,37 +179,23 @@ GLuint ShaderManager::initShaders(const char *vertFile, const char *fragFile, co
 
 	p = glCreateProgram();
 
-	glAttachShader(p, v);
-	glAttachShader(p, f);
-	glAttachShader(p, g);
+	GL_ERROR_CHECK(glAttachShader(p, v));
+	GL_ERROR_CHECK(glAttachShader(p, f));
+	GL_ERROR_CHECK(glAttachShader(p, g));
 
-	glLinkProgram(p);
+	GL_ERROR_CHECK(glLinkProgram(p));
 	//glGetShaderiv(f, GL_COMPILE_STATUS, &compiled);
 	//if (!compiled) {
 	//	std::cout << fragFile << " : Linking Failed." << std::endl;
 	//	printShaderError(f);
 	//}
-	glUseProgram(p);
+	GL_ERROR_CHECK(glUseProgram(p));
 
 	delete[] vs; // dont forget to free allocated memory
 	delete[] fs; // we allocated this in the loadFile function...
 	delete[] gs;
 
 	return p;
-}
-
-void ShaderManager::gl_UseProgram(const GLuint& shader) {
-	glUseProgram(shader);
-}
-
-void ShaderManager::gl_ClearError() {
-	while (glGetError != GL_NO_ERROR);
-}
-
-void ShaderManager::gl_CheckError() {
-	while (GLenum error = glGetError()) {
-		std::cout << "[OpenGL ERROR] : " << error << std::endl; //convert to hexadecimal before checking glew
-	}
 }
 
 void ShaderManager::init() {

@@ -184,6 +184,7 @@ void Renderer::draw_finalDisplay(const float& exposure, const int& ifBloom, cons
 	else {
 		//glBindTexture(GL_TEXTURE_2D, gNormal);
 		//glBindTexture(GL_TEXTURE_2D, FBO_gBuffer->getColourBuffer(num));
+		//program->bindTex_2D("screenTexture", FBO_gBuffer->getColourBuffer(num));
 		program->bindTex_2D("screenTexture", FBO_postProcess->getColourBuffer(0));
 	}
 
@@ -327,6 +328,13 @@ void Renderer::enableCullFace() {
 }
 void Renderer::disableCullFace() {
 	glDisable(GL_CULL_FACE);
+}
+
+void Renderer::setCullFace_Back() {
+	glCullFace(GL_BACK);
+}
+void Renderer::setCullFace_Front() {
+	glCullFace(GL_FRONT);
 }
 
 void Renderer::enableBlend() {

@@ -22,9 +22,6 @@
 
 #include <iostream>
 #include <math.h>
-#include "SDL.h" 
-#include <GL/glew.h> 
-#include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
 #include <stack>
@@ -37,8 +34,8 @@ public:
 	~GameManager();
 	void init(WindowManager * windowManager);
 	void update(float _dt_secs);
-	void draw();
-	bool ControlCheck(const float dt_secs);
+	void draw(WindowManager* windowManager);
+	bool ControlCheck(const float dt_secs, WindowManager* windowManager);
 
 	void toggleDeferredShading();
 	void setPause(const bool& newVal);
@@ -80,7 +77,6 @@ private:
 	AudioManager * audioManager;
 	EditModeManager * editModeManager;
 	ShaderManager * shaderManager;
-	WindowManager * windowManager;
 	CollisionManager * colManager;
 	TerrainManager * terrainManager;
 

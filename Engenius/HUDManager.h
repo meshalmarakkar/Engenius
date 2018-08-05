@@ -3,13 +3,9 @@
 
 #include <SDL_ttf.h>
 #include <string>
-#include <SOIL.h>
 #include <glm/gtc/type_ptr.hpp>
-#include <GL/glew.h>
-#include <iostream>
 #include <vector>
 #include <unordered_map>
-#include <map>
 #include "HUDItem.h"
 #include "WindowManager.h"
 #include "Renderer.h"

@@ -279,7 +279,7 @@ void AnimatedModel::BoneTransform(const float& TimeInSeconds, vector<Matrix4f>& 
 			blendFactor += BLEND_RATE;
 	}
 	else
-		this->animationTime += TimeInSeconds;
+		this->animationTime += (TimeInSeconds * 1.5f);
 
 	float animTPS = currentAnimation->timeDetails.first;
 	float duration = currentAnimation->timeDetails.second;

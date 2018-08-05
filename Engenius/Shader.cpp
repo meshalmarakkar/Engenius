@@ -1,5 +1,5 @@
 #include "Shader.h"
-
+#include "ErrorCheck.h"
 
 Shader::Shader(GLuint program) : program(program), nextAvailableTex(0) {
 
@@ -18,12 +18,12 @@ void Shader::uniformsToShader_RUNTIME() {
 }
 
 void Shader::bind() {
-	glUseProgram(program);
+	GL_ERROR_CHECK(glUseProgram(program));
 	reset_texCount();
 }
 
 void Shader::unbind() {
-	glUseProgram(0);
+	GL_ERROR_CHECK(glUseProgram(0));
 }
 
 GLuint Shader::getShaderProgram() {
@@ -31,38 +31,38 @@ GLuint Shader::getShaderProgram() {
 }
 
 void Shader::uniform(const std::string& name, const float& info) {
-	glUniform1f(glGetUniformLocation(program, (name).c_str()), info);
+	GL_ERROR_CHECK(glUniform1f(glGetUniformLocation(program, (name).c_str()), info));
 }
 void Shader::uniform(const std::string& name, const unsigned int& info) {
-	glUniform1ui(glGetUniformLocation(program, (name).c_str()), info);
+	GL_ERROR_CHECK(glUniform1ui(glGetUniformLocation(program, (name).c_str()), info));
 }
 void Shader::uniform(const std::string& name, const int& info) {
-	glUniform1i(glGetUniformLocation(program, (name).c_str()), info);
+	GL_ERROR_CHECK(glUniform1i(glGetUniformLocation(program, (name).c_str()), info));
 }
 void Shader::uniform(const std::string& name, const glm::vec3& info) {
-	glUniform3fv(glGetUniformLocation(program, (name).c_str()), 1, glm::value_ptr(info));
+	GL_ERROR_CHECK(glUniform3fv(glGetUniformLocation(program, (name).c_str()), 1, glm::value_ptr(info)));
 }
 void Shader::uniform(const std::string& name, const glm::vec4& info) {
-	glUniform4fv(glGetUniformLocation(program, (name).c_str()), 1, glm::value_ptr(info));
+	GL_ERROR_CHECK(glUniform4fv(glGetUniformLocation(program, (name).c_str()), 1, glm::value_ptr(info)));
 }
 void Shader::uniform(const std::string& name, const glm::mat3& info) {
-	glUniformMatrix3fv(glGetUniformLocation(program, (name).c_str()), 1, GL_FALSE, glm::value_ptr(info));
+	GL_ERROR_CHECK(glUniformMatrix3fv(glGetUniformLocation(program, (name).c_str()), 1, GL_FALSE, glm::value_ptr(info)));
 }
 void Shader::uniform(const std::string& name, const glm::mat4& info) {
-	glUniformMatrix4fv(glGetUniformLocation(program, (name).c_str()), 1, GL_FALSE, glm::value_ptr(info));
+	GL_ERROR_CHECK(glUniformMatrix4fv(glGetUniformLocation(program, (name).c_str()), 1, GL_FALSE, glm::value_ptr(info)));
 }
 
 void Shader::bindTex_2D(const char* name, const GLuint& tex){
-	glActiveTexture(GL_TEXTURE0 + nextAvailableTex);
-	glBindTexture(GL_TEXTURE_2D, tex);
-	glUniform1i(glGetUniformLocation(program, name), nextAvailableTex);
+	GL_ERROR_CHECK(glActiveTexture(GL_TEXTURE0 + nextAvailableTex));
+	GL_ERROR_CHECK(glBindTexture(GL_TEXTURE_2D, tex));
+	GL_ERROR_CHECK(glUniform1i(glGetUniformLocation(program, name), nextAvailableTex));
 	nextAvailableTex++;
 }
 
 void Shader::bindTex_Cubemap(const char* name, const GLuint& tex) {
-	glActiveTexture(GL_TEXTURE0 + nextAvailableTex);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, tex);
-	glUniform1i(glGetUniformLocation(program, name), nextAvailableTex);
+	GL_ERROR_CHECK(glActiveTexture(GL_TEXTURE0 + nextAvailableTex));
+	GL_ERROR_CHECK(glBindTexture(GL_TEXTURE_CUBE_MAP, tex));
+	GL_ERROR_CHECK(glUniform1i(glGetUniformLocation(program, name), nextAvailableTex));
 	nextAvailableTex++;
 }
 

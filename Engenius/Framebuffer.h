@@ -3,7 +3,6 @@
 
 #include <GL/glew.h> 
 #include <vector>
-#include <iostream>
 
 struct Tex_Options {
 	static const GLenum gl_linear = GL_LINEAR;

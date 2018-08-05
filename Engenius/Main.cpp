@@ -10,14 +10,14 @@ using namespace std;
 
 
 float gameTime(unsigned int &lastTime) {
-	unsigned int currentTime = clock();
+	//clock_t currentTime = clock();
 
-	unsigned int delta = currentTime - lastTime;
-	float dt_secs = delta / 1000.0f; 
+	//clock_t delta = currentTime - lastTime;
+	//float dt_secs = delta / CLOCKS_PER_SEC;
 
-	if (dt_secs != 0.017f) dt_secs = 0.017f; // is this fair???
-	lastTime = currentTime;
-
+	//if (dt_secs != 0.017f) dt_secs = 0.017f; // is this fair???
+	//lastTime = currentTime;
+	float dt_secs = 0.017f;
 	return dt_secs;
 }
 
@@ -43,9 +43,9 @@ int main(int argc, char *argv[]) {
 	bool running = true; // set running to true
 	while (running) {	// the event loop
 		float dt_secs = gameTime(lastTime);
-		running = game->ControlCheck(dt_secs);
+		running = game->ControlCheck(dt_secs, windowManager);
 		game->update(dt_secs);
-		game->draw();
+		game->draw(windowManager);
 	}
 
 	windowManager->destroy();

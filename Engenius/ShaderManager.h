@@ -38,10 +38,6 @@ public:
 	ShaderManager(Camera* camera, LightingManager* lightingManager);
 	~ShaderManager();
 
-	void gl_UseProgram(const GLuint& shader);
-	void gl_ClearError();
-	void gl_CheckError();
-
 	Shader* getShaderProgram(const char* shaderName);
 
 private:

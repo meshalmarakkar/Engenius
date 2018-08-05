@@ -123,6 +123,8 @@ Terrain::Terrain(const std::vector<glm::vec3> verts, const std::vector<glm::vec3
 void Terrain::initGrass(Material* mat_grass) {
 	float grassPatchOffsetMin = 0.25f;//1.5f
 	float grassPatchOffsetMax = 0.75f;//2.5f
+	//float grassPatchOffsetMin = 1.5f;
+	//float grassPatchOffsetMax = 2.5f;
 									  //float grassPatchHeight = 5.0f;
 
 	glm::vec3 currentPatchPos(terrain_left + grassPatchOffsetMin, 0.0f, terrain_down - grassPatchOffsetMin);

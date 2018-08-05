@@ -2,8 +2,60 @@
 #include "SOIL.h"
 #include <GL/glew.h>
 #include <iostream>
+#include "ErrorCheck.h"
+
 
 namespace TextureLoader{
+
+	unsigned int textToTexture(const char * str, TTF_Font* font) {
+
+		SDL_Surface * stringImage = TTF_RenderText_Blended(font, str, { 255, 255, 255 });
+
+		if (stringImage == 0) {
+			std::cout << "String surface not created." << std::endl;
+		}
+
+		unsigned int texID;
+		GL_ERROR_CHECK(glGenTextures(1, &texID));
+
+		GL_ERROR_CHECK(glBindTexture(GL_TEXTURE_2D, texID));
+		GL_ERROR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+		GL_ERROR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+		GL_ERROR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		GL_ERROR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+		GL_ERROR_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, stringImage->w, stringImage->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, stringImage->pixels));
+		GL_ERROR_CHECK(glBindTexture(GL_TEXTURE_2D, 0));
+		SDL_FreeSurface(stringImage);
+
+		return texID;
+	}
+
+	int loadTexture_SS(const std::string& path)
+	{
+		const char* pathToFile = path.c_str();
+
+		int width, height;
+		unsigned char* image;
+
+		if (SOIL_load_image(pathToFile, &width, &height, 0, SOIL_LOAD_AUTO))
+			image = SOIL_load_image(pathToFile, &width, &height, 0, SOIL_LOAD_AUTO);//SOIL_LOAD_AUTO
+		else
+			return 0;
+
+		unsigned int texID;
+		GL_ERROR_CHECK(glGenTextures(1, &texID)); // generate texture ID
+
+		GL_ERROR_CHECK(glBindTexture(GL_TEXTURE_2D, texID));
+		GL_ERROR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+		GL_ERROR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+		GL_ERROR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+		GL_ERROR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		GL_ERROR_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image));
+		GL_ERROR_CHECK(glBindTexture(GL_TEXTURE_2D, 0));
+		SOIL_free_image_data(image);
+
+		return texID;	// return value of texture ID
+	}
 
 	int loadTexture(const std::string& type, const std::string& path)
 	{
@@ -17,17 +69,17 @@ namespace TextureLoader{
 		unsigned char* image = SOIL_load_image(pathToFile, &width, &height, 0, SOIL_LOAD_RGBA);
 
 		if (image) {
-			glGenTextures(1, &texID); // generate texture ID
-			glBindTexture(GL_TEXTURE_2D, texID);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image);
+			GL_ERROR_CHECK(glGenTextures(1, &texID)); // generate texture ID
+			GL_ERROR_CHECK(glBindTexture(GL_TEXTURE_2D, texID));
+			GL_ERROR_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image));
 
-			glGenerateMipmap(GL_TEXTURE_2D);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //or GL_CLAMP_TO_EDGE
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -0.4f);
-			glBindTexture(GL_TEXTURE_2D, 0);
+			GL_ERROR_CHECK(glGenerateMipmap(GL_TEXTURE_2D));
+			GL_ERROR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)); //or GL_CLAMP_TO_EDGE
+			GL_ERROR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+			GL_ERROR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+			GL_ERROR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+			GL_ERROR_CHECK(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -0.4f));
+			GL_ERROR_CHECK(glBindTexture(GL_TEXTURE_2D, 0));
 
 			SOIL_free_image_data(image);
 		}
@@ -52,16 +104,16 @@ namespace TextureLoader{
 		unsigned char* image = SOIL_load_image(pathToFile, &width, &height, 0, SOIL_LOAD_RGB);
 
 		if (image) {
-			glBindTexture(GL_TEXTURE_2D, texID);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
+			GL_ERROR_CHECK(glBindTexture(GL_TEXTURE_2D, texID));
+			GL_ERROR_CHECK(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image));
 
-			glGenerateMipmap(GL_TEXTURE_2D);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT); //or GL_CLAMP_TO_EDGE
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-			glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -0.4f);
-			glBindTexture(GL_TEXTURE_2D, 0);
+			GL_ERROR_CHECK(glGenerateMipmap(GL_TEXTURE_2D));
+			GL_ERROR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT)); //or GL_CLAMP_TO_EDGE
+			GL_ERROR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+			GL_ERROR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+			GL_ERROR_CHECK(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+			GL_ERROR_CHECK(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -0.4f));
+			GL_ERROR_CHECK(glBindTexture(GL_TEXTURE_2D, 0));
 
 			SOIL_free_image_data(image);
 		}
@@ -75,8 +127,8 @@ namespace TextureLoader{
 
 	unsigned int loadCubeMap(const char *faces[6]) {
 		unsigned int texID;
-		glGenTextures(1, &texID); // generate texture ID
-		glBindTexture(GL_TEXTURE_CUBE_MAP, texID);
+		GL_ERROR_CHECK(glGenTextures(1, &texID)); // generate texture ID
+		GL_ERROR_CHECK(glBindTexture(GL_TEXTURE_CUBE_MAP, texID));
 
 		int width, height;
 		for (unsigned int i = 0; i < 6; i++)
@@ -84,9 +136,9 @@ namespace TextureLoader{
 			unsigned char *image = SOIL_load_image(faces[i], &width, &height, 0, SOIL_LOAD_RGB);
 			if (image)
 			{
-				glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+				GL_ERROR_CHECK(glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
 					0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image
-				); //GL_FLOAT for more precision?
+				)); //GL_FLOAT for more precision?
 				SOIL_free_image_data(image);
 			}
 			else
@@ -95,13 +147,13 @@ namespace TextureLoader{
 				SOIL_free_image_data(image);
 			}
 		}
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		GL_ERROR_CHECK(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+		GL_ERROR_CHECK(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+		GL_ERROR_CHECK(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
+		GL_ERROR_CHECK(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
+		GL_ERROR_CHECK(glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE));
 
-		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+		GL_ERROR_CHECK(glBindTexture(GL_TEXTURE_CUBE_MAP, 0));
 		return texID;
 	}
 };

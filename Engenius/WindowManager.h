@@ -9,6 +9,7 @@ public:
 	WindowManager();
 	void destroy();
 	SDL_Window * getWindow();
+	void swapWindow();
 	void toggleFullScreen();
 	int getScreenWidth();
 	int getScreenHeight();

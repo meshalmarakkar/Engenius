@@ -63,6 +63,8 @@ public:
 
 	void enableCullFace();
 	void disableCullFace();
+	void setCullFace_Back();
+	void setCullFace_Front();
 
 	void enableBlend();
 	void disableBlend();
@@ -71,7 +73,6 @@ public:
 	void disableLineDraw();
 
 	void depthMask_false();
-
 	void depthMask_true();
 
 	void setBlendFunction(const GLenum setting);

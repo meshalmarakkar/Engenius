@@ -7,23 +7,14 @@ Skybox::Skybox(Shader* program, Model* modelForSkybox) : shaderProgram(program),
 }
 
 void Skybox::renderSkybox(const glm::mat4& projection, const glm::mat4& view, Renderer* renderer) {
-	glDepthMask(GL_FALSE); // make sure writing to update depth test is off
-	glCullFace(GL_FRONT); // drawing inside of cube!
+	renderer->depthMask_false(); // make sure writing to update depth test is off
+	renderer->setCullFace_Front(); // drawing inside of cube!
 
 	shaderProgram->bind();
 	glm::mat3 mvRotOnlyMat3 = glm::mat3(view); //removes translation part of view
 	shaderProgram->uniform("view", glm::mat4(mvRotOnlyMat3));
 	shaderProgram->uniform("projection", projection);
 	shaderProgram->uniform("model", modelMatrix);
-	/*glUniformMatrix4fv(glGetUniformLocation(skyboxProgram, "view"), 1, GL_FALSE, glm::value_ptr(glm::mat4(mvRotOnlyMat3)));
-	glUniformMatrix4fv(glGetUniformLocation(skyboxProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-
-	glUniformMatrix4fv(glGetUniformLocation(skyboxProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));*/
-	
-	//glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTexture);
-	//skyboxModel->Draw(skyboxProgram, modelMatrix); //true for shadowRender so we can add texture here
-	//glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
 	shaderProgram->reset_texCount();
 	shaderProgram->bindTex_Cubemap("cubeMap", skyboxTexture);
@@ -33,13 +24,13 @@ void Skybox::renderSkybox(const glm::mat4& projection, const glm::mat4& view, Re
 		renderer->drawElements(m.getVAO());
 	}
 
-	glCullFace(GL_BACK);
-	glDepthMask(GL_TRUE);
+	renderer->setCullFace_Back();
+	renderer->depthMask_true();
 }
 
 void Skybox::renderSkybox(const glm::mat4& projection, const glm::mat4& view, Renderer* renderer, const unsigned int& texture) {
-	glDepthMask(GL_FALSE); // make sure writing to update depth test is off
-	glCullFace(GL_FRONT); // drawing inside of cube!
+	renderer->depthMask_false(); // make sure writing to update depth test is off
+	renderer->setCullFace_Front(); // drawing inside of cube!
 
 	shaderProgram->bind();
 	//glUseProgram(shaderProgram->getShaderProgram());
@@ -47,10 +38,6 @@ void Skybox::renderSkybox(const glm::mat4& projection, const glm::mat4& view, Re
 	shaderProgram->uniform("view", glm::mat4(mvRotOnlyMat3));
 	shaderProgram->uniform("projection", projection);
 	shaderProgram->uniform("model", modelMatrix);
-	//glUniformMatrix4fv(glGetUniformLocation(skyboxProgram, "view"), 1, GL_FALSE, glm::value_ptr(glm::mat4(mvRotOnlyMat3)));
-	//glUniformMatrix4fv(glGetUniformLocation(skyboxProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
-
-	//glUniformMatrix4fv(glGetUniformLocation(skyboxProgram, "model"), 1, GL_FALSE, glm::value_ptr(modelMatrix));
 
 	shaderProgram->reset_texCount();
 	shaderProgram->bindTex_Cubemap("cubeMap", texture);
@@ -59,10 +46,7 @@ void Skybox::renderSkybox(const glm::mat4& projection, const glm::mat4& view, Re
 		m.getVAO()->bind();
 		renderer->drawElements(m.getVAO());
 	}
-	
-	//skyboxModel->Draw(skyboxProgram, modelMatrix); //true for shadowRender so we can add texture here
-//	glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
-	glCullFace(GL_BACK);
-	glDepthMask(GL_TRUE);
+	renderer->setCullFace_Back();
+	renderer->depthMask_true();
 }
